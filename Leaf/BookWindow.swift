@@ -16,8 +16,7 @@ struct BookWindow: View {
                 zoom: Double(settings.zoomPercent) / 100,
                 lineSpacing: settings.lineSpacing, font: settings.font
             )
-            // 只延伸到标题栏下；左侧要给浮动侧栏让位，否则正文被侧栏盖住
-            .ignoresSafeArea(.container, edges: .top)
+            // 不延伸进标题栏：书页自带背景（如白底封面）会铺到标题下，深色模式的浅色标题字被盖住
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button { showsTypography.toggle() } label: {
