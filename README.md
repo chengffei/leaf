@@ -53,7 +53,7 @@ Requires Xcode 26 and [XcodeGen](https://github.com/yonaskolb/XcodeGen):
 
 ```sh
 xcodegen generate
-./scripts/install.sh      # build and install to ~/Applications
+./scripts/install.sh      # build and install to /Applications
 ./scripts/make-dmg.sh     # package a DMG into ~/Downloads
 ```
 
@@ -106,7 +106,7 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 
 ```sh
 xcodegen generate
-./scripts/install.sh      # 构建并安装到 ~/Applications
+./scripts/install.sh      # 构建并安装到 /Applications
 ./scripts/make-dmg.sh     # 打包 DMG 到 ~/Downloads
 ```
 

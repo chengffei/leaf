@@ -1,5 +1,5 @@
 #!/bin/sh
-# 构建 Release 并装到 ~/Applications，顺带处理 LaunchServices 登记与图标缓存。
+# 构建 Release 并装到 /Applications，顺带处理 LaunchServices 登记与图标缓存。
 set -e
 cd "$(dirname "$0")/.."
 
@@ -14,7 +14,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
 
 LS=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 PRODUCTS=.build/DerivedData/Build/Products
-DEST="$HOME/Applications/Leaf.app"
+DEST="/Applications/Leaf.app"
 
 rm -rf "$DEST"
 cp -R "$PRODUCTS/Release/Leaf.app" "$DEST"

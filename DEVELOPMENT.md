@@ -8,7 +8,7 @@ Leaf 的定位是**快捷打开的纯阅读器**：双击打开 → 读 → 关�
 
 ```sh
 xcodegen generate
-./scripts/install.sh   # Release 构建 → ~/Applications/Leaf.app（Leaf 正在运行时会拒绝）
+./scripts/install.sh   # Release 构建 → /Applications/Leaf.app（Leaf 正在运行时会拒绝）
 ./scripts/make-dmg.sh  # 打 DMG，默认输出到 ~/Downloads/Leaf-<版本>.dmg
 ```
 
