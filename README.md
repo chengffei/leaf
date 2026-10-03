@@ -29,12 +29,12 @@
 - **记住位置**：按文件内容识别，改名、挪位置也认得
 - **原生目录侧栏**：`⌘T` 开关，高亮当前章节，点击跳转，点正文自动收起
 - **字体与行距**：字号 80%–200%，行距三档，字体可选原书 / 黑体 / 宋体
-- **系统级体验**：SwiftUI + WebKit，跟随系统深浅色，安装包约 2 MB
+- **原生轻量**：SwiftUI + WebKit，跟随系统深浅色，安装包约 2 MB
 
 ## 安装
 
 1. 下载 [Leaf.dmg](https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg)，把 Leaf 拖进「Applications」
-2. **第一次打开**：Leaf 没有经过 Apple 公证，系统会先拦一下——
+2. **第一次打开**：Leaf 没有经过 Apple 公证，系统会先拦下。按下面操作放行一次：
    双击 Leaf 后点「完成」→ 打开「系统设置 › 隐私与安全性」→ 拉到底部点「仍要打开」
 
 需要 macOS 15 或更高。

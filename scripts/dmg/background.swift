@@ -34,7 +34,7 @@ func render(scale: CGFloat) -> NSBitmapImageRep {
     paper.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
 
     // 标题
-    text("将 Leaf 拖到 Applications 文件夹", font(19, .semibold), ink, x: 0, y: 34, width: W)
+    text("Drag Leaf to the Applications folder", font(19, .semibold), ink, x: 0, y: 34, width: W)
 
     // 图标之间的箭头（图标中心 y=150，Leaf x=170，Applications x=470）
     let ay = H - 150
@@ -56,13 +56,13 @@ func render(scale: CGFloat) -> NSBitmapImageRep {
     card.setFill(); NSBezierPath(roundedRect: cardRect, xRadius: 12, yRadius: 12).fill()
     NSGraphicsContext.restoreGraphicsState()
 
-    text("第一次打开时（只需一次）", font(14, .semibold), ink, x: 52, y: 272, width: 400, align: .left)
-    text("Leaf 未经 App Store 发布，macOS 会先拦一下，按下面放行即可", font(11.5), muted, x: 52, y: 296, width: 540, align: .left)
+    text("Opening Leaf for the first time", font(14, .semibold), ink, x: 52, y: 272, width: 400, align: .left)
+    text("Leaf isn’t from the App Store, so macOS blocks it once. Allow it like this:", font(11.5), muted, x: 52, y: 296, width: 540, align: .left)
 
     let steps = [
-        ("双击打开 Leaf", "看到提示后点「完成」"),
-        ("打开「系统设置」", "进入「隐私与安全性」"),
-        ("拉到最底部", "点「仍要打开」，\n输入开机密码"),
+        ("Open Leaf", "When the warning\nappears, click Done"),
+        ("Open Settings", "Go to System Settings ›\nPrivacy & Security"),
+        ("Scroll to the bottom", "Click Open Anyway and\nenter your password"),
     ]
     let colW = (W - 56 - 48) / 3
     for (i, (title, body)) in steps.enumerated() {
@@ -75,7 +75,7 @@ func render(scale: CGFloat) -> NSBitmapImageRep {
         text(body, font(11.5), muted, x: x + 30, y: 358, width: colW - 34, align: .left, lineSpacing: 2)
     }
 
-    text("需要 macOS 15 或更高　·　从 Kindle 商店购买的带 DRM 电子书无法打开", font(11), muted, x: 0, y: 432, width: W)
+    text("Requires macOS 15 or later  ·  DRM-protected books, such as Kindle Store purchases, can’t be opened", font(11), muted, x: 0, y: 432, width: W)
 
     NSGraphicsContext.restoreGraphicsState()
     return rep

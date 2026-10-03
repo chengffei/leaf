@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-CN" data-lang="zh">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leaf — 只做阅读的 macOS 电子书阅读器</title>
-<meta name="description" content="Leaf 是一个轻量的 macOS 电子书阅读器：双击打开 EPUB / MOBI / AZW3，读完关窗即退出，没有书架。开源免费。">
+<title>Leaf — A macOS ebook reader that only reads</title>
+<meta name="description" content="Leaf is a lightweight macOS ebook reader. Double-click an EPUB, MOBI or AZW3 file to read; close the window to quit. No library, no importing. Free and open source.">
 <meta property="og:title" content="Leaf — Open. Read. Close.">
 <meta property="og:description" content="A lightweight macOS ebook reader for EPUB, MOBI and AZW3. No library, no importing. Free and open source.">
 <meta property="og:image" content="https://chengffei.github.io/leaf/images/reading.jpg">
@@ -149,7 +149,7 @@
       <a class="hide-sm" href="#features"><span lang="zh">功能</span><span lang="en">Features</span></a>
       <a class="hide-sm" href="#install"><span lang="zh">安装</span><span lang="en">Install</span></a>
       <a href="https://github.com/chengffei/leaf">GitHub</a>
-      <button class="lang-toggle" type="button" id="lang-toggle" aria-label="Switch language">EN</button>
+      <button class="lang-toggle" type="button" id="lang-toggle" aria-label="Switch language">中文</button>
     </div>
   </div>
 </nav>
@@ -182,7 +182,7 @@
 </div>
 
 <section id="features" class="wrap">
-  <h2><span lang="zh">少即是多</span><span lang="en">Less, on purpose</span></h2>
+  <h2><span lang="zh">只做阅读需要的事</span><span lang="en">Less, on purpose</span></h2>
   <p class="section-lead">
     <span lang="zh">Leaf 只做一件事：让你尽快读到书里的第一行字。</span>
     <span lang="en">Leaf does one thing: get you to the first line of your book as fast as possible.</span>
@@ -206,7 +206,7 @@
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 5l5 14"/><path d="M5.8 14h6.4"/><path d="M15 19l3-8 3 8"/><path d="M16 16.5h4"/></svg>
       <h3><span lang="zh">字体与行距</span><span lang="en">Type that suits you</span></h3>
-      <p><span lang="zh">字号 80%–200%，三档行距，原书、黑体、宋体随心切换。</span><span lang="en">Font size from 80% to 200%, three line-spacing presets, original, sans or serif fonts.</span></p>
+      <p><span lang="zh">字号 80%–200%，三档行距，原书、黑体、宋体可以切换。</span><span lang="en">Font size from 80% to 200%, three line-spacing presets, original, sans or serif fonts.</span></p>
     </div>
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M14 6l6 6-6 6"/></svg>
@@ -226,7 +226,7 @@
     <div>
       <h2><span lang="zh">目录随手可得</span><span lang="en">Contents, one key away</span></h2>
       <p class="section-lead">
-        <span lang="zh">侧栏用的是系统原生样式。翻页时高亮跟着走，点一下正文侧栏就自动收起，回到纯粹的阅读。</span>
+        <span lang="zh">侧栏用的是系统原生样式。翻页时高亮跟着当前章节走；点一下正文，侧栏就会收起。</span>
         <span lang="en">The sidebar is the system’s own. The highlight follows as you read, and a click on the page tucks it away again.</span>
       </p>
     </div>
@@ -249,7 +249,7 @@
   </div>
   <div class="steps">
     <div class="step">
-      <h3><span lang="zh">拖进应用程序</span><span lang="en">Drag to Applications</span></h3>
+      <h3><span lang="zh">拖进 Applications</span><span lang="en">Drag to Applications</span></h3>
       <p><span lang="zh">打开下载的 <a href="https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg">Leaf.dmg</a>，把 Leaf 拖到 Applications 文件夹。</span><span lang="en">Open <a href="https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg">Leaf.dmg</a> and drag Leaf into the Applications folder.</span></p>
     </div>
     <div class="step">
@@ -303,8 +303,8 @@
     }
     var saved = null;
     try { saved = localStorage.getItem('leaf-lang'); } catch (e) {}
-    var preferred = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
-    apply(saved === 'zh' || saved === 'en' ? saved : preferred);
+    // 默认英文；访客手动切换过则沿用其选择
+    apply(saved === 'zh' || saved === 'en' ? saved : 'en');
     button.addEventListener('click', function () {
       var next = root.getAttribute('data-lang') === 'zh' ? 'en' : 'zh';
       apply(next);
