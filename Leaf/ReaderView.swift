@@ -4,6 +4,13 @@ import WebKit
 
 private let log = Logger(subsystem: "com.chengffei.leaf", category: "reader")
 
+/// 已推给页面的排版参数，用于跳过重复推送
+struct Typography: Equatable {
+    let zoom: Double
+    let lineSpacing: LineSpacing
+    let font: ReaderFont
+}
+
 struct ReaderView: NSViewRepresentable {
     let book: BookDocument
     let model: ReaderModel
@@ -20,7 +27,6 @@ struct ReaderView: NSViewRepresentable {
 
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
-        webView.pageZoom = zoom
         model.webView = webView
         webView.setValue(false, forKey: "drawsBackground") // 加载前不闪白
         #if DEBUG
@@ -30,24 +36,24 @@ struct ReaderView: NSViewRepresentable {
         var url = URLComponents(string: "\(BookSchemeHandler.scheme)://app/reader.html")!
         // 首屏就按当前排版渲染，避免先按默认排一遍再跳
         url.queryItems = [
+            URLQueryItem(name: "fs", value: String(zoom)),
             URLQueryItem(name: "lh", value: String(lineSpacing.rawValue)),
             URLQueryItem(name: "font", value: font.rawValue),
         ]
         if let cfi = ReadingPosition.load(book.id) {
             url.queryItems?.append(URLQueryItem(name: "cfi", value: cfi))
         }
-        context.coordinator.applied = (lineSpacing, font)
+        context.coordinator.applied = Typography(zoom: zoom, lineSpacing: lineSpacing, font: font)
         webView.load(URLRequest(url: url.url!))
         return webView
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
-        if webView.pageZoom != zoom { webView.pageZoom = zoom }
-        let coordinator = context.coordinator
-        guard coordinator.applied.0 != lineSpacing || coordinator.applied.1 != font else { return }
-        coordinator.applied = (lineSpacing, font)
+        let typography = Typography(zoom: zoom, lineSpacing: lineSpacing, font: font)
+        guard context.coordinator.applied != typography else { return }
+        context.coordinator.applied = typography
         webView.evaluateJavaScript(
-            "leaf.setPrefs({ lineHeight: \(lineSpacing.rawValue), font: '\(font.rawValue)' })",
+            "leaf.setPrefs({ fontScale: \(zoom), lineHeight: \(lineSpacing.rawValue), font: '\(font.rawValue)' })",
             completionHandler: nil
         )
     }
@@ -60,7 +66,7 @@ struct ReaderView: NSViewRepresentable {
     final class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
         private let bookID: String
         private let model: ReaderModel
-        var applied: (LineSpacing, ReaderFont) = (.standard, .original)
+        var applied = Typography(zoom: 1, lineSpacing: .standard, font: .original)
 
         init(bookID: String, model: ReaderModel) {
             self.bookID = bookID

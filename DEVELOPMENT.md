@@ -29,7 +29,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 | 桥 | `BookSchemeHandler.swift` | `leaf://app/*` 读 bundle 里的 `Web/`；`leaf://app/book` 给出当前书的字节（必须与页面同源，跨 host 会被 fetch 拦截） |
 | 窗口 | `BookWindow.swift` `ReaderModel.swift` | `NavigationSplitView`：左侧原生目录侧栏（目录由 JS 压平回传，选中态 = 当前章节，点选 = 跳转） |
 | 视图 | `ReaderView.swift` | `WKWebView`；接收 JS 消息：relocate 存进度、外链交给浏览器；只放行 leaf / blob / about / data |
-| 排版 | `ReaderSettings.swift` `TypographyPanel.swift` | 全局设置：字号 = `WKWebView.pageZoom`（对写死 px 字号的书也有效）；行距三档以 `!important` 覆盖书本；字体 原书 / 黑体 / 宋体 |
+| 排版 | `ReaderSettings.swift` `TypographyPanel.swift` | 全局设置：字号 = 书页根字号 `html { font-size: N% }`（作用于 em / rem / % 字号，写死 px 的书不受影响）；行距三档以 `!important` 覆盖书本；字体 原书 / 黑体 / 宋体 |
 | 状态 | `ReadingPosition.swift` | 唯一的持久化：`UserDefaults["position.<sha256>"] = CFI` |
 | 渲染 | `Web/app.js` + `Web/foliate/` | [foliate-js](https://github.com/johnfactotum/foliate-js) 原样内置（版本见 `Web/foliate/VERSION`，移除了 PDF / OPDS / 示例） |
 | 图标 | `Leaf/Leaf.icon` | Icon Composer 格式，两层手写 SVG |
@@ -41,6 +41,8 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 
 - **沙盒里的 WKWebView 需要 `com.apple.security.network.client`**，否则 WebContent 进程直接崩溃、页面全空。书始终只从本地读取。
 - **foliate 的 `goTo` 失败只打日志不抛错**，页面会静默留白。`app.js` 已兜底：初始化后未渲染则退回第一节。
+- **不要用 `WKWebView.pageZoom` 调字号**：非 100% 时 foliate 分页混用缩放前后的尺寸，右侧会露出半截下一栏。
+- **章首空白栏**：书的 CSS 常给章节标题加 `page-break-before: always`，WebKit 多栏把它当断栏，每章前多出一整栏空白。`app.js` 只对每段开头那串元素取消断开。
 - **侧栏遮挡**：正文视图若 `ignoresSafeArea()` 全部边，会铺到浮动侧栏下面；只忽略顶部。
 - **SF Symbol 会随系统语言本地化**（`textformat.size` 在中文下显示「大小」），工具栏按钮固定用英文变体。
 - **放大快捷键绑 `=`**：绑 `+` 时 `⌘=` 不触发。

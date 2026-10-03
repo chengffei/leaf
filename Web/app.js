@@ -24,6 +24,13 @@ p, li, blockquote, dd {
 [align="right"] { text-align: right; }
 [align="center"] { text-align: center; }
 pre { white-space: pre-wrap !important; }
+/* 章首的「分页前断开」在 WebKit 多栏里变成断栏，每章前多出一整栏空白；只取消每段开头那一串元素的 */
+body > :first-child,
+body > :first-child > :first-child,
+body > :first-child > :first-child > :first-child {
+  break-before: auto !important;
+  page-break-before: auto !important;
+}
 aside[epub|type~="endnote"], aside[epub|type~="footnote"],
 aside[epub|type~="note"], aside[epub|type~="rearnote"] { display: none; }
 `
@@ -33,7 +40,8 @@ const FONTS = {
   sans: '-apple-system, "PingFang SC", sans-serif',
   serif: 'ui-serif, "New York", "Songti SC", serif',
 }
-const prefsCSS = ({ lineHeight, font }) => `
+const prefsCSS = ({ fontScale, lineHeight, font }) => `
+html { font-size: ${fontScale * 100}% !important; }
 p, li, blockquote, dd, dt, div, td, th { line-height: ${lineHeight} !important; }
 ${FONTS[font] ? `body, body :not(pre):not(code):not(kbd):not(samp):not(tt) {
   font-family: ${FONTS[font]} !important;
@@ -41,6 +49,7 @@ ${FONTS[font] ? `body, body :not(pre):not(code):not(kbd):not(samp):not(tt) {
 `
 const query = new URLSearchParams(location.search)
 let prefs = {
+  fontScale: parseFloat(query.get('fs')) || 1,
   lineHeight: parseFloat(query.get('lh')) || 1.7,
   font: query.get('font') || 'original',
 }

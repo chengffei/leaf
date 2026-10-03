@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/reading.jpg" width="760" alt="Leaf 阅读界面">
+  <img src="docs/images/reading.png" width="760" alt="Leaf 阅读界面">
 </p>
 
 ## 为什么做 Leaf

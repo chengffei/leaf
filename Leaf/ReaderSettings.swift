@@ -34,7 +34,8 @@ final class ReaderSettings {
 
     private let defaults = UserDefaults.standard
 
-    /// 字号百分比，用 WebView 的 pageZoom 实现，对写死像素字号的书也有效
+    /// 字号百分比：在书页里放大根字号（作用于 em/rem/% 字号）。
+    /// 不用 WKWebView.pageZoom —— 非 100% 时 foliate 分页按缩放前后混合的尺寸计算，分栏会错位。
     var zoomPercent: Int {
         didSet { defaults.set(zoomPercent, forKey: "zoomPercent") }
     }
@@ -57,7 +58,4 @@ final class ReaderSettings {
     func zoomIn() { zoomPercent = min(zoomPercent + Self.zoomStep, Self.zoomRange.upperBound) }
     func zoomOut() { zoomPercent = max(zoomPercent - Self.zoomStep, Self.zoomRange.lowerBound) }
     func resetZoom() { zoomPercent = 100 }
-
-    /// 传给 JS 的排版参数（字号走原生 pageZoom，不在这里）
-    var webPrefs: [String: Any] { ["lineHeight": lineSpacing.rawValue, "font": font.rawValue] }
 }

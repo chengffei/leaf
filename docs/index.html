@@ -7,7 +7,7 @@
 <meta name="description" content="Leaf is a lightweight macOS ebook reader. Double-click an EPUB, MOBI or AZW3 file to read; close the window to quit. No library, no importing. Free and open source.">
 <meta property="og:title" content="Leaf — Open. Read. Close.">
 <meta property="og:description" content="A lightweight macOS ebook reader for EPUB, MOBI and AZW3. No library, no importing. Free and open source.">
-<meta property="og:image" content="https://chengffei.github.io/leaf/images/reading.jpg">
+<meta property="og:image" content="https://chengffei.github.io/leaf/images/reading.png">
 <link rel="icon" type="image/png" href="images/icon.png">
 <style>
   :root {
@@ -82,7 +82,7 @@
     margin: 0 auto; max-width: 1000px;
     border-radius: 14px; overflow: hidden;
     box-shadow: 0 30px 80px rgba(60, 48, 20, .16), 0 0 0 1px rgba(0,0,0,.06);
-    background: var(--card);
+    background: transparent; /* 截图自带窗口圆角（透明角） */
   }
 
   section.wrap { padding-top: 112px; }
@@ -177,7 +177,7 @@
 
 <div class="wrap">
   <div class="shot">
-    <img src="images/reading.jpg" width="1600" height="1105" alt="Leaf reading view" loading="eager">
+    <img src="images/reading.png" width="1600" height="1105" alt="Leaf reading view" loading="eager">
   </div>
 </div>
 
@@ -231,7 +231,7 @@
       </p>
     </div>
     <div class="shot">
-      <img src="images/toc.jpg" width="1600" height="1105" alt="Leaf contents sidebar" loading="lazy">
+      <img src="images/toc.png" width="1600" height="1105" alt="Leaf contents sidebar" loading="lazy">
     </div>
   </div>
 </section>
