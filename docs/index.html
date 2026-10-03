@@ -3,12 +3,104 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leaf — A macOS ebook reader that only reads</title>
-<meta name="description" content="Leaf is a lightweight macOS ebook reader. Double-click an EPUB, MOBI or AZW3 file to read; close the window to quit. No library, no importing. Free and open source.">
-<meta property="og:title" content="Leaf — Open. Read. Close.">
-<meta property="og:description" content="A lightweight macOS ebook reader for EPUB, MOBI and AZW3. No library, no importing. Free and open source.">
-<meta property="og:image" content="https://chengffei.github.io/leaf/images/reading.png">
-<link rel="icon" type="image/png" href="images/icon.png">
+<title>Leaf — Free EPUB, MOBI &amp; AZW3 Reader for Mac</title>
+<meta name="description" content="Leaf is a free, open-source ebook reader for Mac. Double-click an EPUB, MOBI or AZW3 file to start reading — no library, no importing. Requires macOS 15.">
+<link rel="canonical" href="https://chengffei.github.io/leaf/">
+<meta name="theme-color" content="#f6f4ef">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Leaf">
+<meta property="og:url" content="https://chengffei.github.io/leaf/">
+<meta property="og:title" content="Leaf — Free EPUB, MOBI &amp; AZW3 Reader for Mac">
+<meta property="og:description" content="A lightweight ebook reader for Mac. Open EPUB, MOBI and AZW3 files without a library or importing. Free and open source.">
+<meta property="og:image" content="https://chengffei.github.io/leaf/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Leaf showing a book in two-column layout">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Leaf — Free EPUB, MOBI &amp; AZW3 Reader for Mac">
+<meta name="twitter:description" content="A lightweight ebook reader for Mac. No library, no importing. Free and open source.">
+<meta name="twitter:image" content="https://chengffei.github.io/leaf/images/og.png">
+<link rel="icon" type="image/png" sizes="64x64" href="images/favicon.png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Leaf",
+  "description": "A free, open-source ebook reader for Mac that opens EPUB, MOBI and AZW3 files without a library or importing.",
+  "applicationCategory": "ProductivityApplication",
+  "applicationSubCategory": "Ebook reader",
+  "operatingSystem": "macOS 15 or later",
+  "softwareVersion": "0.1.1",
+  "url": "https://chengffei.github.io/leaf/",
+  "downloadUrl": "https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg",
+  "screenshot": "https://chengffei.github.io/leaf/images/reading.png",
+  "image": "https://chengffei.github.io/leaf/images/icon.png",
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Felix",
+    "url": "https://github.com/chengffei"
+  },
+  "codeRepository": "https://github.com/chengffei/leaf"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I open MOBI and AZW3 files on a Mac?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Install Leaf, then double-click the file in Finder, or right-click it and choose Open With › Leaf. The file must be DRM-free."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Leaf free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Leaf is free and open source under the MIT License."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does macOS say it can’t verify the developer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Leaf isn’t notarized by Apple. Open it once and dismiss the warning, then go to System Settings › Privacy & Security and click Open Anyway. You only need to do this once."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can Leaf open Kindle books I bought?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Only DRM-free files. Books bought from the Kindle Store usually have DRM, and Leaf can’t open them."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Leaf have a library or bookshelf?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Leaf opens books where they are, without importing or copying them, and remembers where you stopped reading."
+      }
+    }
+  ]
+}
+</script>
 <style>
   :root {
     --paper: #f6f4ef;
@@ -61,6 +153,14 @@
 
   .hero { text-align: center; padding: 88px 24px 56px; }
   .hero .icon { width: 128px; height: 128px; margin: 0 auto 28px; }
+  .eyebrow { margin: 0 0 14px; font-size: 15px; font-weight: 600; letter-spacing: .02em; color: var(--green); }
+  .faq { max-width: 760px; margin: 0 auto; }
+  .faq details { background: var(--card); border-radius: 14px; padding: 18px 24px; margin-bottom: 12px; }
+  .faq summary { cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; float: right; color: var(--muted); font-weight: 400; }
+  .faq details[open] summary::after { content: "–"; }
+  .faq p { margin: 10px 0 0; color: var(--muted); font-size: 16px; }
   h1 {
     font-size: clamp(40px, 7vw, 68px); line-height: 1.08; letter-spacing: -.02em;
     margin: 0 0 18px; font-weight: 700;
@@ -144,7 +244,7 @@
 
 <nav>
   <div class="wrap">
-    <a class="brand" href="#"><img src="images/icon.png" alt="">Leaf</a>
+    <a class="brand" href="#"><img src="images/favicon.png" width="28" height="28" alt="">Leaf</a>
     <div class="nav-links">
       <a class="hide-sm" href="#features"><span lang="zh">功能</span><span lang="en">Features</span></a>
       <a class="hide-sm" href="#install"><span lang="zh">安装</span><span lang="en">Install</span></a>
@@ -155,7 +255,8 @@
 </nav>
 
 <header class="hero wrap">
-  <img class="icon" src="images/icon.png" alt="Leaf">
+  <img class="icon" src="images/icon-256.png" width="128" height="128" alt="Leaf app icon">
+  <p class="eyebrow"><span lang="zh">免费的 Mac 电子书阅读器 · EPUB · MOBI · AZW3</span><span lang="en">Free ebook reader for Mac · EPUB · MOBI · AZW3</span></p>
   <h1><span lang="zh">打开，阅读，关上。</span><span lang="en">Open. Read. Close.</span></h1>
   <p class="lead">
     <span lang="zh">一个只做阅读的 macOS 电子书阅读器。在访达里双击一本书就开始读，没有书架，没有导入。</span>
@@ -177,7 +278,7 @@
 
 <div class="wrap">
   <div class="shot">
-    <img src="images/reading.png" width="1600" height="1105" alt="Leaf reading view" loading="eager">
+    <img src="images/reading.png" width="1600" height="1105" alt="Leaf reading an EPUB book on Mac in two-column layout" loading="eager">
   </div>
 </div>
 
@@ -231,7 +332,7 @@
       </p>
     </div>
     <div class="shot">
-      <img src="images/toc.png" width="1600" height="1105" alt="Leaf contents sidebar" loading="lazy">
+      <img src="images/toc.png" width="1600" height="1105" alt="Leaf table of contents sidebar on macOS" loading="lazy">
     </div>
   </div>
 </section>
@@ -281,6 +382,18 @@
   </table>
 </section>
 
+<section id="faq" class="wrap">
+  <h2><span lang="zh">常见问题</span><span lang="en">FAQ</span></h2>
+  <p class="section-lead"><span lang="zh">安装和使用中最常被问到的几件事。</span><span lang="en">Common questions about installing and using Leaf.</span></p>
+  <div class="faq">
+    <details><summary><span lang="en">How do I open MOBI and AZW3 files on a Mac?</span><span lang="zh">怎么在 Mac 上打开 MOBI 和 AZW3 文件？</span></summary><p><span lang="en">Install Leaf, then double-click the file in Finder, or right-click it and choose Open With › Leaf. The file must be DRM-free.</span><span lang="zh">装好 Leaf 后，在访达里双击文件，或右键选「打开方式 › Leaf」。文件需要无 DRM。</span></p></details>
+    <details><summary><span lang="en">Is Leaf free?</span><span lang="zh">Leaf 免费吗？</span></summary><p><span lang="en">Yes. Leaf is free and open source under the MIT License.</span><span lang="zh">免费，并以 MIT 协议开源。</span></p></details>
+    <details><summary><span lang="en">Why does macOS say it can’t verify the developer?</span><span lang="zh">为什么 macOS 提示无法验证开发者？</span></summary><p><span lang="en">Leaf isn’t notarized by Apple. Open it once and dismiss the warning, then go to System Settings › Privacy & Security and click Open Anyway. You only need to do this once.</span><span lang="zh">Leaf 没有经过 Apple 公证。先打开一次并关掉提示，再到「系统设置 › 隐私与安全性」点「仍要打开」。只需操作一次。</span></p></details>
+    <details><summary><span lang="en">Can Leaf open Kindle books I bought?</span><span lang="zh">能打开在 Kindle 商店买的书吗？</span></summary><p><span lang="en">Only DRM-free files. Books bought from the Kindle Store usually have DRM, and Leaf can’t open them.</span><span lang="zh">只能打开无 DRM 的文件。Kindle 商店购买的书通常带 DRM，Leaf 打不开。</span></p></details>
+    <details><summary><span lang="en">Does Leaf have a library or bookshelf?</span><span lang="zh">Leaf 有书架或书库吗？</span></summary><p><span lang="en">No. Leaf opens books where they are, without importing or copying them, and remembers where you stopped reading.</span><span lang="zh">没有。Leaf 直接打开书所在的位置，不导入也不复制文件，并记住你读到哪里。</span></p></details>
+  </div>
+</section>
+
 <footer class="wrap">
   <p>
     <span lang="zh">Leaf 以 MIT 协议开源 · 排版由 <a href="https://github.com/johnfactotum/foliate-js">foliate-js</a> 驱动</span>
@@ -298,8 +411,8 @@
       root.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
       button.textContent = lang === 'zh' ? 'EN' : '中文';
       document.title = lang === 'zh'
-        ? 'Leaf — 只做阅读的 macOS 电子书阅读器'
-        : 'Leaf — A macOS ebook reader that only reads';
+        ? 'Leaf — 免费的 Mac EPUB / MOBI / AZW3 电子书阅读器'
+        : 'Leaf — Free EPUB, MOBI & AZW3 Reader for Mac';
     }
     var saved = null;
     try { saved = localStorage.getItem('leaf-lang'); } catch (e) {}
