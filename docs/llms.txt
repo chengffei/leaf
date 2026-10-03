@@ -1,0 +1,30 @@
+# Leaf
+
+> Leaf is a free, open-source ebook reader for macOS. It opens EPUB, MOBI and AZW3 files directly from Finder without importing them into a library, remembers where you stopped reading, and quits when you close the window. Requires macOS 15 or later. MIT License.
+
+Leaf is built with SwiftUI and WebKit and uses foliate-js to parse and paginate books. It deliberately has no bookshelf or library: you double-click a file, read, and close the window. MOBI and AZW3 files must be DRM-free; books bought from the Kindle Store usually carry DRM and cannot be opened.
+
+## Key facts
+
+- Formats: EPUB, MOBI, AZW3 (DRM-free)
+- Platform: macOS 15 or later; universal app for Apple silicon and Intel Macs
+- Price: free; source code under the MIT License
+- Download: about 2.4 MB DMG
+- Reading position: remembered per book, identified by file content (survives renaming or moving)
+- Contents sidebar: native macOS sidebar, toggled with ⌘T, highlights the current chapter
+- Typography: font size 80–200% (⌘= / ⌘- / ⌘0), three line-spacing presets, original / sans / serif fonts
+- First launch: Leaf is not notarized by Apple; allow it once in System Settings › Privacy & Security › Open Anyway
+
+## How it compares
+
+- Apple Books: built into macOS and opens EPUB and PDF, but does not import MOBI or AZW3, and adds books to its library.
+- Calibre: opens MOBI, AZW3 and EPUB and is centered on library management (about 350 MB download, macOS 14+, GPL-3.0); its viewer can also be launched on its own.
+- Leaf: opens all three formats without a library, in a 2.4 MB app.
+
+## Links
+
+- [Website](https://chengffei.github.io/leaf/): overview, screenshots, comparison and FAQ
+- [中文介绍页](https://chengffei.github.io/leaf/zh/): Chinese version of the website
+- [Download Leaf.dmg](https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg): latest release
+- [Source code](https://github.com/chengffei/leaf): GitHub repository, README and release notes
+- [Development notes](https://github.com/chengffei/leaf/blob/main/DEVELOPMENT.md): architecture and known pitfalls (Chinese)

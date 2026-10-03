@@ -29,7 +29,7 @@ Most readers ask you to build a library before you can read. Leaf does the oppos
 - **Remembers your place:** books are recognized by content, even after renaming or moving
 - **Native contents sidebar:** toggle with `⌘T`, highlights the current chapter, click to jump, click the page to hide it
 - **Type controls:** font size 80–200%, three line-spacing presets, original / sans / serif fonts
-- **Small and native:** SwiftUI + WebKit, follows system light/dark appearance, about 2 MB download
+- **Small and native:** SwiftUI + WebKit, follows system light/dark appearance, about 2.4 MB download
 
 ## Install
 
@@ -81,7 +81,7 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 - **记住位置**：按文件内容识别，改名、挪位置也认得
 - **原生目录侧栏**：`⌘T` 开关，高亮当前章节，点击跳转，点正文自动收起
 - **字体与行距**：字号 80%–200%，行距三档，字体可选原书 / 黑体 / 宋体
-- **原生轻量**：SwiftUI + WebKit，跟随系统深浅色，安装包约 2 MB
+- **原生轻量**：SwiftUI + WebKit，跟随系统深浅色，安装包约 2.4 MB
 
 ### 安装
 

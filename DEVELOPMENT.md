@@ -33,6 +33,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 | 状态 | `ReadingPosition.swift` | 唯一的持久化：`UserDefaults["position.<sha256>"] = CFI` |
 | 渲染 | `Web/app.js` + `Web/foliate/` | [foliate-js](https://github.com/johnfactotum/foliate-js) 原样内置（版本见 `Web/foliate/VERSION`，移除了 PDF / OPDS / 示例） |
 | 图标 | `Leaf/Leaf.icon` | Icon Composer 格式，两层手写 SVG |
+| 介绍页 | `scripts/site/index.template.html` `scripts/site/build.py` | **改模板，不要直接改 `docs/*.html`**。`python3 scripts/site/build.py` 生成 `docs/index.html`（英文）与 `docs/zh/index.html`（中文），每页只保留本语言；版本号取自 `project.yml`，FAQ 结构化数据从页面 FAQ 解析。`docs/llms.txt`、`docs/sitemap.xml` 手工维护 |
 | 安装包 | `scripts/make-dmg.sh` `scripts/dmg/background.swift` | 背景图由脚本绘制；窗口 640×460，图标中心 (170,150) / (470,150) 与背景箭头对齐，挪图标须同步改箭头坐标 |
 
 调试：Debug 构建开启了 `isInspectable`，可在 Safari ›「开发」菜单里检查 Leaf 的页面。JS 端的报错与 `console.error/warn` 会转发到系统日志（subsystem `com.chengffei.leaf`）。
