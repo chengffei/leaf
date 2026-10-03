@@ -1,0 +1,11 @@
+# Xcode / SPM
+*.xcodeproj/
+!*.xcodeproj/project.pbxproj
+xcuserdata/
+DerivedData/
+.build/
+.swiftpm/
+*.xcuserstate
+# macOS
+.DS_Store
+NOTES.md

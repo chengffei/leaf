@@ -1,0 +1,75 @@
+name: Leaf
+options:
+  bundleIdPrefix: com.chengffei
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+targets:
+  Leaf:
+    type: application
+    platform: macOS
+    sources:
+      - path: Leaf
+      - path: Web
+        type: folder
+        buildPhase: resources
+    entitlements:
+      path: Leaf/Leaf.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.files.user-selected.read-only: true
+        com.apple.security.network.client: true # WKWebView 子进程在沙盒里必需，书只从本地读
+    info:
+      path: Leaf/Info.plist
+      properties:
+        CFBundleName: Leaf
+        CFBundleDevelopmentRegion: zh-Hans
+        CFBundleDisplayName: Leaf
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        LSMinimumSystemVersion: "15.0"
+        LSApplicationCategoryType: public.app-category.books
+        NSHumanReadableCopyright: "© 2026 Felix"
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: EPUB Book
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [org.idpf.epub-container]
+          - CFBundleTypeName: Kindle Book
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.chengffei.leaf.mobi, com.chengffei.leaf.azw3]
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: com.chengffei.leaf.mobi
+            UTTypeDescription: Mobipocket Book
+            UTTypeConformsTo: [public.data, public.content]
+            UTTypeTagSpecification:
+              public.filename-extension: [mobi, prc]
+              public.mime-type: [application/x-mobipocket-ebook]
+          - UTTypeIdentifier: com.chengffei.leaf.azw3
+            UTTypeDescription: Kindle KF8 Book
+            UTTypeConformsTo: [public.data, public.content]
+            UTTypeTagSpecification:
+              public.filename-extension: [azw3, azw]
+              public.mime-type: [application/vnd.amazon.mobi8-ebook]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.chengffei.leaf
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        MARKETING_VERSION: "0.1.0"
+        DEVELOPMENT_LANGUAGE: zh-Hans
+        ASSETCATALOG_COMPILER_APPICON_NAME: Leaf
+        CURRENT_PROJECT_VERSION: "1"
+schemes:
+  Leaf:
+    build:
+      targets:
+        Leaf: all
+    run:
+      config: Debug

@@ -1,0 +1,55 @@
+:root {
+  --bg: #fbfaf7;
+  --fg: #1d1d1f;
+  --muted: #86868b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1e;
+    --fg: #e5e5e7;
+    --muted: #8e8e93;
+  }
+}
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px -apple-system, "PingFang SC", sans-serif;
+  -webkit-user-select: none;
+  cursor: default;
+}
+foliate-view {
+  position: absolute;
+  inset: 28px 0 32px 0; /* 上留红绿灯，下留状态行 */
+}
+#status {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity .25s;
+}
+body:hover #status { opacity: 1; }
+#chapter { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
+
+#error[hidden] { display: none; }
+
+#error {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  color: var(--muted);
+  text-align: center;
+  white-space: pre-wrap;
+}

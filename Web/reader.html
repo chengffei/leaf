@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<footer id="status"><span id="chapter"></span><span id="percent"></span></footer>
+<div id="error" hidden></div>
+<script>
+const report = m => window.webkit?.messageHandlers?.leaf?.postMessage({ type: "error", message: m })
+addEventListener("error", e => report(`${e.message} @${e.filename}:${e.lineno}`))
+for (const level of ["error", "warn"]) {
+  const orig = console[level]
+  console[level] = (...a) => { orig(...a); report(`console.${level}: ${a.map(String).join(" ")}`) }
+}
+addEventListener("unhandledrejection", e => report(`unhandled: ${e.reason?.message ?? e.reason}\n${e.reason?.stack ?? ""}`))
+</script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
