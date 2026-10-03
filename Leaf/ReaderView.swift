@@ -89,6 +89,9 @@ struct ReaderView: NSViewRepresentable {
                         depth: item["depth"] as? Int ?? 0
                     )
                 }
+            case "meta":
+                model.title = body["title"] as? String ?? ""
+                model.author = body["author"] as? String ?? ""
             case "toggleTOC":
                 model.showsTOC.toggle()
             case "closeTOC":

@@ -127,6 +127,9 @@ try {
   await view.open('leaf://app/book')
   const { book } = view
   const title = titleOf(book.metadata?.title) || '未命名'
+  const author = [book.metadata?.author].flat()
+    .map(a => typeof a === 'string' ? a : titleOf(a?.name)).filter(Boolean).join('、')
+  post({ type: 'meta', title, author })
 
   view.addEventListener('load', e => listen(e.detail.doc))
   view.addEventListener('relocate', e => {

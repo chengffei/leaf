@@ -27,7 +27,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 |---|---|---|
 | 文档 | `BookDocument.swift` | `DocumentGroup(viewing:)` 只读；整本读入内存，SHA-256 作为书的身份 |
 | 桥 | `BookSchemeHandler.swift` | `leaf://app/*` 读 bundle 里的 `Web/`；`leaf://app/book` 给出当前书的字节（必须与页面同源，跨 host 会被 fetch 拦截） |
-| 窗口 | `BookWindow.swift` `ReaderModel.swift` | `NavigationSplitView`：左侧原生目录侧栏（目录由 JS 压平回传，选中态 = 当前章节，点选 = 跳转） |
+| 窗口 | `BookWindow.swift` `ReaderModel.swift` | `NavigationSplitView`：左侧原生目录侧栏（目录由 JS 压平回传，选中态 = 当前章节，点选 = 跳转），侧栏头部显示书名与作者；`WindowChrome` 隐藏窗口标题，红绿灯与工具栏仅在目录打开、Aa 面板打开或鼠标停在顶部时淡入 |
 | 视图 | `ReaderView.swift` | `WKWebView`；接收 JS 消息：relocate 存进度、外链交给浏览器；只放行 leaf / blob / about / data |
 | 排版 | `ReaderSettings.swift` `TypographyPanel.swift` | 全局设置：字号 = 书页根字号 `html { font-size: N% }`（作用于 em / rem / % 字号，写死 px 的书不受影响）；行距三档以 `!important` 覆盖书本；字体 原书 / 黑体 / 宋体 |
 | 状态 | `ReadingPosition.swift` | 唯一的持久化：`UserDefaults["position.<sha256>"] = CFI` |
@@ -45,6 +45,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 - **不要用 `WKWebView.pageZoom` 调字号**：非 100% 时 foliate 分页混用缩放前后的尺寸，右侧会露出半截下一栏。
 - **章首空白栏**：书的 CSS 常给章节标题加 `page-break-before: always`，WebKit 多栏把它当断栏，每章前多出一整栏空白。`app.js` 只对每段开头那串元素取消断开。
 - **侧栏遮挡**：正文视图若 `ignoresSafeArea()` 全部边，会铺到浮动侧栏下面；只忽略顶部。
+- **标题与工具栏**：别用 `.toolbar(removing: .title)`，工具栏会向左收拢、Aa 挤到目录按钮旁；改用 `titleVisibility = .hidden` 加 `ToolbarSpacer(.flexible)`。窗口标题不能露出来：书页自带白底（如封面）会铺到标题下，深色模式的浅色标题字被盖住。
 - **SF Symbol 会随系统语言本地化**（`textformat.size` 在中文下显示「大小」），工具栏按钮固定用英文变体。
 - **放大快捷键绑 `=`**：绑 `+` 时 `⌘=` 不触发。
 - **构建目录里的 .app 会被 LaunchServices 登记**，Finder 可能打开旧版；`install.sh` 会注销它们并刷新图标缓存。

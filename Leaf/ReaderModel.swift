@@ -15,6 +15,9 @@ final class ReaderModel {
     var toc: [TOCEntry] = []
     var currentHref: String?
     var showsTOC = false
+    var title = ""
+    var author = ""
+    var hoversTop = false // 鼠标在窗口顶部，用来浮现红绿灯与工具栏
     @ObservationIgnored weak var webView: WKWebView?
 
     var currentID: TOCEntry.ID? {

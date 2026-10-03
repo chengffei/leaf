@@ -16,8 +16,11 @@ struct BookWindow: View {
                 zoom: Double(settings.zoomPercent) / 100,
                 lineSpacing: settings.lineSpacing, font: settings.font
             )
-            // 不延伸进标题栏：书页自带背景（如白底封面）会铺到标题下，深色模式的浅色标题字被盖住
+            // 铺到窗口顶部（标题文字已移除，按钮悬停才浮现）；左侧要给浮动侧栏让位，否则正文被侧栏盖住
+            .ignoresSafeArea(.container, edges: .top)
             .toolbar {
+                // 标题隐藏后工具栏会向左收拢，用弹性间隔把 Aa 推回右上角
+                if #available(macOS 26.0, *) { ToolbarSpacer(.flexible) }
                 ToolbarItem(placement: .primaryAction) {
                     Button { showsTypography.toggle() } label: {
                         // 该符号随系统语言本地化（中文显示「大小」），固定用英文变体「Aa」
@@ -31,6 +34,12 @@ struct BookWindow: View {
                 }
             }
         }
+        .background(
+            WindowChrome(visible: model.showsTOC || model.hoversTop || showsTypography) { hovering in
+                if model.hoversTop != hovering { model.hoversTop = hovering }
+            }
+            .ignoresSafeArea()
+        )
         .focusedSceneValue(\.reader, model)
     }
 
@@ -46,20 +55,44 @@ struct TOCSidebar: View {
     let model: ReaderModel
 
     var body: some View {
-        if model.toc.isEmpty {
-            ContentUnavailableView("没有目录", systemImage: "list.bullet")
-        } else {
-            ScrollViewReader { proxy in
-                List(model.toc, selection: selection) { entry in
-                    Text(entry.label)
-                        .lineLimit(2)
-                        .padding(.leading, CGFloat(entry.depth) * 14)
-                        .help(entry.label)
+        Group {
+            if model.toc.isEmpty {
+                ContentUnavailableView("没有目录", systemImage: "list.bullet")
+            } else {
+                ScrollViewReader { proxy in
+                    List(model.toc, selection: selection) { entry in
+                        Text(entry.label)
+                            .lineLimit(2)
+                            .padding(.leading, CGFloat(entry.depth) * 14)
+                            .help(entry.label)
+                    }
+                    .listStyle(.sidebar)
+                    .onAppear { scrollToCurrent(proxy) }
+                    .onChange(of: model.showsTOC) { scrollToCurrent(proxy) }
                 }
-                .listStyle(.sidebar)
-                .onAppear { scrollToCurrent(proxy) }
-                .onChange(of: model.showsTOC) { scrollToCurrent(proxy) }
             }
+        }
+        .safeAreaInset(edge: .top, spacing: 0) { header }
+    }
+
+    @ViewBuilder private var header: some View {
+        if !model.title.isEmpty {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(model.title)
+                    .font(.headline)
+                    .lineLimit(2)
+                if !model.author.isEmpty {
+                    Text(model.author)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            .help(model.author.isEmpty ? model.title : "\(model.title)\n\(model.author)")
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+            .padding(.bottom, 10)
         }
     }
 
@@ -75,6 +108,72 @@ struct TOCSidebar: View {
 
     private func scrollToCurrent(_ proxy: ScrollViewProxy) {
         if model.showsTOC, let id = model.currentID { proxy.scrollTo(id, anchor: .center) }
+    }
+}
+
+/// 红绿灯与工具栏只在需要时出现：目录或 Aa 面板打开、或鼠标停在窗口顶部。
+/// 垫在整个窗口背后，用追踪区感知鼠标（不参与点击），淡入淡出整条标题栏。
+struct WindowChrome: NSViewRepresentable {
+    let visible: Bool
+    let onHoverTop: (Bool) -> Void
+
+    func makeNSView(context: Context) -> TrackingView { TrackingView() }
+
+    func updateNSView(_ view: TrackingView, context: Context) {
+        view.onHoverTop = onHoverTop
+        view.setChromeVisible(visible)
+    }
+
+    final class TrackingView: NSView {
+        var onHoverTop: (Bool) -> Void = { _ in }
+        private var visible = true
+        private static let band: CGFloat = 60 // 比带工具栏的标题栏（52pt）略高，按钮出现前鼠标已在区内
+
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            // 书名改在侧栏头部，窗口菜单里仍是文件名。不用 .toolbar(removing: .title)：那样 Aa 会挤到左边
+            window?.titleVisibility = .hidden
+            applyAlpha(animated: false)
+        }
+
+        override func updateTrackingAreas() {
+            super.updateTrackingAreas()
+            trackingAreas.forEach(removeTrackingArea)
+            addTrackingArea(NSTrackingArea(
+                rect: .zero,
+                options: [.mouseMoved, .mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+                owner: self
+            ))
+        }
+
+        override func mouseMoved(with event: NSEvent) { report(event) }
+        override func mouseEntered(with event: NSEvent) { report(event) }
+        override func mouseExited(with event: NSEvent) { onHoverTop(false) }
+
+        private func report(_ event: NSEvent) {
+            guard let window else { return }
+            onHoverTop(window.frame.height - event.locationInWindow.y < Self.band)
+        }
+
+        func setChromeVisible(_ newValue: Bool) {
+            guard newValue != visible else { return }
+            visible = newValue
+            applyAlpha(animated: true)
+        }
+
+        private func applyAlpha(animated: Bool) {
+            // 全屏时标题栏由系统自己收放，不插手
+            guard let window, !window.styleMask.contains(.fullScreen),
+                  let titlebar = window.standardWindowButton(.closeButton)?.superview?.superview else { return }
+            let alpha: CGFloat = visible ? 1 : 0
+            if animated {
+                NSAnimationContext.runAnimationGroup { $0.duration = 0.2; titlebar.animator().alphaValue = alpha }
+            } else {
+                titlebar.alphaValue = alpha
+            }
+        }
     }
 }
 

@@ -22,7 +22,7 @@ html, body {
 }
 foliate-view {
   position: absolute;
-  inset: 0 0 32px 0; /* 网页已在标题栏下方，只留下方状态行 */
+  inset: 0 0 32px 0; /* 顶部按钮悬停才浮现，不再预留；下留状态行 */
 }
 #status {
   position: absolute;
