@@ -12,6 +12,8 @@ html {
 }
 @media (prefers-color-scheme: dark) {
   a:link { color: #6cb4ff; }
+  /* 书里写死的深色字（常见行内 color:rgb(0,0,0)）在深底上看不见，由 markDarkText 标记 */
+  [data-leaf-dark]:not(a) { color: CanvasText !important; }
 }
 p, li, blockquote, dd {
   text-align: justify;
@@ -62,6 +64,17 @@ const applyStyles = () => {
     const cs = p && doc.defaultView.getComputedStyle(p)
     post({ type: 'styled', ...prefs, width: innerWidth, lineHeightPx: cs?.lineHeight, fontSizePx: cs?.fontSize, fontFamily: cs?.fontFamily })
   })
+}
+
+// 标记深灰到纯黑的字，深色模式下由 bookCSS 改成系统前景色；浅色模式规则不生效，原书颜色不变。
+// 只认接近无彩色的：书里用来强调的红、蓝等颜色保留
+const markDarkText = doc => {
+  const win = doc.defaultView
+  for (const el of doc.body?.querySelectorAll('*') ?? []) {
+    const [r, g, b, a = 1] = win.getComputedStyle(el).color.match(/[\d.]+/g)?.map(Number) ?? []
+    const gray = Math.max(r, g, b) - Math.min(r, g, b) < 40
+    if (a > 0 && gray && 0.2126 * r + 0.7152 * g + 0.0722 * b < 90) el.setAttribute('data-leaf-dark', '')
+  }
 }
 
 const titleOf = x => !x ? '' : typeof x === 'string' ? x : Object.values(x)[0] ?? ''
@@ -131,7 +144,10 @@ try {
     .map(a => typeof a === 'string' ? a : titleOf(a?.name)).filter(Boolean).join('、')
   post({ type: 'meta', title, author })
 
-  view.addEventListener('load', e => listen(e.detail.doc))
+  view.addEventListener('load', e => {
+    listen(e.detail.doc)
+    markDarkText(e.detail.doc)
+  })
   view.addEventListener('relocate', e => {
     const { cfi, fraction, tocItem } = e.detail
     $('#chapter').textContent = tocItem?.label ?? ''
