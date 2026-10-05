@@ -29,7 +29,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 | 桥 | `BookSchemeHandler.swift` | `leaf://app/*` 读 bundle 里的 `Web/`；`leaf://app/book` 给出当前书的字节（必须与页面同源，跨 host 会被 fetch 拦截） |
 | 窗口 | `BookWindow.swift` `ReaderModel.swift` | `NavigationSplitView`：左侧原生目录侧栏（目录由 JS 压平回传，选中态 = 当前章节，点选 = 跳转），侧栏头部显示书名与作者；`WindowChrome` 隐藏窗口标题，红绿灯与工具栏仅在目录打开、Aa 面板打开或鼠标停在顶部时淡入 |
 | 视图 | `ReaderView.swift` | `WKWebView`；接收 JS 消息：relocate 存进度、外链交给浏览器；只放行 leaf / blob / about / data |
-| 排版 | `ReaderSettings.swift` `TypographyPanel.swift` | 全局设置：字号 = 书页根字号 `html { font-size: N% }`（作用于 em / rem / % 字号，写死 px 的书不受影响）；行距三档以 `!important` 覆盖书本；字体 原书 / 黑体 / 宋体 |
+| 排版 | `ReaderSettings.swift` `TypographyPanel.swift` | 全局设置：字号 = 书页根字号 `html { font-size: N% }`（作用于 em / rem / % 字号，写死 px 的书不受影响）；行距三档以 `!important` 覆盖书本；页边距三档 = foliate 的 `gap` / `margin` 属性（数值在 app.js `MARGINS`）；字体 原书 / 黑体 / 宋体 |
 | 状态 | `ReadingPosition.swift` | 唯一的持久化：`UserDefaults["position.<sha256>"] = CFI` |
 | 渲染 | `Web/app.js` + `Web/foliate/` | [foliate-js](https://github.com/johnfactotum/foliate-js) 原样内置（版本见 `Web/foliate/VERSION`，移除了 PDF / OPDS / 示例） |
 | 图标 | `Leaf/Leaf.icon` | Icon Composer 格式，两层手写 SVG |
