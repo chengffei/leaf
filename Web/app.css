@@ -42,7 +42,8 @@ body > foliate-view {
   opacity: 0;
   transition: opacity .25s;
 }
-body:hover #status { opacity: 1; }
+/* 悬停时常显；打开、翻页、跳转后由 app.js 加 .show 亮 2 秒（:hover 要等鼠标动了才生效，刚打开时看不到） */
+body:hover #status, #status.show { opacity: 1; }
 #chapter { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
 
 #error[hidden] { display: none; }

@@ -237,6 +237,13 @@ $('#back').addEventListener('click', () => {
 })
 listen(document)
 
+let statusTimer
+const flashStatus = () => {
+  $('#status').classList.add('show')
+  clearTimeout(statusTimer)
+  statusTimer = setTimeout(() => $('#status').classList.remove('show'), 2000)
+}
+
 // ---- 打开 ----
 try {
   await view.open('leaf://app/book')
@@ -252,6 +259,7 @@ try {
   })
   view.addEventListener('relocate', e => {
     closeNote()
+    flashStatus()
     const { cfi, fraction, tocItem } = e.detail
     $('#chapter').textContent = tocItem?.label ?? ''
     $('#percent').textContent = `${Math.round((fraction ?? 0) * 100)}%`
