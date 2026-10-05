@@ -189,6 +189,15 @@ struct ReaderCommands: Commands {
             .keyboardShortcut("t")
             .disabled(reader == nil)
         }
+        // 跳转（目录、书内链接、脚注「前往」）之后回到原处；快捷键与 Safari、Books 一致
+        CommandMenu("前往") {
+            Button("返回") { reader?.goBack() }
+                .keyboardShortcut("[")
+                .disabled(reader?.canGoBack != true)
+            Button("前进") { reader?.goForward() }
+                .keyboardShortcut("]")
+                .disabled(reader?.canGoForward != true)
+        }
         CommandGroup(after: .toolbar) {
             let settings = ReaderSettings.shared
             Button("放大") { settings.zoomIn() }

@@ -2,12 +2,16 @@
   --bg: #fbfaf7;
   --fg: #1d1d1f;
   --muted: #86868b;
+  --line: rgba(0, 0, 0, .1);
+  --hover: #f0eee9;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #1c1c1e;
     --fg: #e5e5e7;
     --muted: #8e8e93;
+    --line: rgba(255, 255, 255, .12);
+    --hover: #2c2c2e;
   }
 }
 html, body {
@@ -20,7 +24,7 @@ html, body {
   -webkit-user-select: none;
   cursor: default;
 }
-foliate-view {
+body > foliate-view {
   position: absolute;
   inset: 0 0 32px 0; /* 顶部按钮悬停才浮现，不再预留；下留状态行 */
 }
@@ -53,3 +57,53 @@ body:hover #status { opacity: 1; }
   text-align: center;
   white-space: pre-wrap;
 }
+
+/* 脚注卡片：贴着点击处弹出 */
+#note {
+  position: absolute;
+  z-index: 10;
+  box-sizing: border-box;
+  padding: 16px 20px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .18);
+}
+#note[hidden] { display: none; }
+#note-body foliate-view { display: block; height: 100%; }
+#note-go {
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+#note-go:hover { color: var(--fg); }
+#note-go[hidden] { display: none; }
+
+/* 跳转后的「返回」：浮在状态行上方正中 */
+#back {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+  color: var(--fg);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+#back:hover { background: var(--hover); }
+#back[hidden] { display: none; }

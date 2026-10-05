@@ -17,6 +17,8 @@ final class ReaderModel {
     var showsTOC = false
     var title = ""
     var author = ""
+    var canGoBack = false
+    var canGoForward = false
     var hoversTop = false // 鼠标在窗口顶部，用来浮现红绿灯与工具栏
     @ObservationIgnored weak var webView: WKWebView?
 
@@ -32,6 +34,9 @@ final class ReaderModel {
         webView.evaluateJavaScript("leaf.goTo(\(json))", completionHandler: nil)
         webView.window?.makeFirstResponder(webView) // 跳完继续用键盘翻页
     }
+
+    func goBack() { webView?.evaluateJavaScript("leaf.back()", completionHandler: nil) }
+    func goForward() { webView?.evaluateJavaScript("leaf.forward()", completionHandler: nil) }
 }
 
 extension FocusedValues {
