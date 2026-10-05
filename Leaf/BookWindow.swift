@@ -14,7 +14,7 @@ struct BookWindow: View {
             ReaderView(
                 book: book, model: model,
                 zoom: Double(settings.zoomPercent) / 100,
-                lineSpacing: settings.lineSpacing, font: settings.font
+                lineSpacing: settings.lineSpacing, font: settings.font, margin: settings.margin
             )
             // 铺到窗口顶部（标题文字已移除，按钮悬停才浮现）；左侧要给浮动侧栏让位，否则正文被侧栏盖住
             .ignoresSafeArea(.container, edges: .top)

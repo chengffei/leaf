@@ -25,6 +25,19 @@ enum ReaderFont: String, CaseIterable, Identifiable {
     }
 }
 
+/// 页边距：正文四周的留白，左右为主，上下按比例跟着变（具体数值在 app.js 的 MARGINS）
+enum PageMargin: String, CaseIterable, Identifiable {
+    case narrow, standard, wide
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .narrow: "窄"
+        case .standard: "标准"
+        case .wide: "宽"
+        }
+    }
+}
+
 /// 全局排版设置：所有书共用，改动即时推到每个打开的窗口。
 @MainActor @Observable
 final class ReaderSettings {
@@ -45,12 +58,16 @@ final class ReaderSettings {
     var font: ReaderFont {
         didSet { defaults.set(font.rawValue, forKey: "font") }
     }
+    var margin: PageMargin {
+        didSet { defaults.set(margin.rawValue, forKey: "margin") }
+    }
 
     private init() {
         let zoom = defaults.integer(forKey: "zoomPercent")
         zoomPercent = Self.zoomRange.contains(zoom) ? zoom : 100
         lineSpacing = LineSpacing(rawValue: defaults.double(forKey: "lineSpacing")) ?? .standard
         font = ReaderFont(rawValue: defaults.string(forKey: "font") ?? "") ?? .original
+        margin = PageMargin(rawValue: defaults.string(forKey: "margin") ?? "") ?? .standard
     }
 
     var canZoomIn: Bool { zoomPercent < Self.zoomRange.upperBound }

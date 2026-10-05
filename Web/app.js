@@ -55,8 +55,18 @@ let prefs = {
   fontScale: parseFloat(query.get('fs')) || 1,
   lineHeight: parseFloat(query.get('lh')) || 1.7,
   font: query.get('font') || 'original',
+  margin: query.get('margin') || 'standard',
+}
+// 页边距三档：gap = 栏间距（也是左右留白，foliate 两侧各留一半），margin = 上下留白
+const MARGINS = {
+  narrow: { gap: '4%', margin: '24px' },
+  standard: { gap: '7%', margin: '40px' },
+  wide: { gap: '12%', margin: '56px' },
 }
 const applyStyles = () => {
+  const { gap, margin } = MARGINS[prefs.margin] ?? MARGINS.standard
+  view.renderer?.setAttribute?.('gap', gap)
+  view.renderer?.setAttribute?.('margin', margin)
   view.renderer?.setStyles?.(bookCSS + prefsCSS(prefs))
   // 回报实际生效的排版，供日志验收
   requestAnimationFrame(() => {
@@ -284,8 +294,6 @@ try {
     post({ type: 'link', href: e.detail.a.href })
   })
 
-  view.renderer.setAttribute('margin', '40px')
-  view.renderer.setAttribute('gap', '7%')
   view.renderer.setAttribute('max-inline-size', '680px')
   applyStyles()
 

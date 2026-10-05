@@ -35,6 +35,12 @@ struct TypographyPanel: View {
                 }
             }
 
+            row("页边距") {
+                Picker("页边距", selection: $settings.margin) {
+                    ForEach(PageMargin.allCases) { Text($0.label).tag($0) }
+                }
+            }
+
             row("字体") {
                 Picker("字体", selection: $settings.font) {
                     ForEach(ReaderFont.allCases) { Text($0.label).tag($0) }

@@ -9,6 +9,7 @@ struct Typography: Equatable {
     let zoom: Double
     let lineSpacing: LineSpacing
     let font: ReaderFont
+    let margin: PageMargin
 }
 
 struct ReaderView: NSViewRepresentable {
@@ -17,6 +18,7 @@ struct ReaderView: NSViewRepresentable {
     let zoom: Double
     let lineSpacing: LineSpacing
     let font: ReaderFont
+    let margin: PageMargin
 
     func makeCoordinator() -> Coordinator { Coordinator(bookID: book.id, model: model) }
 
@@ -39,21 +41,22 @@ struct ReaderView: NSViewRepresentable {
             URLQueryItem(name: "fs", value: String(zoom)),
             URLQueryItem(name: "lh", value: String(lineSpacing.rawValue)),
             URLQueryItem(name: "font", value: font.rawValue),
+            URLQueryItem(name: "margin", value: margin.rawValue),
         ]
         if let cfi = ReadingPosition.load(book.id) {
             url.queryItems?.append(URLQueryItem(name: "cfi", value: cfi))
         }
-        context.coordinator.applied = Typography(zoom: zoom, lineSpacing: lineSpacing, font: font)
+        context.coordinator.applied = Typography(zoom: zoom, lineSpacing: lineSpacing, font: font, margin: margin)
         webView.load(URLRequest(url: url.url!))
         return webView
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
-        let typography = Typography(zoom: zoom, lineSpacing: lineSpacing, font: font)
+        let typography = Typography(zoom: zoom, lineSpacing: lineSpacing, font: font, margin: margin)
         guard context.coordinator.applied != typography else { return }
         context.coordinator.applied = typography
         webView.evaluateJavaScript(
-            "leaf.setPrefs({ fontScale: \(zoom), lineHeight: \(lineSpacing.rawValue), font: '\(font.rawValue)' })",
+            "leaf.setPrefs({ fontScale: \(zoom), lineHeight: \(lineSpacing.rawValue), font: '\(font.rawValue)', margin: '\(margin.rawValue)' })",
             completionHandler: nil
         )
     }
@@ -66,7 +69,7 @@ struct ReaderView: NSViewRepresentable {
     final class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
         private let bookID: String
         private let model: ReaderModel
-        var applied = Typography(zoom: 1, lineSpacing: .standard, font: .original)
+        var applied = Typography(zoom: 1, lineSpacing: .standard, font: .original, margin: .standard)
 
         init(bookID: String, model: ReaderModel) {
             self.bookID = bookID
