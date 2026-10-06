@@ -27,6 +27,8 @@ p, li, blockquote, dd {
 [align="right"] { text-align: right; }
 [align="center"] { text-align: center; }
 pre { white-space: pre-wrap !important; }
+/* 标题行高：书里大多不写，字体默认的行高太紧，折行后会贴住下划线 */
+h1, h2, h3, h4, h5, h6 { line-height: 1.35 !important; }
 /* 章首的「分页前断开」在 WebKit 多栏里变成断栏，每章前多出一整栏空白；只取消每段开头那一串元素的 */
 body > :first-child,
 body > :first-child > :first-child,
@@ -85,6 +87,20 @@ const markDarkText = doc => {
     const [r, g, b, a = 1] = win.getComputedStyle(el).color.match(/[\d.]+/g)?.map(Number) ?? []
     const gray = Math.max(r, g, b) - Math.min(r, g, b) < 40
     if (a > 0 && gray && 0.2126 * r + 0.7152 * g + 0.0722 * b < 90) el.setAttribute('data-leaf-dark', '')
+  }
+}
+
+// 标题字号上限：不少转换书（如 Kindle 中文版）把标题设成正文的 2.5 倍，再叠加字号放大就一行放不下几个字。
+// 超过正文 1.8 倍的压到 1.8 倍，用 rem 写，之后调字号仍按比例缩放；没超的不动
+const HEADING_MAX = 1.8
+const capHeadings = doc => {
+  const win = doc.defaultView
+  const px = el => parseFloat(win.getComputedStyle(el).fontSize)
+  const text = [...doc.querySelectorAll('p')].find(p => p.textContent.trim().length > 20)
+  const body = px(text ?? doc.body), root = px(doc.documentElement)
+  if (!body || !root) return
+  for (const h of doc.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+    if (px(h) > body * HEADING_MAX) h.style.setProperty('font-size', `${(body * HEADING_MAX / root).toFixed(3)}rem`, 'important')
   }
 }
 
@@ -266,6 +282,7 @@ try {
   view.addEventListener('load', e => {
     listen(e.detail.doc)
     markDarkText(e.detail.doc)
+    capHeadings(e.detail.doc)
   })
   view.addEventListener('relocate', e => {
     closeNote()
