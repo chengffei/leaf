@@ -55,24 +55,45 @@ struct TOCSidebar: View {
     let model: ReaderModel
 
     var body: some View {
-        Group {
+        // 头部放在列表外面：放进 safeAreaInset 时列表会从书名底下滚过去，两者叠在一起
+        VStack(alignment: .leading, spacing: 0) {
+            header
             if model.toc.isEmpty {
                 ContentUnavailableView("没有目录", systemImage: "list.bullet")
             } else {
                 ScrollViewReader { proxy in
-                    List(model.toc, selection: selection) { entry in
-                        Text(entry.label)
-                            .lineLimit(2)
-                            .padding(.leading, CGFloat(entry.depth) * 14)
-                            .help(entry.label)
+                    List(model.visibleTOC, selection: selection) { entry in
+                        row(entry)
                     }
                     .listStyle(.sidebar)
-                    .onAppear { scrollToCurrent(proxy) }
-                    .onChange(of: model.showsTOC) { scrollToCurrent(proxy) }
+                    .onAppear { reveal(proxy) }
+                    .onChange(of: model.showsTOC) { reveal(proxy) }
                 }
             }
         }
-        .safeAreaInset(edge: .top, spacing: 0) { header }
+    }
+
+    private func row(_ entry: TOCEntry) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            // 三角只管展开收起，不跳转；没有下级的留同宽空位，同层文字对齐
+            if entry.hasChildren {
+                Button { withAnimation(.easeOut(duration: 0.15)) { model.toggle(entry.id) } } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(model.expanded.contains(entry.id) ? 90 : 0))
+                        .frame(width: 12, height: 12)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            } else if model.isNested {
+                Color.clear.frame(width: 12, height: 1)
+            }
+            Text(entry.label)
+                .lineLimit(2)
+                .help(entry.label)
+        }
+        .padding(.leading, CGFloat(entry.depth) * 14)
     }
 
     @ViewBuilder private var header: some View {
@@ -96,18 +117,25 @@ struct TOCSidebar: View {
         }
     }
 
-    // 读取 = 当前章节（随翻页高亮）；写入 = 用户点了某条 → 跳转
+    // 读取 = 当前章节（收在折叠里就是它的可见祖先）；写入 = 用户点了某条 → 跳转，有下级的顺带展开
     private var selection: Binding<TOCEntry.ID?> {
         Binding(
-            get: { model.currentID },
+            get: { model.visibleCurrentID },
             set: { id in
-                if let id, model.toc.indices.contains(id) { model.goTo(model.toc[id]) }
+                guard let id, model.toc.indices.contains(id) else { return }
+                if model.toc[id].hasChildren { model.expanded.insert(id) }
+                model.goTo(model.toc[id])
             }
         )
     }
 
-    private func scrollToCurrent(_ proxy: ScrollViewProxy) {
-        if model.showsTOC, let id = model.currentID { proxy.scrollTo(id, anchor: .center) }
+    // 打开侧栏时展开到当前章节，并滚过去
+    private func reveal(_ proxy: ScrollViewProxy) {
+        guard model.showsTOC else { return }
+        model.revealCurrent()
+        if let id = model.currentID {
+            DispatchQueue.main.async { proxy.scrollTo(id, anchor: .center) }
+        }
     }
 }
 

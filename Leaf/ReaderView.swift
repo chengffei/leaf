@@ -84,14 +84,14 @@ struct ReaderView: NSViewRepresentable {
                 model.currentHref = body["tocHref"] as? String
             case "toc":
                 let items = body["items"] as? [[String: Any]] ?? []
-                model.toc = items.enumerated().map { index, item in
+                model.setTOC(items.enumerated().map { index, item in
                     TOCEntry(
                         id: index,
                         label: item["label"] as? String ?? "",
                         href: item["href"] as? String ?? "",
                         depth: item["depth"] as? Int ?? 0
                     )
-                }
+                })
             case "meta":
                 model.title = body["title"] as? String ?? ""
                 model.author = body["author"] as? String ?? ""

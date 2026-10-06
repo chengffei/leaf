@@ -27,7 +27,7 @@ Most readers ask you to build a library before you can read. Leaf does the oppos
 
 - **Three formats:** EPUB, MOBI and AZW3 (MOBI/AZW3 must be DRM-free)
 - **Remembers your place:** books are recognized by content, even after renaming or moving
-- **Native contents sidebar:** toggle with `⌘T`, highlights the current chapter, click to jump, click the page to hide it
+- **Native contents sidebar:** toggle with `⌘T`, highlights the current chapter, click to jump, click the page to hide it; long contents (such as box sets) start collapsed to book titles
 - **Footnotes in place:** click a note marker and the note pops up over the page; after following a link or the contents, a **Back** button (or `⌘[`) returns you to where you were
 - **Type controls:** font size 80–200%, three line-spacing presets, three margin presets, original / sans / serif fonts
 - **Small and native:** SwiftUI + WebKit, follows system light/dark appearance, about 2.4 MB download
@@ -80,7 +80,7 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 
 - **三种格式**：EPUB、MOBI、AZW3（AZW3/MOBI 须无 DRM）
 - **记住位置**：按文件内容识别，改名、挪位置也认得
-- **原生目录侧栏**：`⌘T` 开关，高亮当前章节，点击跳转，点正文自动收起
+- **原生目录侧栏**：`⌘T` 开关，高亮当前章节，点击跳转，点正文自动收起；合集等长目录默认只列书名，可逐层展开
 - **脚注就地弹出**：点注释编号直接弹出注释，不离开当前页；点链接或目录跳走后，底部给「返回」，也可按 `⌘[`
 - **字体与行距**：字号 80%–200%，行距三档，页边距三档，字体可选原书 / 黑体 / 宋体
 - **原生轻量**：SwiftUI + WebKit，跟随系统深浅色，安装包约 2.4 MB
