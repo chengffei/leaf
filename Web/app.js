@@ -1,5 +1,6 @@
 import './foliate/view.js'
 import { FootnoteHandler } from './foliate/footnotes.js'
+import { Overlayer } from './foliate/overlayer.js'
 
 const $ = s => document.querySelector(s)
 const post = msg => window.webkit?.messageHandlers?.leaf?.postMessage(msg)
@@ -44,41 +45,81 @@ aside[epub|type~="note"], aside[epub|type~="rearnote"] { display: none; }
 `
 
 // 用户排版偏好：行距强制覆盖书本（否则很多书调了没反应），字体「原书」时不干预
+// font 是内置的 sans/serif，或任意已安装字体的家族名（Swift 侧从 NSFontManager 取）
 const FONTS = {
   sans: '-apple-system, "PingFang SC", sans-serif',
   serif: 'ui-serif, "New York", "Songti SC", serif',
 }
+const fontStack = font => font === 'original' ? '' : FONTS[font] ?? `"${font.replace(/["\\]/g, '')}", -apple-system, "PingFang SC", sans-serif`
+// 主题。浅色 / 深色由窗口外观决定（跟随系统 = 不动窗口外观），这里只补书页的底色：
+// 深色：书里常写死 body{background:white}，配上 markDarkText 改白的字就整页看不见，底色一并压掉
+// 米黄：浅色外观之上染底色；深灰到黑的字（markDarkText 标记）换成棕色，彩色强调不动
+const SEPIA = { bg: '#f4ecd8', fg: '#5b4636', link: '#8a5a2b' }
+const DARK_BG = '#1c1c1e'
+const darkMedia = matchMedia('(prefers-color-scheme: dark)')
+const effectiveTheme = () => prefs.theme === 'system' ? (darkMedia.matches ? 'dark' : 'light') : prefs.theme
+const THEME_CSS = {
+  light: '',
+  dark: `
+html { background-color: ${DARK_BG} !important; }
+body { background-color: transparent !important; }
+`,
+  sepia: `
+html { color-scheme: light !important; background-color: ${SEPIA.bg} !important; color: ${SEPIA.fg}; }
+body { background-color: transparent !important; }
+[data-leaf-dark]:not(a) { color: ${SEPIA.fg} !important; }
+a:link { color: ${SEPIA.link}; }
+`,
+}
 const prefsCSS = ({ fontScale, lineHeight, font }) => `
 html { font-size: ${fontScale * 100}% !important; }
 p, li, blockquote, dd, dt, div, td, th { line-height: ${lineHeight} !important; }
-${FONTS[font] ? `body, body :not(pre):not(code):not(kbd):not(samp):not(tt) {
-  font-family: ${FONTS[font]} !important;
+${fontStack(font) ? `body, body :not(pre):not(code):not(kbd):not(samp):not(tt) {
+  font-family: ${fontStack(font)} !important;
 }` : ''}
+${THEME_CSS[effectiveTheme()] ?? ''}
 `
 const query = new URLSearchParams(location.search)
-let prefs = {
-  fontScale: parseFloat(query.get('fs')) || 1,
-  lineHeight: parseFloat(query.get('lh')) || 1.7,
-  font: query.get('font') || 'original',
-  margin: query.get('margin') || 'standard',
+const DEFAULT_PREFS = {
+  fontScale: 1, lineHeight: 1.7, font: 'original', margin: 'standard',
+  maxWidth: 680, columns: 'auto', theme: 'system',
 }
+let prefs = { ...DEFAULT_PREFS }
+try { prefs = { ...prefs, ...JSON.parse(query.get('prefs') ?? '{}') } } catch {}
 // 页边距三档：gap = 栏间距（也是左右留白，foliate 两侧各留一半），margin = 上下留白
 const MARGINS = {
   narrow: { gap: '4%', margin: '24px' },
   standard: { gap: '7%', margin: '40px' },
   wide: { gap: '12%', margin: '56px' },
 }
+// 版心与分栏：foliate 的栏数 = min(max-column-count, ceil(宽度 / max-inline-size))，竖窗另有上限（上游写死 1，
+// paginator.js 已打补丁开放为属性）。「双栏」在窄窗口里也要两栏，就把每栏上限压到半个窗口
+// 值没变就不写：foliate 的 attributeChangedCallback 每次都会重排
+const setAttr = (name, value) => {
+  const r = view.renderer
+  if (r?.setAttribute && r.getAttribute(name) !== value) r.setAttribute(name, value)
+}
+const applyLayout = () => {
+  const max = prefs.maxWidth > 0 ? prefs.maxWidth : 100000
+  const { columns } = prefs
+  setAttr('max-column-count', columns === 'single' ? '1' : '2')
+  setAttr('max-column-count-portrait', columns === 'double' ? '2' : '1')
+  setAttr('max-inline-size', `${columns === 'double' ? Math.min(max, Math.floor(innerWidth / 2)) : max}px`)
+}
 const applyStyles = () => {
   const { gap, margin } = MARGINS[prefs.margin] ?? MARGINS.standard
-  view.renderer?.setAttribute?.('gap', gap)
-  view.renderer?.setAttribute?.('margin', margin)
+  document.documentElement.dataset.theme = effectiveTheme()
+  setAttr('gap', gap)
+  setAttr('margin', margin)
+  applyLayout()
   view.renderer?.setStyles?.(bookCSS + prefsCSS(prefs))
   // 回报实际生效的排版，供日志验收
   requestAnimationFrame(() => {
     const doc = view.renderer?.getContents?.()?.[0]?.doc
     const p = doc?.querySelector('p')
     const cs = p && doc.defaultView.getComputedStyle(p)
-    post({ type: 'styled', ...prefs, width: innerWidth, lineHeightPx: cs?.lineHeight, fontSizePx: cs?.fontSize, fontFamily: cs?.fontFamily })
+    const dark = doc?.defaultView.matchMedia('(prefers-color-scheme: dark)').matches
+    post({ type: 'styled', ...prefs, width: innerWidth, lineHeightPx: cs?.lineHeight, fontSizePx: cs?.fontSize, fontFamily: cs?.fontFamily, color: cs?.color, dark, hostDark: matchMedia('(prefers-color-scheme: dark)').matches })
   })
 }
 
@@ -138,6 +179,10 @@ globalThis.leaf = {
   },
   back() { view.history.back() },
   forward() { view.history.forward() },
+  prev() { turn(() => view.goLeft()) },
+  next() { turn(() => view.goRight()) },
+  find() { openFind() },
+  findNext(step) { stepFind(step) },
 }
 
 // ---- 翻页输入：键盘 + 触控板（一次手势只翻一页） ----
@@ -149,8 +194,10 @@ const turn = go => {
 }
 const onKey = e => {
   if (!view.book || e.metaKey || e.ctrlKey || e.altKey) return
+  if (e.target.closest?.('#find')) return // 查找框里打字不翻页
   const k = e.key
   if (k === 'Escape' && !$('#note').hidden) return closeNote()
+  if (k === 'Escape' && !$('#find').hidden) return closeFind()
   if (k === 't') return post({ type: 'toggleTOC' })
   if (k === 'ArrowLeft') turn(() => view.goLeft())
   else if (k === 'ArrowRight') turn(() => view.goRight())
@@ -176,14 +223,29 @@ const onWheel = e => {
 
 // 书页在 iframe 里，点击坐标要加上 iframe 的偏移才是窗口坐标；注释卡片按它定位
 let lastPoint = { x: innerWidth / 2, y: innerHeight / 2 }
+const CHROME = '#note, #back, #find, #status'
+const windowPoint = e => {
+  const frame = e.view?.frameElement?.getBoundingClientRect()
+  return { x: e.clientX + (frame?.left ?? 0), y: e.clientY + (frame?.top ?? 0) }
+}
+// 点正文左右两侧翻页：外侧各 15%，中间不动（留给选字）；拖选、点链接不算
+const EDGE = 0.15
 const listen = target => {
   target.addEventListener('keydown', onKey)
   target.addEventListener('mousedown', e => {
-    if (e.target.closest?.('#note, #back')) return // 点卡片里的按钮不算点正文
-    const frame = e.view?.frameElement?.getBoundingClientRect()
-    lastPoint = { x: e.clientX + (frame?.left ?? 0), y: e.clientY + (frame?.top ?? 0) }
+    if (e.target.closest?.(CHROME)) return // 点卡片里的按钮不算点正文
+    lastPoint = windowPoint(e)
     closeNote()
     post({ type: 'closeTOC' }) // 点正文 = 收起目录
+  })
+  target.addEventListener('click', e => {
+    if (e.button !== 0 || e.target.closest?.(`a, ${CHROME}`)) return
+    if (!e.target.ownerDocument.getSelection()?.isCollapsed) return
+    const { x, y } = windowPoint(e)
+    if (Math.hypot(x - lastPoint.x, y - lastPoint.y) > 4) return
+    const edge = innerWidth * EDGE
+    if (x < edge) turn(() => view.goLeft())
+    else if (x > innerWidth - edge) turn(() => view.goRight())
   })
   target.addEventListener('wheel', onWheel, { passive: false })
 }
@@ -273,6 +335,75 @@ $('#back').addEventListener('click', () => {
   backLabel = null
   view.history.back()
 })
+// ---- 查找：顶部浮条，Enter 下一个、Shift+Enter 上一个、Esc 关闭；命中处由 foliate 画高亮 ----
+const find = { query: '', results: [], index: -1, run: 0 }
+const findCount = text => { $('#find-count').textContent = text }
+const openFind = () => {
+  if (!view.book) return
+  $('#find').hidden = false
+  const input = $('#find-input')
+  input.focus()
+  input.select()
+}
+const closeFind = () => {
+  if ($('#find').hidden) return
+  $('#find').hidden = true
+  find.run++ // 正在跑的搜索作废
+  find.query = ''
+  find.results = []
+  find.index = -1
+  findCount('')
+  view.clearSearch()
+  view.renderer?.getContents?.()?.[0]?.doc?.defaultView?.focus()
+}
+const runFind = async query => {
+  const run = ++find.run
+  find.query = query
+  find.results = []
+  find.index = -1
+  view.clearSearch()
+  if (!query) return findCount('')
+  findCount('搜索中…')
+  const gen = view.search({
+    query, matchCase: false, matchDiacritics: false, matchWholeWords: false,
+    draw: Overlayer.highlight, drawOptions: { color: '#ffd60a' },
+  })
+  let first = true
+  for await (const r of gen) {
+    if (run !== find.run) return gen.return()
+    if (r === 'done') break
+    if (r.subitems) {
+      find.results.push(...r.subitems.map(({ cfi }) => cfi))
+      if (first) { first = false; stepFind(1) } // 第一处命中立刻跳过去，不等整本搜完
+      else findCount(`${find.index + 1} / ${find.results.length}…`)
+    }
+  }
+  findCount(find.results.length ? `${find.index + 1} / ${find.results.length}` : '无结果')
+}
+const stepFind = step => {
+  if ($('#find').hidden) return openFind()
+  const n = find.results.length
+  if (!n) return
+  find.index = ((find.index + step) % n + n) % n
+  findCount(`${find.index + 1} / ${n}`)
+  view.goTo(find.results[find.index]).catch(e => post({ type: 'error', message: String(e) }))
+}
+let findTimer
+$('#find-input').addEventListener('input', e => {
+  clearTimeout(findTimer)
+  findTimer = setTimeout(() => runFind(e.target.value.trim()), 300)
+})
+$('#find-input').addEventListener('keydown', e => {
+  if (e.key === 'Escape') return closeFind()
+  if (e.key !== 'Enter') return
+  e.preventDefault()
+  clearTimeout(findTimer)
+  const q = e.target.value.trim()
+  q === find.query ? stepFind(e.shiftKey ? -1 : 1) : runFind(q)
+})
+$('#find-prev').addEventListener('click', () => stepFind(-1))
+$('#find-next').addEventListener('click', () => stepFind(1))
+$('#find-close').addEventListener('click', closeFind)
 listen(document)
 
 let statusTimer
@@ -324,8 +455,9 @@ try {
     post({ type: 'link', href: e.detail.a.href })
   })
 
-  view.renderer.setAttribute('max-inline-size', '680px')
   applyStyles()
+  addEventListener('resize', () => { if (prefs.columns === 'double') applyLayout() })
+  darkMedia.addEventListener('change', applyStyles) // 跟随系统时，系统切换外观要重算底色
 
   post({ type: 'toc', items: flatTOC(book.toc) })
 

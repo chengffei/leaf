@@ -3,7 +3,6 @@ import SwiftUI
 struct BookWindow: View {
     let book: BookDocument
     @State private var model = ReaderModel()
-    @State private var showsTypography = false
     private let settings = ReaderSettings.shared
 
     var body: some View {
@@ -11,36 +10,34 @@ struct BookWindow: View {
             TOCSidebar(model: model)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 260, max: 380)
         } detail: {
-            ReaderView(
-                book: book, model: model,
-                zoom: Double(settings.zoomPercent) / 100,
-                lineSpacing: settings.lineSpacing, font: settings.font, margin: settings.margin
-            )
+            ReaderView(book: book, model: model, prefs: settings.prefs)
             // 铺到窗口顶部（标题文字已移除，按钮悬停才浮现）；左侧要给浮动侧栏让位，否则正文被侧栏盖住
             .ignoresSafeArea(.container, edges: .top)
             .toolbar {
                 // 标题隐藏后工具栏会向左收拢，用弹性间隔把 Aa 推回右上角
                 if #available(macOS 26.0, *) { ToolbarSpacer(.flexible) }
                 ToolbarItem(placement: .primaryAction) {
-                    Button { showsTypography.toggle() } label: {
+                    Button { model.showsTypography.toggle() } label: {
                         // 该符号随系统语言本地化（中文显示「大小」），固定用英文变体「Aa」
                         Image(systemName: "textformat.size")
                             .environment(\.locale, Locale(identifier: "en"))
                     }
-                    .help("字体与行距")
-                    .popover(isPresented: $showsTypography, arrowEdge: .bottom) {
+                    .help("字号与主题")
+                    .popover(isPresented: $model.showsTypography, arrowEdge: .bottom) {
                         TypographyPanel()
                     }
                 }
             }
         }
         .background(
-            WindowChrome(visible: model.showsTOC || model.hoversTop || showsTypography) { hovering in
+            WindowChrome(visible: model.showsTOC || model.hoversTop || model.showsTypography) { hovering in
                 if model.hoversTop != hovering { model.hoversTop = hovering }
             }
             .ignoresSafeArea()
         )
         .focusedSceneValue(\.reader, model)
+        // 主题的浅色 / 深色：改窗口外观，WebView 的 prefers-color-scheme 跟着窗口走；米黄按浅色
+        .preferredColorScheme(settings.theme.colorScheme)
     }
 
     private var sidebarVisibility: Binding<NavigationSplitViewVisibility> {
@@ -225,6 +222,17 @@ struct ReaderCommands: Commands {
             Button("前进") { reader?.goForward() }
                 .keyboardShortcut("]")
                 .disabled(reader?.canGoForward != true)
+        }
+        CommandGroup(after: .textEditing) {
+            Button("查找…") { reader?.find() }
+                .keyboardShortcut("f")
+                .disabled(reader == nil)
+            Button("查找下一个") { reader?.findNext() }
+                .keyboardShortcut("g")
+                .disabled(reader == nil)
+            Button("查找上一个") { reader?.findPrevious() }
+                .keyboardShortcut("g", modifiers: [.command, .shift])
+                .disabled(reader == nil)
         }
         CommandGroup(after: .toolbar) {
             let settings = ReaderSettings.shared

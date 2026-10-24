@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// 工具栏 Aa 弹层：只放最常碰的字号与主题，其余在「设置…」
 struct TypographyPanel: View {
     @Bindable var settings = ReaderSettings.shared
 
@@ -29,32 +30,22 @@ struct TypographyPanel: View {
                 .help("放大 ⌘=")
             }
 
-            row("行距") {
-                Picker("行距", selection: $settings.lineSpacing) {
-                    ForEach(LineSpacing.allCases) { Text($0.label).tag($0) }
+            VStack(alignment: .leading, spacing: 6) {
+                Text("主题").font(.caption).foregroundStyle(.secondary)
+                Picker("主题", selection: $settings.theme) {
+                    ForEach(Theme.allCases) { Text($0.label).tag($0) }
                 }
+                .pickerStyle(.segmented)
+                .labelsHidden()
             }
 
-            row("页边距") {
-                Picker("页边距", selection: $settings.margin) {
-                    ForEach(PageMargin.allCases) { Text($0.label).tag($0) }
-                }
+            SettingsLink {
+                Text("更多设置…")
             }
-
-            row("字体") {
-                Picker("字体", selection: $settings.font) {
-                    ForEach(ReaderFont.allCases) { Text($0.label).tag($0) }
-                }
-            }
+            .buttonStyle(.link)
+            .font(.callout)
         }
         .padding(16)
-        .frame(width: 260)
-    }
-
-    private func row(_ title: String, @ViewBuilder picker: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
-            picker().pickerStyle(.segmented).labelsHidden()
-        }
+        .frame(width: 280)
     }
 }

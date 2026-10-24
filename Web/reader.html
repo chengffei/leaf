@@ -8,6 +8,13 @@
 <body>
 <div id="note" hidden><div id="note-body"></div><button id="note-go" type="button">前往注释所在位置</button></div>
 <button id="back" type="button" hidden></button>
+<div id="find" hidden>
+  <input id="find-input" type="text" placeholder="查找" spellcheck="false" autocomplete="off">
+  <span id="find-count"></span>
+  <button id="find-prev" type="button" title="上一个 ⇧⏎">‹</button>
+  <button id="find-next" type="button" title="下一个 ⏎">›</button>
+  <button id="find-close" type="button">完成</button>
+</div>
 <footer id="status"><span id="chapter"></span><span id="percent"></span></footer>
 <div id="error" hidden></div>
 <script>

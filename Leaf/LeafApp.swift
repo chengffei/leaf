@@ -12,6 +12,7 @@ struct LeafApp: App {
         }
         .defaultSize(width: 760, height: 920)
         .commands { ReaderCommands() }
+        Settings { SettingsView() }
     }
 }
 

@@ -29,8 +29,11 @@ Most readers ask you to build a library before you can read. Leaf does the oppos
 - **Remembers your place:** books are recognized by content, even after renaming or moving
 - **Native contents sidebar:** toggle with `⌘T`, highlights the current chapter, click to jump, click the page to hide it; long contents (such as box sets) start collapsed to book titles
 - **Footnotes in place:** click a note marker and the note pops up over the page; after following a link or the contents, a **Back** button (or `⌘[`) returns you to where you were
-- **Type controls:** font size 80–200%, three line-spacing presets, three margin presets, original / sans / serif fonts
-- **Small and native:** SwiftUI + WebKit, follows system light/dark appearance, about 2.4 MB download
+- **Type controls:** font size 80–200%, three line-spacing presets, three margin presets, any installed font (or the book's own / sans / serif)
+- **Layout:** text width presets, single or two-column, click the left or right edge of the page to turn
+- **Themes:** paper, sepia, dark, or follow the system
+- **Find in book:** `⌘F`, with matches highlighted on the page
+- **Small and native:** SwiftUI + WebKit, about 2.4 MB download
 
 ## Install
 
@@ -46,7 +49,9 @@ Requires macOS 15 or later.
 | Turn page | `←` `→` · Space · swipe left/right on the trackpad |
 | Contents | `⌘T` or `t` |
 | Font size | `⌘=` larger · `⌘-` smaller · `⌘0` actual size |
-| Font and line spacing | `Aa` in the top-right corner |
+| Find | `⌘F` · `⌘G` next · `⇧⌘G` previous |
+| Size and theme | `Aa` in the top-right corner, or right-click the page |
+| All settings | `⌘,` |
 
 ## Build from source
 
@@ -82,8 +87,11 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 - **记住位置**：按文件内容识别，改名、挪位置也认得
 - **原生目录侧栏**：`⌘T` 开关，高亮当前章节，点击跳转，点正文自动收起；合集等长目录默认只列书名，可逐层展开
 - **脚注就地弹出**：点注释编号直接弹出注释，不离开当前页；点链接或目录跳走后，底部给「返回」，也可按 `⌘[`
-- **字体与行距**：字号 80%–200%，行距三档，页边距三档，字体可选原书 / 黑体 / 宋体
-- **原生轻量**：SwiftUI + WebKit，跟随系统深浅色，安装包约 2.4 MB
+- **字体与行距**：字号 80%–200%，行距三档，页边距三档，字体可选原书 / 黑体 / 宋体或任意已安装字体
+- **版式**：版心宽度四档，单栏 / 双栏，点正文左右两侧翻页
+- **主题**：纸白、米黄、深色，或跟随系统
+- **全书查找**：`⌘F`，命中处在页面上高亮
+- **原生轻量**：SwiftUI + WebKit，安装包约 2.4 MB
 
 ### 安装
 
@@ -100,7 +108,9 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 | 翻页 | `←` `→` · 空格 · 触控板左右滑 |
 | 目录 | `⌘T` 或 `t` |
 | 字号 | `⌘=` 放大 · `⌘-` 缩小 · `⌘0` 还原 |
-| 字体与行距 | 窗口右上角 `Aa` |
+| 查找 | `⌘F` · `⌘G` 下一个 · `⇧⌘G` 上一个 |
+| 字号与主题 | 窗口右上角 `Aa`，或在正文上右键 |
+| 全部设置 | `⌘,` |
 
 ### 从源码构建
 

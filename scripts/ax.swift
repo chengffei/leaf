@@ -20,18 +20,21 @@ func texts(_ e: AXUIElement) -> [String] {
 let win = (attr(root, kAXFocusedWindowAttribute) as! AXUIElement)
 let title = attr(win, kAXTitleAttribute) as? String ?? ""
 // 安全闸：只对测试书窗口动手，防止误碰用户正在读的书
-guard title.hasPrefix("alice") || title.hasPrefix("hongloumeng") else { print("ABORT: focused window is \(title)"); exit(1) }
-if CommandLine.arguments.count > 1, CommandLine.arguments[1] == "clickpage" {
-    // 真实鼠标点击：窗口右侧 3/4、垂直居中
+guard title.hasPrefix("alice") || title.hasPrefix("hongloumeng") || title.hasPrefix("Leaf") else { print("ABORT: focused window is \(title)"); exit(1) }
+// clickpage = 右侧 3/4 垂直居中；clickat <x比例> <y比例> 任意位置；rightclick <x比例> <y比例> 右键
+if CommandLine.arguments.count > 1, ["clickpage", "clickat", "rightclick"].contains(CommandLine.arguments[1]) {
+    let a = CommandLine.arguments
+    let fx = a.count > 3 ? Double(a[2]) ?? 0.75 : 0.75, fy = a.count > 3 ? Double(a[3]) ?? 0.5 : 0.5
     let pos = attr(win, kAXPositionAttribute) as! AXValue, size = attr(win, kAXSizeAttribute) as! AXValue
     var p = CGPoint.zero, sz = CGSize.zero
     AXValueGetValue(pos, .cgPoint, &p); AXValueGetValue(size, .cgSize, &sz)
-    let pt = CGPoint(x: p.x + sz.width * 0.75, y: p.y + sz.height * 0.5)
-    for t in [CGEventType.leftMouseDown, .leftMouseUp] {
-        CGEvent(mouseEventSource: nil, mouseType: t, mouseCursorPosition: pt, mouseButton: .left)!.post(tap: .cghidEventTap)
+    let pt = CGPoint(x: p.x + sz.width * fx, y: p.y + sz.height * fy)
+    let right = a[1] == "rightclick"
+    for t in right ? [CGEventType.rightMouseDown, .rightMouseUp] : [CGEventType.leftMouseDown, .leftMouseUp] {
+        CGEvent(mouseEventSource: nil, mouseType: t, mouseCursorPosition: pt, mouseButton: right ? .right : .left)!.post(tap: .cghidEventTap)
         usleep(50_000)
     }
-    print("clicked page at \(pt)"); exit(0)
+    print("\(a[1]) at \(pt)"); exit(0)
 }
 func all(_ e: AXUIElement, _ role: String, _ out: inout [AXUIElement]) {
     if attr(e, kAXRoleAttribute) as? String == role { out.append(e) }

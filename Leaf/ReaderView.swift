@@ -4,21 +4,10 @@ import WebKit
 
 private let log = Logger(subsystem: "com.chengffei.leaf", category: "reader")
 
-/// 已推给页面的排版参数，用于跳过重复推送
-struct Typography: Equatable {
-    let zoom: Double
-    let lineSpacing: LineSpacing
-    let font: ReaderFont
-    let margin: PageMargin
-}
-
 struct ReaderView: NSViewRepresentable {
     let book: BookDocument
     let model: ReaderModel
-    let zoom: Double
-    let lineSpacing: LineSpacing
-    let font: ReaderFont
-    let margin: PageMargin
+    let prefs: ReaderPrefs
 
     func makeCoordinator() -> Coordinator { Coordinator(bookID: book.id, model: model) }
 
@@ -27,8 +16,9 @@ struct ReaderView: NSViewRepresentable {
         config.setURLSchemeHandler(BookSchemeHandler(book: book.data), forURLScheme: BookSchemeHandler.scheme)
         config.userContentController.add(context.coordinator, name: "leaf")
 
-        let webView = WKWebView(frame: .zero, configuration: config)
+        let webView = ReaderWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
+        webView.model = model
         model.webView = webView
         webView.setValue(false, forKey: "drawsBackground") // 加载前不闪白
         #if DEBUG
@@ -37,28 +27,19 @@ struct ReaderView: NSViewRepresentable {
 
         var url = URLComponents(string: "\(BookSchemeHandler.scheme)://app/reader.html")!
         // 首屏就按当前排版渲染，避免先按默认排一遍再跳
-        url.queryItems = [
-            URLQueryItem(name: "fs", value: String(zoom)),
-            URLQueryItem(name: "lh", value: String(lineSpacing.rawValue)),
-            URLQueryItem(name: "font", value: font.rawValue),
-            URLQueryItem(name: "margin", value: margin.rawValue),
-        ]
+        url.queryItems = [URLQueryItem(name: "prefs", value: prefs.json)]
         if let cfi = ReadingPosition.load(book.id) {
             url.queryItems?.append(URLQueryItem(name: "cfi", value: cfi))
         }
-        context.coordinator.applied = Typography(zoom: zoom, lineSpacing: lineSpacing, font: font, margin: margin)
+        context.coordinator.applied = prefs
         webView.load(URLRequest(url: url.url!))
         return webView
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
-        let typography = Typography(zoom: zoom, lineSpacing: lineSpacing, font: font, margin: margin)
-        guard context.coordinator.applied != typography else { return }
-        context.coordinator.applied = typography
-        webView.evaluateJavaScript(
-            "leaf.setPrefs({ fontScale: \(zoom), lineHeight: \(lineSpacing.rawValue), font: '\(font.rawValue)', margin: '\(margin.rawValue)' })",
-            completionHandler: nil
-        )
+        guard context.coordinator.applied != prefs else { return }
+        context.coordinator.applied = prefs
+        webView.evaluateJavaScript("leaf.setPrefs(\(prefs.json))", completionHandler: nil)
     }
 
     static func dismantleNSView(_ webView: WKWebView, coordinator: Coordinator) {
@@ -69,7 +50,8 @@ struct ReaderView: NSViewRepresentable {
     final class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
         private let bookID: String
         private let model: ReaderModel
-        var applied = Typography(zoom: 1, lineSpacing: .standard, font: .original, margin: .standard)
+        /// 已推给页面的排版参数，用于跳过重复推送
+        var applied: ReaderPrefs?
 
         init(bookID: String, model: ReaderModel) {
             self.bookID = bookID
@@ -132,4 +114,53 @@ struct ReaderView: NSViewRepresentable {
             return .cancel
         }
     }
+}
+
+/// 右键菜单换成阅读器自己的：保留系统的拷贝、查询、翻译，去掉「重新载入」之类
+final class ReaderWebView: WKWebView {
+    weak var model: ReaderModel?
+
+    override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
+        super.willOpenMenu(menu, with: event)
+        let keep = menu.items.filter { item in
+            let id = item.identifier?.rawValue ?? ""
+            return id.hasSuffix("Copy") || id.hasSuffix("LookUp") || id.hasSuffix("Translate")
+        }
+        guard let model else { return }
+        var items = keep
+        if !keep.isEmpty { items.append(.separator()) }
+        items += [
+            ClosureMenuItem("上一页") { model.previousPage() },
+            ClosureMenuItem("下一页") { model.nextPage() },
+            .separator(),
+            ClosureMenuItem(model.showsTOC ? "隐藏目录" : "显示目录", key: "t") { model.showsTOC.toggle() },
+            ClosureMenuItem("查找…", key: "f") { model.find() },
+        ]
+        if model.canGoBack {
+            items.append(ClosureMenuItem("返回", key: "[") { model.goBack() })
+        }
+        items += [
+            .separator(),
+            ClosureMenuItem("字体与主题…") { model.showsTypography = true },
+            ClosureMenuItem("设置…", key: ",") {
+                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+            },
+        ]
+        menu.items = items
+    }
+}
+
+@MainActor
+final class ClosureMenuItem: NSMenuItem {
+    private let handler: @MainActor () -> Void
+
+    init(_ title: String, key: String = "", handler: @escaping @MainActor () -> Void) {
+        self.handler = handler
+        super.init(title: title, action: #selector(run), keyEquivalent: key)
+        target = self
+    }
+
+    required init(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    @objc private func run() { MainActor.assumeIsolated { handler() } }
 }
