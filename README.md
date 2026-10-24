@@ -37,6 +37,7 @@ Most readers ask you to build a library before you can read. Leaf does the oppos
 - **Themes:** paper, sepia, dark, or follow the system
 - **Find in book:** `⌘F` opens a results list grouped by chapter, with matches highlighted on the page
 - **Reading progress:** click the bottom-right corner to cycle percent, location, time left in chapter and time left in book; the estimate learns from your own page turns
+- **In your language:** English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español
 - **Small and native:** SwiftUI + WebKit, about 2.4 MB download
 
 ## Install
@@ -100,6 +101,7 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 - **主题**：纸白、米黄、深色，或跟随系统
 - **全书查找**：`⌘F` 打开按章节分组的结果列表，命中处在页面上高亮
 - **进度指示**：点右下角循环切换百分比、位置、本章剩余、全书剩余；剩余时间按你自己的翻页速度估算
+- **多语言**：英文、简体中文、繁体中文、日文、韩文、法文、德文、西班牙文
 - **原生轻量**：SwiftUI + WebKit，安装包约 2.4 MB
 
 ### 安装

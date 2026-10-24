@@ -7,8 +7,8 @@ enum PanelTab: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .toc: "目录"
-        case .search: "查找"
+        case .toc: String(localized: "Contents")
+        case .search: String(localized: "Find")
         }
     }
 }

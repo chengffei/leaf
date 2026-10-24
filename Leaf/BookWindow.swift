@@ -24,7 +24,7 @@ struct BookWindow: View {
                 Button { model.toggleTOC() } label: {
                     Image(systemName: "sidebar.leading")
                 }
-                .help("目录 ⌘T")
+                .help("Contents ⌘T")
             }
             // 标题隐藏后工具栏会向左收拢，用弹性间隔把 Aa 推回右上角
             if #available(macOS 26.0, *) { ToolbarSpacer(.flexible) }
@@ -34,7 +34,7 @@ struct BookWindow: View {
                     Image(systemName: "textformat.size")
                         .environment(\.locale, Locale(identifier: "en"))
                 }
-                .help("字号与主题")
+                .help("Size and Theme")
                 .popover(isPresented: $model.showsTypography, arrowEdge: .bottom) {
                     TypographyPanel()
                 }
@@ -59,7 +59,7 @@ struct TOCPanel: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("面板", selection: $model.panelTab) {
+            Picker("Panel", selection: $model.panelTab) {
                 ForEach(PanelTab.allCases) { Text($0.label).tag($0) }
             }
             .pickerStyle(.segmented)
@@ -92,7 +92,7 @@ struct SearchPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                TextField("查找", text: $text)
+                TextField("Find", text: $text)
                     .textFieldStyle(.roundedBorder)
                     .focused($focused)
                     .onSubmit { text == model.searchQuery ? model.findNext() : model.search(text) }
@@ -104,7 +104,7 @@ struct SearchPanel: View {
             .padding(.vertical, 8)
             if model.searchHits.isEmpty {
                 ContentUnavailableView(
-                    model.searchStatus == "done" && !model.searchQuery.isEmpty ? "没有找到" : "整本书里找",
+                    model.searchStatus == "done" && !model.searchQuery.isEmpty ? "Nothing Found" : "Search the Whole Book",
                     systemImage: "magnifyingglass"
                 )
                 .frame(maxHeight: .infinity)
@@ -136,7 +136,7 @@ struct SearchPanel: View {
 
     private var countText: String {
         switch model.searchStatus {
-        case "searching": model.searchHits.isEmpty ? "搜索中" : "\(model.searchHits.count)…"
+        case "searching": model.searchHits.isEmpty ? String(localized: "Searching") : "\(model.searchHits.count)…"
         case "done": model.searchHits.isEmpty ? "" : "\(model.searchIndex + 1) / \(model.searchHits.count)"
         default: ""
         }
@@ -147,7 +147,7 @@ struct SearchPanel: View {
         var out: [Group] = []
         for hit in model.searchHits {
             if out.last?.label == hit.label { out[out.count - 1].hits.append(hit) }
-            else { out.append(Group(label: hit.label.isEmpty ? "正文" : hit.label, hits: [hit])) }
+            else { out.append(Group(label: hit.label.isEmpty ? String(localized: "Body") : hit.label, hits: [hit])) }
         }
         return out
     }
@@ -172,7 +172,7 @@ struct TOCSidebar: View {
         VStack(alignment: .leading, spacing: 0) {
             header
             if model.toc.isEmpty {
-                ContentUnavailableView("没有目录", systemImage: "list.bullet")
+                ContentUnavailableView("No Contents", systemImage: "list.bullet")
                     .frame(maxHeight: .infinity)
             } else {
                 ScrollViewReader { proxy in
@@ -327,45 +327,45 @@ struct ReaderCommands: Commands {
     var body: some Commands {
         // 侧栏只有目录这一种用途，不再挂系统的「显示边栏」，免得两个菜单项管同一件事
         CommandGroup(before: .toolbar) {
-            Button(reader?.showsTOC == true && reader?.panelTab == .toc ? "隐藏目录" : "显示目录") {
+            Button(reader?.showsTOC == true && reader?.panelTab == .toc ? "Hide Contents" : "Show Contents") {
                 reader?.toggleTOC()
             }
             .keyboardShortcut("t")
             .disabled(reader == nil)
         }
         // 跳转（目录、书内链接、脚注「前往」）之后回到原处；快捷键与 Safari、Books 一致
-        CommandMenu("前往") {
-            Button("位置…") { reader?.goToPrompt() }
+        CommandMenu("Go") {
+            Button("Location…") { reader?.goToPrompt() }
                 .keyboardShortcut("l")
                 .disabled(reader == nil)
             Divider()
-            Button("返回") { reader?.goBack() }
+            Button("Back") { reader?.goBack() }
                 .keyboardShortcut("[")
                 .disabled(reader?.canGoBack != true)
-            Button("前进") { reader?.goForward() }
+            Button("Forward") { reader?.goForward() }
                 .keyboardShortcut("]")
                 .disabled(reader?.canGoForward != true)
         }
         CommandGroup(after: .textEditing) {
-            Button("查找…") { reader?.find() }
+            Button("Find…") { reader?.find() }
                 .keyboardShortcut("f")
                 .disabled(reader == nil)
-            Button("查找下一个") { reader?.findNext() }
+            Button("Find Next") { reader?.findNext() }
                 .keyboardShortcut("g")
                 .disabled(reader == nil)
-            Button("查找上一个") { reader?.findPrevious() }
+            Button("Find Previous") { reader?.findPrevious() }
                 .keyboardShortcut("g", modifiers: [.command, .shift])
                 .disabled(reader == nil)
         }
         CommandGroup(after: .toolbar) {
             let settings = ReaderSettings.shared
-            Button("放大") { settings.zoomIn() }
+            Button("Zoom In") { settings.zoomIn() }
                 .keyboardShortcut("=") // 实际按键 ⌘=，与 Safari 等一致
                 .disabled(!settings.canZoomIn)
-            Button("缩小") { settings.zoomOut() }
+            Button("Zoom Out") { settings.zoomOut() }
                 .keyboardShortcut("-")
                 .disabled(!settings.canZoomOut)
-            Button("实际大小") { settings.resetZoom() }
+            Button("Actual Size") { settings.resetZoom() }
                 .keyboardShortcut("0")
         }
     }

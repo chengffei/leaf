@@ -23,7 +23,7 @@ targets:
       path: Leaf/Info.plist
       properties:
         CFBundleName: Leaf
-        CFBundleDevelopmentRegion: zh-Hans
+        CFBundleDevelopmentRegion: en
         CFBundleDisplayName: Leaf
         CFBundleShortVersionString: "0.2.0"
         CFBundleVersion: "6"
@@ -63,7 +63,7 @@ targets:
         DEVELOPMENT_TEAM: ""
         ENABLE_USER_SCRIPT_SANDBOXING: YES
         MARKETING_VERSION: "0.2.0"
-        DEVELOPMENT_LANGUAGE: zh-Hans
+        DEVELOPMENT_LANGUAGE: en
         ASSETCATALOG_COMPILER_APPICON_NAME: Leaf
         CURRENT_PROJECT_VERSION: "6"
 schemes:

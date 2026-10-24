@@ -8,68 +8,69 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("预设") {
+            Section("Presets") {
                 PresetPicker(settings: settings)
                 HStack {
-                    Button("把当前设置存为预设…") { presetName = ""; namingPreset = true }
+                    Button("Save Current Settings as Preset…") { presetName = ""; namingPreset = true }
                     Spacer()
                 }
                 ForEach(settings.customPresets) { preset in
-                    LabeledContent(preset.name) {
-                        Button("删除") { settings.deletePreset(preset) }
+                    LabeledContent(preset.displayName) {
+                        Button("Delete") { settings.deletePreset(preset) }
                             .buttonStyle(.borderless)
                             .foregroundStyle(.secondary)
                     }
                 }
             }
-            Section("文字") {
-                Picker("字体", selection: $settings.font) {
+            Section("Text") {
+                Picker("Font", selection: $settings.font) {
                     ForEach(ReaderFont.allCases) { Text($0.label).tag($0.rawValue) }
                     Divider()
                     ForEach(ReaderSettings.installedFonts, id: \.family) { font in
                         Text(font.display).tag(font.family)
                     }
                 }
-                LabeledContent("字号") {
+                LabeledContent("Size") {
                     HStack(spacing: 8) {
                         Text("\(settings.zoomPercent)%").monospacedDigit()
-                        Stepper("字号", value: $settings.zoomPercent, in: ReaderSettings.zoomRange, step: ReaderSettings.zoomStep)
+                        Stepper("Size", value: $settings.zoomPercent, in: ReaderSettings.zoomRange, step: ReaderSettings.zoomStep)
                             .labelsHidden()
                     }
                 }
-                LabeledContent("字重") {
+                LabeledContent("Weight") {
                     HStack(spacing: 8) {
-                        Text(settings.weight == 0 ? "原书" : "+\(settings.weight)").monospacedDigit()
-                        Stepper("字重", value: $settings.weight, in: ReaderSettings.weightRange).labelsHidden()
+                        Text(settings.weight == 0 ? String(localized: "Original") : "+\(settings.weight)").monospacedDigit()
+                        Stepper("Weight", value: $settings.weight, in: ReaderSettings.weightRange).labelsHidden()
                     }
                 }
-                segmented("行距", $settings.lineSpacing, LineSpacing.allCases)
-                segmented("段距", $settings.paragraphSpacing, ParagraphSpacing.allCases)
-                segmented("字距", $settings.letterSpacing, LetterSpacing.allCases)
+                segmented("Line Spacing", $settings.lineSpacing, LineSpacing.allCases)
+                segmented("Paragraph Spacing", $settings.paragraphSpacing, ParagraphSpacing.allCases)
+                segmented("Letter Spacing", $settings.letterSpacing, LetterSpacing.allCases)
             }
-            Section("版式") {
-                segmented("对齐", $settings.align, TextAlign.allCases)
-                segmented("页边距", $settings.margin, PageMargin.allCases)
-                segmented("版心宽度", $settings.textWidth, TextWidth.allCases)
-                segmented("分栏", $settings.columns, Columns.allCases)
+            Section("Layout") {
+                segmented("Alignment", $settings.align, TextAlign.allCases)
+                segmented("Margins", $settings.margin, PageMargin.allCases)
+                segmented("Text Width", $settings.textWidth, TextWidth.allCases)
+                segmented("Columns", $settings.columns, Columns.allCases)
             }
-            Section("外观") {
-                segmented("主题", $settings.theme, Theme.allCases)
+            Section("Appearance") {
+                segmented("Theme", $settings.theme, Theme.allCases)
             }
         }
         .formStyle(.grouped)
         .frame(width: 460)
         .fixedSize(horizontal: false, vertical: true)
-        .alert("预设名称", isPresented: $namingPreset) {
-            TextField("名称", text: $presetName)
-            Button("保存") { settings.savePreset(named: presetName) }
-            Button("取消", role: .cancel) {}
+        .alert("Preset Name", isPresented: $namingPreset) {
+            TextField("Name", text: $presetName)
+            Button("Save") { settings.savePreset(named: presetName) }
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("保存字体、字号、字重、间距、页边距、版心、分栏和对齐；主题另算。")
+            Text("Saves font, size, weight, spacing, margins, text width, columns and alignment. Theme is kept separate.")
         }
     }
 
-    private func segmented<T: Hashable & Identifiable>(_ title: String, _ selection: Binding<T>, _ cases: [T]) -> some View
+    // 标题类型必须是 LocalizedStringKey，用 String 就不会查翻译表
+    private func segmented<T: Hashable & Identifiable>(_ title: LocalizedStringKey, _ selection: Binding<T>, _ cases: [T]) -> some View
         where T: LabeledCase {
         Picker(title, selection: selection) {
             ForEach(cases) { Text($0.label).tag($0) }
@@ -83,9 +84,9 @@ struct PresetPicker: View {
     @Bindable var settings: ReaderSettings
 
     var body: some View {
-        Picker("排版预设", selection: selection) {
-            Text("自定义").tag("")
-            ForEach(Preset.builtins) { Text($0.name).tag($0.name) }
+        Picker("Layout Preset", selection: selection) {
+            Text("Custom").tag("")
+            ForEach(Preset.builtins) { Text($0.displayName).tag($0.name) }
             if !settings.customPresets.isEmpty {
                 Divider()
                 ForEach(settings.customPresets) { Text($0.name).tag($0.name) }

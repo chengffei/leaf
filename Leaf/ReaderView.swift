@@ -138,19 +138,19 @@ final class ReaderWebView: WKWebView {
         var items = keep
         if !keep.isEmpty { items.append(.separator()) }
         items += [
-            ClosureMenuItem("上一页") { model.previousPage() },
-            ClosureMenuItem("下一页") { model.nextPage() },
+            ClosureMenuItem(String(localized: "Previous Page")) { model.previousPage() },
+            ClosureMenuItem(String(localized: "Next Page")) { model.nextPage() },
             .separator(),
-            ClosureMenuItem(model.showsTOC && model.panelTab == .toc ? "隐藏目录" : "显示目录", key: "t") { model.toggleTOC() },
-            ClosureMenuItem("查找…", key: "f") { model.find() },
+            ClosureMenuItem(String(localized: model.showsTOC && model.panelTab == .toc ? "Hide Contents" : "Show Contents"), key: "t") { model.toggleTOC() },
+            ClosureMenuItem(String(localized: "Find…"), key: "f") { model.find() },
         ]
         if model.canGoBack {
-            items.append(ClosureMenuItem("返回", key: "[") { model.goBack() })
+            items.append(ClosureMenuItem(String(localized: "Back"), key: "[") { model.goBack() })
         }
         items += [
             .separator(),
-            ClosureMenuItem("字体与主题…") { model.showsTypography = true },
-            ClosureMenuItem("设置…", key: ",") { model.openSettings() },
+            ClosureMenuItem(String(localized: "Font and Theme…")) { model.showsTypography = true },
+            ClosureMenuItem(String(localized: "Settings…"), key: ",") { model.openSettings() },
         ]
         menu.items = items
     }

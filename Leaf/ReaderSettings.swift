@@ -8,9 +8,9 @@ enum LineSpacing: Double, CaseIterable, Identifiable, Codable {
     var id: Double { rawValue }
     var label: String {
         switch self {
-        case .compact: "紧凑"
-        case .standard: "标准"
-        case .loose: "宽松"
+        case .compact: String(localized: "Compact")
+        case .standard: String(localized: "Standard")
+        case .loose: String(localized: "Loose")
         }
     }
 }
@@ -21,9 +21,9 @@ enum ReaderFont: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .original: "原书"
-        case .sans: "黑体"
-        case .serif: "宋体"
+        case .original: String(localized: "Original")
+        case .sans: String(localized: "Sans-serif")
+        case .serif: String(localized: "Serif")
         }
     }
 }
@@ -34,9 +34,9 @@ enum PageMargin: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .narrow: "窄"
-        case .standard: "标准"
-        case .wide: "宽"
+        case .narrow: String(localized: "Narrow")
+        case .standard: String(localized: "Standard")
+        case .wide: String(localized: "Wide")
         }
     }
 }
@@ -47,10 +47,10 @@ enum TextWidth: Int, CaseIterable, Identifiable, Codable {
     var id: Int { rawValue }
     var label: String {
         switch self {
-        case .narrow: "窄"
-        case .standard: "标准"
-        case .wide: "宽"
-        case .unlimited: "不限"
+        case .narrow: String(localized: "Narrow")
+        case .standard: String(localized: "Standard")
+        case .wide: String(localized: "Wide")
+        case .unlimited: String(localized: "Unlimited")
         }
     }
 }
@@ -61,9 +61,9 @@ enum Columns: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .auto: "自动"
-        case .single: "单栏"
-        case .double: "双栏"
+        case .auto: String(localized: "Auto")
+        case .single: String(localized: "One column")
+        case .double: String(localized: "Two columns")
         }
     }
 }
@@ -74,8 +74,8 @@ enum TextAlign: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .justify: "两端"
-        case .left: "左对齐"
+        case .justify: String(localized: "Justified")
+        case .left: String(localized: "Left")
         }
     }
 }
@@ -86,9 +86,9 @@ enum ParagraphSpacing: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .tight: "紧凑"
-        case .original: "原书"
-        case .loose: "宽松"
+        case .tight: String(localized: "Compact")
+        case .original: String(localized: "Original")
+        case .loose: String(localized: "Loose")
         }
     }
 }
@@ -99,9 +99,9 @@ enum LetterSpacing: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .tight: "紧"
-        case .standard: "标准"
-        case .loose: "松"
+        case .tight: String(localized: "Tight")
+        case .standard: String(localized: "Standard")
+        case .loose: String(localized: "Loose")
         }
     }
 }
@@ -112,10 +112,10 @@ enum Theme: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .system: "跟随系统"
-        case .light: "纸白"
-        case .sepia: "米黄"
-        case .dark: "深色"
+        case .system: String(localized: "System")
+        case .light: String(localized: "Paper")
+        case .sepia: String(localized: "Sepia")
+        case .dark: String(localized: "Dark")
         }
     }
     var colorScheme: ColorScheme? {
@@ -140,6 +140,8 @@ struct ReaderPrefs: Equatable, Encodable {
     let align: String
     let paragraphSpacing: String
     let letterSpacing: String
+    /// 界面语言，网页层据此选文案；取 app 实际用的本地化，不是系统首选
+    let lang: String
 
     var json: String {
         String(data: (try? JSONEncoder().encode(self)) ?? Data("{}".utf8), encoding: .utf8) ?? "{}"
@@ -221,7 +223,8 @@ final class ReaderSettings {
         ReaderPrefs(
             fontScale: Double(zoomPercent) / 100, lineHeight: lineSpacing.rawValue, font: font,
             margin: margin.rawValue, maxWidth: textWidth.rawValue, columns: columns.rawValue, theme: theme.rawValue,
-            weight: weight, align: align.rawValue, paragraphSpacing: paragraphSpacing.rawValue, letterSpacing: letterSpacing.rawValue
+            weight: weight, align: align.rawValue, paragraphSpacing: paragraphSpacing.rawValue, letterSpacing: letterSpacing.rawValue,
+            lang: Bundle.main.preferredLocalizations.first ?? "en"
         )
     }
 
@@ -304,6 +307,10 @@ struct Preset: Codable, Identifiable, Hashable {
     var align: TextAlign
 
     var id: String { name }
+    /// 内置预设的名字是英文 key，显示时翻译；自定义的照原样
+    var displayName: String {
+        Self.builtins.contains { $0.name == name } ? String(localized: String.LocalizationValue(name)) : name
+    }
 
     @MainActor func matches(_ s: ReaderSettings) -> Bool {
         (font == nil || font == s.font) && zoomPercent == s.zoomPercent && weight == s.weight
@@ -314,13 +321,13 @@ struct Preset: Codable, Identifiable, Hashable {
 
     /// 内置四套，对应 Kindle 的 Compact / Standard / Large / Low Vision
     static let builtins: [Preset] = [
-        Preset(name: "紧凑", font: nil, zoomPercent: 90, weight: 0, lineSpacing: .compact, paragraphSpacing: .tight,
+        Preset(name: "Compact", font: nil, zoomPercent: 90, weight: 0, lineSpacing: .compact, paragraphSpacing: .tight,
                letterSpacing: .standard, margin: .narrow, textWidth: .wide, columns: .auto, align: .justify),
-        Preset(name: "标准", font: nil, zoomPercent: 100, weight: 0, lineSpacing: .standard, paragraphSpacing: .original,
+        Preset(name: "Standard", font: nil, zoomPercent: 100, weight: 0, lineSpacing: .standard, paragraphSpacing: .original,
                letterSpacing: .standard, margin: .standard, textWidth: .standard, columns: .auto, align: .justify),
-        Preset(name: "大字", font: nil, zoomPercent: 130, weight: 1, lineSpacing: .loose, paragraphSpacing: .original,
+        Preset(name: "Large", font: nil, zoomPercent: 130, weight: 1, lineSpacing: .loose, paragraphSpacing: .original,
                letterSpacing: .standard, margin: .standard, textWidth: .wide, columns: .auto, align: .justify),
-        Preset(name: "低视力", font: nil, zoomPercent: 170, weight: 3, lineSpacing: .loose, paragraphSpacing: .loose,
+        Preset(name: "Low Vision", font: nil, zoomPercent: 170, weight: 3, lineSpacing: .loose, paragraphSpacing: .loose,
                letterSpacing: .loose, margin: .narrow, textWidth: .unlimited, columns: .single, align: .left),
     ]
 }

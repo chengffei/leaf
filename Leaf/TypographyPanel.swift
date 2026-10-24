@@ -12,7 +12,7 @@ struct TypographyPanel: View {
                         .frame(maxWidth: .infinity, minHeight: 22)
                 }
                 .disabled(!settings.canZoomOut)
-                .help("缩小 ⌘-")
+                .help("Smaller ⌘-")
 
                 Button { settings.resetZoom() } label: {
                     Text("\(settings.zoomPercent)%").monospacedDigit()
@@ -20,24 +20,24 @@ struct TypographyPanel: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .help("恢复默认 ⌘0")
+                .help("Reset ⌘0")
 
                 Button { settings.zoomIn() } label: {
                     Text("A").font(.system(size: 18))
                         .frame(maxWidth: .infinity, minHeight: 22)
                 }
                 .disabled(!settings.canZoomIn)
-                .help("放大 ⌘=")
+                .help("Larger ⌘=")
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("排版预设").font(.caption).foregroundStyle(.secondary)
+                Text("Layout Preset").font(.caption).foregroundStyle(.secondary)
                 PresetPicker(settings: settings).labelsHidden()
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("主题").font(.caption).foregroundStyle(.secondary)
-                Picker("主题", selection: $settings.theme) {
+                Text("Theme").font(.caption).foregroundStyle(.secondary)
+                Picker("Theme", selection: $settings.theme) {
                     ForEach(Theme.allCases) { Text($0.label).tag($0) }
                 }
                 .pickerStyle(.segmented)
@@ -45,7 +45,7 @@ struct TypographyPanel: View {
             }
 
             SettingsLink {
-                Text("更多设置…")
+                Text("More Settings…")
             }
             .buttonStyle(.link)
             .font(.callout)

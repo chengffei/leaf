@@ -1,6 +1,7 @@
 import './foliate/view.js'
 import { FootnoteHandler } from './foliate/footnotes.js'
 import { Overlayer } from './foliate/overlayer.js'
+import { STRINGS } from './strings.js'
 
 const $ = s => document.querySelector(s)
 const post = msg => window.webkit?.messageHandlers?.leaf?.postMessage(msg)
@@ -96,6 +97,15 @@ const DEFAULT_PREFS = {
 }
 let prefs = { ...DEFAULT_PREFS }
 try { prefs = { ...prefs, ...JSON.parse(query.get('prefs') ?? '{}') } } catch {}
+// 界面文案：键是英文原文，表与 Localizable.xcstrings 同源；%@ 依次替换
+const L = STRINGS[prefs.lang] ?? STRINGS[prefs.lang?.split('-')[0]] ?? STRINGS.en
+const t = (key, ...args) => { let i = 0; return (L[key] ?? STRINGS.en[key] ?? key).replace(/%@/g, () => String(args[i++] ?? '')) }
+document.documentElement.lang = prefs.lang ?? 'en'
+$('#chapter').title = t('Contents ⌘T')
+$('#percent').title = t('Click to cycle: percent, location, time left in chapter, time left in book')
+$('#scrub').title = t('Drag to jump')
+$('#note-go').textContent = t('Go to note')
+$('#goto-close').textContent = t('Cancel')
 // 页边距三档：gap = 栏间距（也是左右留白，foliate 两侧各留一半），margin = 上下留白
 const MARGINS = {
   narrow: { gap: '4%', margin: '24px' },
@@ -344,7 +354,7 @@ addEventListener('resize', closeNote)
 const BACK_PAGES = 3 // 在新位置连翻几页就当作接着读下去了，收起提示（⌘[ 仍可用）
 let backLabel = null, pagesSinceJump = 0
 const jumpTo = href => {
-  backLabel = view.lastLocation?.tocItem?.label?.trim() || '原来的位置'
+  backLabel = view.lastLocation?.tocItem?.label?.trim() || t('where you were')
   pagesSinceJump = 0
   return view.goTo(href).catch(e => post({ type: 'error', message: String(e) }))
 }
@@ -352,7 +362,7 @@ const updateBack = () => {
   const back = $('#back')
   const show = backLabel && view.history.canGoBack && pagesSinceJump < BACK_PAGES
   back.hidden = !show
-  if (show) back.textContent = `返回「${backLabel}」`
+  if (show) back.textContent = t('Back to “%@”', backLabel)
 }
 $('#back').addEventListener('click', () => {
   backLabel = null
@@ -411,7 +421,7 @@ const openGoTo = () => {
   $('#goto').hidden = false
   const input = $('#goto-input')
   input.value = ''
-  input.placeholder = lastLocation?.location ? `百分比，或位置号 1 到 ${lastLocation.location.total}` : '百分比'
+  input.placeholder = lastLocation?.location ? t('Percent, or location 1 to %@', lastLocation.location.total) : t('Percent')
   input.focus()
 }
 const closeGoTo = () => {
@@ -419,7 +429,7 @@ const closeGoTo = () => {
   view.renderer?.getContents?.()?.[0]?.doc?.defaultView?.focus()
 }
 const jumpToFraction = f => {
-  backLabel = view.lastLocation?.tocItem?.label?.trim() || '原来的位置'
+  backLabel = view.lastLocation?.tocItem?.label?.trim() || t('where you were')
   pagesSinceJump = 0
   return view.goToFraction(Math.min(Math.max(f, 0), 1)).catch(e => post({ type: 'error', message: String(e) }))
 }
@@ -492,9 +502,10 @@ const sampleSpeed = loc => {
 }
 const bytesPerMinute = () => speed.minutes >= MIN_SAMPLE_MINUTES ? speed.bytes / speed.minutes : DEFAULT_SPEED
 const fmtMinutes = m => {
-  if (m < 1) return '不到 1 分钟'
+  if (m < 1) return t('Less than a minute')
   const h = Math.floor(m / 60), r = Math.round(m % 60)
-  return h ? `${h} 小时${r ? ` ${r} 分钟` : ''}` : `${Math.round(m)} 分钟`
+  if (!h) return t('%@ min', Math.round(m))
+  return r ? t('%@ h %@ min', h, r) : t('%@ h', h)
 }
 const progressText = loc => {
   if (!loc) return ''
@@ -502,9 +513,9 @@ const progressText = loc => {
   // foliate 的 time 按 DEFAULT_SPEED 算，换成剩余字节再除以本人速度
   const left = t => fmtMinutes((t ?? 0) * DEFAULT_SPEED / bytesPerMinute())
   switch (progressMode) {
-    case 'location': return loc.location ? `位置 ${loc.location.current} / ${loc.location.total}` : `${Math.round((loc.fraction ?? 0) * 100)}%`
-    case 'chapter': return learning ? '本章剩余：测算中' : `本章剩余 ${left(loc.time?.section)}`
-    case 'book': return learning ? '全书剩余：测算中' : `全书剩余 ${left(loc.time?.total)}`
+    case 'location': return loc.location ? t('Location %@ of %@', loc.location.current, loc.location.total) : `${Math.round((loc.fraction ?? 0) * 100)}%`
+    case 'chapter': return learning ? t('Chapter: calculating') : t('%@ left in chapter', left(loc.time?.section))
+    case 'book': return learning ? t('Book: calculating') : t('%@ left in book', left(loc.time?.total))
     default: return `${Math.round((loc.fraction ?? 0) * 100)}%`
   }
 }
@@ -521,7 +532,7 @@ $('#percent').addEventListener('click', () => {
 try {
   await view.open('leaf://app/book')
   const { book } = view
-  const title = titleOf(book.metadata?.title) || '未命名'
+  const title = titleOf(book.metadata?.title) || t('Untitled')
   const author = [book.metadata?.author].flat()
     .map(a => typeof a === 'string' ? a : titleOf(a?.name)).filter(Boolean).join('、')
   post({ type: 'meta', title, author })
@@ -583,6 +594,6 @@ try {
   })
 } catch (e) {
   $('#error').hidden = false
-  $('#error').textContent = `打不开这本书\n\n${e?.message ?? e}`
+  $('#error').textContent = `${t('Can’t open this book')}\n\n${e?.message ?? e}`
   post({ type: 'error', message: `${e?.name}: ${e?.message}\n${e?.stack}` })
 }
