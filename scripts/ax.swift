@@ -48,7 +48,7 @@ func all(_ e: AXUIElement, _ role: String, _ out: inout [AXUIElement]) {
 let args = Array(CommandLine.arguments.dropFirst())
 if args.first == "press" {  // press <help 文本>：按工具栏按钮
     var bs: [AXUIElement] = []; all(win, "AXButton", &bs)
-    let b = bs.first { (attr($0, kAXHelpAttribute) as? String) == args[1] || (attr($0, kAXDescriptionAttribute) as? String) == args[1] }
+    let b = bs.first { e in [kAXHelpAttribute, kAXDescriptionAttribute, kAXTitleAttribute].contains { (attr(e, $0) as? String) == args[1] } }
     if let b { AXUIElementPerformAction(b, kAXPressAction as CFString); print("pressed \(args[1])") } else { print("button not found") }
     exit(0)
 }

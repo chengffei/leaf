@@ -5,6 +5,8 @@ struct SettingsView: View {
     @Bindable var settings = ReaderSettings.shared
     @State private var namingPreset = false
     @State private var presetName = ""
+    /// 启动时的语言设置；改了且没重开，就显示「重新打开」
+    @State private var launchedLanguage = ReaderSettings.shared.uiLanguage
 
     var body: some View {
         Form {
@@ -55,6 +57,20 @@ struct SettingsView: View {
             }
             Section("Appearance") {
                 segmented("Theme", $settings.theme, Theme.allCases)
+            }
+            Section("Language") {
+                Picker("Language", selection: $settings.uiLanguage) {
+                    Text("Follow System").tag("")
+                    Divider()
+                    ForEach(ReaderSettings.languages, id: \.code) { Text($0.name).tag($0.code) }
+                }
+                if settings.uiLanguage != launchedLanguage {
+                    LabeledContent {
+                        Button("Reopen Now") { settings.relaunch() }
+                    } label: {
+                        Text("Takes effect the next time Leaf opens.").foregroundStyle(.secondary)
+                    }
+                }
             }
         }
         .formStyle(.grouped)

@@ -199,6 +199,19 @@ final class ReaderSettings {
         didSet { defaults.set(try? JSONEncoder().encode(customPresets), forKey: "presets") }
     }
     static let weightRange = 0...4
+    /// 界面语言："" = 跟随系统，否则是 lproj 代码。写进 AppleLanguages，下次启动生效（菜单栏由 AppKit 在启动时定，改不了）
+    var uiLanguage: String {
+        didSet {
+            defaults.set(uiLanguage, forKey: "uiLanguage")
+            if uiLanguage.isEmpty { defaults.removeObject(forKey: "AppleLanguages") }
+            else { defaults.set([uiLanguage], forKey: "AppleLanguages") }
+        }
+    }
+    /// 可选语言与各自的母语名；顺序 = 设置里的顺序
+    static let languages: [(code: String, name: String)] = [
+        ("en", "English"), ("zh-Hans", "简体中文"), ("zh-Hant", "繁體中文"), ("ja", "日本語"),
+        ("ko", "한국어"), ("fr", "Français"), ("de", "Deutsch"), ("es", "Español"),
+    ]
 
     private init() {
         let zoom = defaults.integer(forKey: "zoomPercent")
@@ -217,6 +230,17 @@ final class ReaderSettings {
         paragraphSpacing = ParagraphSpacing(rawValue: defaults.string(forKey: "paragraphSpacing") ?? "") ?? .original
         letterSpacing = LetterSpacing(rawValue: defaults.string(forKey: "letterSpacing") ?? "") ?? .standard
         customPresets = defaults.data(forKey: "presets").flatMap { try? JSONDecoder().decode([Preset].self, from: $0) } ?? []
+        uiLanguage = defaults.string(forKey: "uiLanguage") ?? ""
+    }
+
+    /// 语言改了要重开才生效：开一个新实例带上当前打开的书，再退出自己
+    func relaunch() {
+        let files = NSDocumentController.shared.documents.compactMap(\.fileURL?.path)
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        p.arguments = ["-n", "-a", Bundle.main.bundlePath] + files
+        try? p.run()
+        NSApp.terminate(nil)
     }
 
     var prefs: ReaderPrefs {
