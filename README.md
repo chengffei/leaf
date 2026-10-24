@@ -27,7 +27,7 @@ Most readers ask you to build a library before you can read. Leaf does the oppos
 
 - **Three formats:** EPUB, MOBI and AZW3 (MOBI/AZW3 must be DRM-free)
 - **Remembers your place:** books are recognized by content, even after renaming or moving
-- **Native contents sidebar:** toggle with `⌘T`, highlights the current chapter, click to jump, click the page to hide it; long contents (such as box sets) start collapsed to book titles
+- **Floating contents panel:** `⌘T` or click the chapter name in the bottom-left corner; it floats over the page instead of reflowing it, highlights the current chapter, closes when you pick an entry or click the page; long contents (such as box sets) start collapsed to book titles
 - **Footnotes in place:** click a note marker and the note pops up over the page; after following a link or the contents, a **Back** button (or `⌘[`) returns you to where you were
 - **Type controls:** font size 80–200%, three line-spacing presets, three margin presets, any installed font (or the book's own / sans / serif)
 - **Layout:** text width presets, single or two-column, click the left or right edge of the page to turn
@@ -48,7 +48,7 @@ Requires macOS 15 or later.
 | Action | Keys |
 |---|---|
 | Turn page | `←` `→` · Space · swipe left/right on the trackpad |
-| Contents | `⌘T` or `t` |
+| Contents | `⌘T`, `t`, or click the chapter name bottom-left |
 | Font size | `⌘=` larger · `⌘-` smaller · `⌘0` actual size |
 | Find | `⌘F` · `⌘G` next · `⇧⌘G` previous |
 | Size and theme | `Aa` in the top-right corner, or right-click the page |
@@ -86,7 +86,7 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 
 - **三种格式**：EPUB、MOBI、AZW3（AZW3/MOBI 须无 DRM）
 - **记住位置**：按文件内容识别，改名、挪位置也认得
-- **原生目录侧栏**：`⌘T` 开关，高亮当前章节，点击跳转，点正文自动收起；合集等长目录默认只列书名，可逐层展开
+- **浮动目录面板**：`⌘T` 或点左下角章名；浮在正文上，不重排书页；高亮当前章节，选中或点正文即收起；合集等长目录默认只列书名，可逐层展开
 - **脚注就地弹出**：点注释编号直接弹出注释，不离开当前页；点链接或目录跳走后，底部给「返回」，也可按 `⌘[`
 - **字体与行距**：字号 80%–200%，行距三档，页边距三档，字体可选原书 / 黑体 / 宋体或任意已安装字体
 - **版式**：版心宽度四档，单栏 / 双栏，点正文左右两侧翻页
@@ -108,7 +108,7 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 | 操作 | 按键 |
 |---|---|
 | 翻页 | `←` `→` · 空格 · 触控板左右滑 |
-| 目录 | `⌘T` 或 `t` |
+| 目录 | `⌘T`、`t`，或点左下角章名 |
 | 字号 | `⌘=` 放大 · `⌘-` 缩小 · `⌘0` 还原 |
 | 查找 | `⌘F` · `⌘G` 下一个 · `⇧⌘G` 上一个 |
 | 字号与主题 | 窗口右上角 `Aa`，或在正文上右键 |

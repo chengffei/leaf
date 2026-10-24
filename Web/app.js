@@ -199,6 +199,7 @@ const onKey = e => {
   const k = e.key
   if (k === 'Escape' && !$('#note').hidden) return closeNote()
   if (k === 'Escape' && !$('#find').hidden) return closeFind()
+  if (k === 'Escape') return post({ type: 'closeTOC' })
   if (k === 't') return post({ type: 'toggleTOC' })
   if (k === 'ArrowLeft') turn(() => view.goLeft())
   else if (k === 'ArrowRight') turn(() => view.goRight())
@@ -462,6 +463,7 @@ const progressText = loc => {
   }
 }
 const renderProgress = () => { $('#percent').textContent = progressText(lastLocation) }
+$('#chapter').addEventListener('click', () => post({ type: 'toggleTOC' })) // 左下角章名 = 目录开关
 $('#percent').addEventListener('click', () => {
   progressMode = MODES[(MODES.indexOf(progressMode) + 1) % MODES.length]
   store.set('leaf.progressMode', progressMode)

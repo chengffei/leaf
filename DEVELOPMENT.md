@@ -27,7 +27,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 |---|---|---|
 | 文档 | `BookDocument.swift` | `DocumentGroup(viewing:)` 只读；整本读入内存，SHA-256 作为书的身份 |
 | 桥 | `BookSchemeHandler.swift` | `leaf://app/*` 读 bundle 里的 `Web/`；`leaf://app/book` 给出当前书的字节（必须与页面同源，跨 host 会被 fetch 拦截） |
-| 窗口 | `BookWindow.swift` `ReaderModel.swift` | `NavigationSplitView`：左侧原生目录侧栏（目录由 JS 压平回传，选中态 = 当前章节，点选 = 跳转），侧栏头部显示书名与作者；`WindowChrome` 隐藏窗口标题，红绿灯与工具栏仅在目录打开、Aa 面板打开或鼠标停在顶部时淡入；主题的浅 / 深色靠 `.preferredColorScheme` 改窗口外观 |
+| 窗口 | `BookWindow.swift` `ReaderModel.swift` | `ZStack`：正文铺满，目录是浮在左侧的玻璃面板 `TOCPanel`（宽 300，`regularMaterial`，不推挤正文、不重排书页；目录由 JS 压平回传，选中态 = 当前章节，点选 = 跳转并收起），头部显示书名与作者；`WindowChrome` 隐藏窗口标题，红绿灯与工具栏仅在目录打开、Aa 面板打开或鼠标停在顶部时淡入；主题的浅 / 深色靠 `.preferredColorScheme` 改窗口外观 |
 | 视图 | `ReaderView.swift` | `WKWebView`（`ReaderWebView` 子类接管右键菜单：保留系统的拷贝 / 查询 / 翻译，加翻页、目录、查找、设置）；接收 JS 消息：relocate 存进度、外链交给浏览器；只放行 leaf / blob / about / data |
 | 设置 | `ReaderSettings.swift` `SettingsView.swift` `TypographyPanel.swift` | 全局设置，`ReaderPrefs` 整包 JSON 推给页面。`SettingsView` 是「设置… ⌘,」窗口（全部选项）；`TypographyPanel` 是工具栏 Aa 弹层（只有字号和主题）。字号 = 书页根字号 `html { font-size: N% }`（作用于 em / rem / % 字号，写死 px 的书不受影响）；行距三档以 `!important` 覆盖书本；页边距三档 = foliate 的 `gap` / `margin` 属性（数值在 app.js `MARGINS`）；字体 原书 / 黑体 / 宋体 / 任意已安装家族（`NSFontManager`）；版心宽度四档 + 分栏三档 = foliate 的 `max-inline-size` / `max-column-count`；主题四档 |
 | 状态 | `ReadingPosition.swift` | 阅读位置：`UserDefaults["position.<sha256>"] = CFI`。另有两项小状态存在 WebView 的 localStorage（`leaf.progressMode` 进度指示模式、`leaf.readingSpeed` 阅读速度样本），所有书共用 |
@@ -44,7 +44,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 - **foliate 的 `goTo` 失败只打日志不抛错**，页面会静默留白。`app.js` 已兜底：初始化后未渲染则退回第一节。
 - **不要用 `WKWebView.pageZoom` 调字号**：非 100% 时 foliate 分页混用缩放前后的尺寸，右侧会露出半截下一栏。
 - **章首空白栏**：书的 CSS 常给章节标题加 `page-break-before: always`，WebKit 多栏把它当断栏，每章前多出一整栏空白。`app.js` 只对每段开头那串元素取消断开。
-- **侧栏遮挡**：正文视图若 `ignoresSafeArea()` 全部边，会铺到浮动侧栏下面；只忽略顶部。
+- **目录为什么浮动**：10-24 前是 `NavigationSplitView` 推挤式侧栏，打开目录会让书重新分页，读者刚看到的那页就变了。目录是瞬态工具（开、选、关），改成覆盖层；将来的标注、查找结果面板也走这条路。正文仍只忽略顶部安全区。
 - **脚注弹窗**：用 foliate 自带的 `FootnoteHandler` 识别（epub:type、role、上标三种）。注释视图必须在 `before-render` 时就挂进页面，iframe 不在文档里没有 `contentDocument`；主视图的 `foliate-view` 定位规则要限定 `body >`，否则会套到卡片里。
 - **返回**：foliate 每次 `goTo` 压一条历史，翻页只改写当前那条，`history.back()` 回到跳走前实际读到的位置。「返回」提示按用户亲手翻页计数收起，别用 relocate 计数（一次跳转会触发好几次）。
 - **标题字号上限**：转换书常把标题设成正文 2.5 倍，`capHeadings` 把超过 1.8 倍的压到 1.8 倍（rem 写法，调字号仍等比）；标题行高统一 1.35。

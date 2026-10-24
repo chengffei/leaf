@@ -7,26 +7,35 @@ struct BookWindow: View {
     private let settings = ReaderSettings.shared
 
     var body: some View {
-        NavigationSplitView(columnVisibility: sidebarVisibility) {
-            TOCSidebar(model: model)
-                .navigationSplitViewColumnWidth(min: 200, ideal: 260, max: 380)
-        } detail: {
+        // 目录是浮动面板，盖在正文上：推挤式侧栏会让书重新分页，读者刚看到的那页就变了
+        ZStack(alignment: .topLeading) {
             ReaderView(book: book, model: model, prefs: settings.prefs)
-            // 铺到窗口顶部（标题文字已移除，按钮悬停才浮现）；左侧要给浮动侧栏让位，否则正文被侧栏盖住
-            .ignoresSafeArea(.container, edges: .top)
-            .toolbar {
-                // 标题隐藏后工具栏会向左收拢，用弹性间隔把 Aa 推回右上角
-                if #available(macOS 26.0, *) { ToolbarSpacer(.flexible) }
-                ToolbarItem(placement: .primaryAction) {
-                    Button { model.showsTypography.toggle() } label: {
-                        // 该符号随系统语言本地化（中文显示「大小」），固定用英文变体「Aa」
-                        Image(systemName: "textformat.size")
-                            .environment(\.locale, Locale(identifier: "en"))
-                    }
-                    .help("字号与主题")
-                    .popover(isPresented: $model.showsTypography, arrowEdge: .bottom) {
-                        TypographyPanel()
-                    }
+                // 铺到窗口顶部（标题文字已移除，按钮悬停才浮现）
+                .ignoresSafeArea(.container, edges: .top)
+            if model.showsTOC {
+                TOCPanel(model: model)
+                    .transition(.move(edge: .leading).combined(with: .opacity))
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: model.showsTOC)
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button { model.showsTOC.toggle() } label: {
+                    Image(systemName: "sidebar.leading")
+                }
+                .help("目录 ⌘T")
+            }
+            // 标题隐藏后工具栏会向左收拢，用弹性间隔把 Aa 推回右上角
+            if #available(macOS 26.0, *) { ToolbarSpacer(.flexible) }
+            ToolbarItem(placement: .primaryAction) {
+                Button { model.showsTypography.toggle() } label: {
+                    // 该符号随系统语言本地化（中文显示「大小」），固定用英文变体「Aa」
+                    Image(systemName: "textformat.size")
+                        .environment(\.locale, Locale(identifier: "en"))
+                }
+                .help("字号与主题")
+                .popover(isPresented: $model.showsTypography, arrowEdge: .bottom) {
+                    TypographyPanel()
                 }
             }
         }
@@ -41,12 +50,21 @@ struct BookWindow: View {
         // 主题的浅色 / 深色：改窗口外观，WebView 的 prefers-color-scheme 跟着窗口走；米黄按浅色
         .preferredColorScheme(settings.theme.colorScheme)
     }
+}
 
-    private var sidebarVisibility: Binding<NavigationSplitViewVisibility> {
-        Binding(
-            get: { model.showsTOC ? .all : .detailOnly },
-            set: { model.showsTOC = $0 != .detailOnly }
-        )
+/// 浮动目录：固定宽度的玻璃面板，贴左侧，上不压标题栏按钮，下不压状态行
+struct TOCPanel: View {
+    let model: ReaderModel
+
+    var body: some View {
+        TOCSidebar(model: model)
+            .frame(width: 300)
+            .frame(maxHeight: .infinity)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .shadow(color: .black.opacity(0.18), radius: 24, y: 8)
+            .padding(.leading, 12)
+            .padding(.top, 12)
+            .padding(.bottom, 44)
     }
 }
 
@@ -59,12 +77,14 @@ struct TOCSidebar: View {
             header
             if model.toc.isEmpty {
                 ContentUnavailableView("没有目录", systemImage: "list.bullet")
+                    .frame(maxHeight: .infinity)
             } else {
                 ScrollViewReader { proxy in
                     List(model.visibleTOC, selection: selection) { entry in
                         row(entry)
                     }
                     .listStyle(.sidebar)
+                    .scrollContentBackground(.hidden)
                     .onAppear { reveal(proxy) }
                     .onChange(of: model.showsTOC) { reveal(proxy) }
                 }
@@ -111,12 +131,12 @@ struct TOCSidebar: View {
             .help(model.author.isEmpty ? model.title : "\(model.title)\n\(model.author)")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
-            .padding(.top, 4)
+            .padding(.top, 14)
             .padding(.bottom, 10)
         }
     }
 
-    // 读取 = 当前章节（收在折叠里就是它的可见祖先）；写入 = 用户点了某条 → 跳转，有下级的顺带展开
+    // 读取 = 当前章节（收在折叠里就是它的可见祖先）；写入 = 用户点了某条 → 跳转并收起面板，有下级的顺带展开
     private var selection: Binding<TOCEntry.ID?> {
         Binding(
             get: { model.visibleCurrentID },
@@ -124,6 +144,7 @@ struct TOCSidebar: View {
                 guard let id, model.toc.indices.contains(id) else { return }
                 if model.toc[id].hasChildren { model.expanded.insert(id) }
                 model.goTo(model.toc[id])
+                model.showsTOC = false
             }
         )
     }
