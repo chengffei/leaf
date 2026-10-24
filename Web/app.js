@@ -71,18 +71,28 @@ body { background-color: transparent !important; }
 a:link { color: ${SEPIA.link}; }
 `,
 }
-const prefsCSS = ({ fontScale, lineHeight, font }) => `
+// 字重：描边加粗，任何字体都生效（font-weight 只对可变字体有 5 级，还会抹平标题的原有粗细）
+const WEIGHT_EM = [0, 0.012, 0.024, 0.036, 0.05]
+const PARAGRAPH = { tight: '0.25em', loose: '1em' } // original = 不动
+const LETTER = { tight: '-0.01em', loose: '0.05em' } // standard = 不动
+const TEXT = 'p, li, blockquote, dd, dt, td, th'
+const prefsCSS = ({ fontScale, lineHeight, font, weight, align, paragraphSpacing, letterSpacing }) => `
 html { font-size: ${fontScale * 100}% !important; }
 p, li, blockquote, dd, dt, div, td, th { line-height: ${lineHeight} !important; }
 ${fontStack(font) ? `body, body :not(pre):not(code):not(kbd):not(samp):not(tt) {
   font-family: ${fontStack(font)} !important;
 }` : ''}
+${WEIGHT_EM[weight] ? `html { -webkit-text-stroke: ${WEIGHT_EM[weight]}em currentColor; }` : ''}
+${align === 'left' ? `${TEXT} { text-align: left !important; }` : ''}
+${PARAGRAPH[paragraphSpacing] ? `p { margin-top: ${PARAGRAPH[paragraphSpacing]} !important; margin-bottom: ${PARAGRAPH[paragraphSpacing]} !important; }` : ''}
+${LETTER[letterSpacing] ? `body, ${TEXT}, span, div { letter-spacing: ${LETTER[letterSpacing]} !important; }` : ''}
 ${THEME_CSS[effectiveTheme()] ?? ''}
 `
 const query = new URLSearchParams(location.search)
 const DEFAULT_PREFS = {
   fontScale: 1, lineHeight: 1.7, font: 'original', margin: 'standard',
   maxWidth: 680, columns: 'auto', theme: 'system',
+  weight: 0, align: 'justify', paragraphSpacing: 'original', letterSpacing: 'standard',
 }
 let prefs = { ...DEFAULT_PREFS }
 try { prefs = { ...prefs, ...JSON.parse(query.get('prefs') ?? '{}') } } catch {}
@@ -181,8 +191,12 @@ globalThis.leaf = {
   forward() { view.history.forward() },
   prev() { turn(() => view.goLeft()) },
   next() { turn(() => view.goRight()) },
-  find() { openFind() },
+  search(query) { runFind(query) },
   findNext(step) { stepFind(step) },
+  goToResult(i) { goToFindResult(i) },
+  clearSearch() { closeFind() },
+  goToPrompt() { openGoTo() },
+  goToFraction(f) { jumpToFraction(f) },
 }
 
 // ---- 翻页输入：键盘 + 触控板（一次手势只翻一页） ----
@@ -195,10 +209,11 @@ const turn = go => {
 }
 const onKey = e => {
   if (!view.book || e.metaKey || e.ctrlKey || e.altKey) return
-  if (e.target.closest?.('#find')) return // 查找框里打字不翻页
+  if (e.target.closest?.('#goto')) return // 跳转框里打字不翻页
   const k = e.key
+  if (k === 'Escape' && !$('#lightbox').hidden) return closeLightbox()
   if (k === 'Escape' && !$('#note').hidden) return closeNote()
-  if (k === 'Escape' && !$('#find').hidden) return closeFind()
+  if (k === 'Escape' && !$('#goto').hidden) return closeGoTo()
   if (k === 'Escape') return post({ type: 'closeTOC' })
   if (k === 't') return post({ type: 'toggleTOC' })
   if (k === 'ArrowLeft') turn(() => view.goLeft())
@@ -211,7 +226,7 @@ const onKey = e => {
 
 let wheelFired = false, wheelIdle
 const onWheel = e => {
-  if (!view.book || view.renderer?.getAttribute('flow') === 'scrolled') return
+  if (!view.book || view.renderer?.getAttribute('flow') === 'scrolled' || !$('#lightbox').hidden) return
   e.preventDefault()
   clearTimeout(wheelIdle)
   wheelIdle = setTimeout(() => wheelFired = false, 180) // 惯性滚动结束才解锁
@@ -225,7 +240,7 @@ const onWheel = e => {
 
 // 书页在 iframe 里，点击坐标要加上 iframe 的偏移才是窗口坐标；注释卡片按它定位
 let lastPoint = { x: innerWidth / 2, y: innerHeight / 2 }
-const CHROME = '#note, #back, #find, #status'
+const CHROME = '#note, #back, #goto, #status, #lightbox'
 const windowPoint = e => {
   const frame = e.view?.frameElement?.getBoundingClientRect()
   return { x: e.clientX + (frame?.left ?? 0), y: e.clientY + (frame?.top ?? 0) }
@@ -240,8 +255,14 @@ const listen = target => {
     closeNote()
     post({ type: 'closeTOC' }) // 点正文 = 收起目录
   })
+  // 书里的图有两种写法：<img>，或封面常用的 <svg><image xlink:href>；foliate 已把它们的地址换成 blob
+  target.addEventListener('dblclick', e => {
+    const el = e.target.closest?.('img, image')
+    const src = el?.currentSrc || el?.src || el?.href?.baseVal
+    if (src) openLightbox(src)
+  })
   target.addEventListener('click', e => {
-    if (e.button !== 0 || e.target.closest?.(`a, ${CHROME}`)) return
+    if (e.button !== 0 || e.target.closest?.(`a, img, image, ${CHROME}`)) return
     if (!e.target.ownerDocument.getSelection()?.isCollapsed) return
     const { x, y } = windowPoint(e)
     if (Math.hypot(x - lastPoint.x, y - lastPoint.y) > 4) return
@@ -337,26 +358,19 @@ $('#back').addEventListener('click', () => {
   backLabel = null
   view.history.back()
 })
-// ---- 查找：顶部浮条，Enter 下一个、Shift+Enter 上一个、Esc 关闭；命中处由 foliate 画高亮 ----
+// ---- 查找：输入框和结果列表在原生面板里，这里只管搜、画高亮、跳 ----
+// view.search() 是异步生成器，整本逐节扫；换关键词用 run 计数器作废旧搜索
 const find = { query: '', results: [], index: -1, run: 0 }
-const findCount = text => { $('#find-count').textContent = text }
-const openFind = () => {
-  if (!view.book) return
-  $('#find').hidden = false
-  const input = $('#find-input')
-  input.focus()
-  input.select()
-}
+const postFind = (status) => post({
+  type: 'search', query: find.query, status, index: find.index,
+  results: find.results.map(({ cfi, label, excerpt }) => ({ cfi, label, ...excerpt })),
+})
 const closeFind = () => {
-  if ($('#find').hidden) return
-  $('#find').hidden = true
-  find.run++ // 正在跑的搜索作废
+  find.run++
   find.query = ''
   find.results = []
   find.index = -1
-  findCount('')
   view.clearSearch()
-  view.renderer?.getContents?.()?.[0]?.doc?.defaultView?.focus()
 }
 const runFind = async query => {
   const run = ++find.run
@@ -364,48 +378,80 @@ const runFind = async query => {
   find.results = []
   find.index = -1
   view.clearSearch()
-  if (!query) return findCount('')
-  findCount('搜索中…')
+  if (!query) return postFind('idle')
+  postFind('searching')
   const gen = view.search({
     query, matchCase: false, matchDiacritics: false, matchWholeWords: false,
     draw: Overlayer.highlight, drawOptions: { color: '#ffd60a' },
   })
-  let first = true
+  let first = true, lastPost = 0
   for await (const r of gen) {
     if (run !== find.run) return gen.return()
     if (r === 'done') break
     if (r.subitems) {
-      find.results.push(...r.subitems.map(({ cfi }) => cfi))
+      find.results.push(...r.subitems.map(({ cfi, excerpt }) => ({ cfi, label: r.label, excerpt })))
       if (first) { first = false; stepFind(1) } // 第一处命中立刻跳过去，不等整本搜完
-      else findCount(`${find.index + 1} / ${find.results.length}…`)
+      else if (Date.now() - lastPost > 150) { lastPost = Date.now(); postFind('searching') }
     }
   }
-  findCount(find.results.length ? `${find.index + 1} / ${find.results.length}` : '无结果')
+  postFind('done')
 }
-const stepFind = step => {
-  if ($('#find').hidden) return openFind()
+const goToFindResult = i => {
   const n = find.results.length
   if (!n) return
-  find.index = ((find.index + step) % n + n) % n
-  findCount(`${find.index + 1} / ${n}`)
-  view.goTo(find.results[find.index]).catch(e => post({ type: 'error', message: String(e) }))
+  find.index = ((i % n) + n) % n
+  postFind(find.run && find.index >= 0 ? 'done' : 'idle')
+  view.goTo(find.results[find.index].cfi).catch(e => post({ type: 'error', message: String(e) }))
 }
-let findTimer
-$('#find-input').addEventListener('input', e => {
-  clearTimeout(findTimer)
-  findTimer = setTimeout(() => runFind(e.target.value.trim()), 300)
-})
-$('#find-input').addEventListener('keydown', e => {
-  if (e.key === 'Escape') return closeFind()
+const stepFind = step => goToFindResult(find.index + step)
+
+// ---- 跳转：⌘L 弹小条，输入百分比或位置号；状态行悬停出现滑杆，拖动按比例跳 ----
+const openGoTo = () => {
+  if (!view.book) return
+  $('#goto').hidden = false
+  const input = $('#goto-input')
+  input.value = ''
+  input.placeholder = lastLocation?.location ? `百分比，或位置号 1 到 ${lastLocation.location.total}` : '百分比'
+  input.focus()
+}
+const closeGoTo = () => {
+  $('#goto').hidden = true
+  view.renderer?.getContents?.()?.[0]?.doc?.defaultView?.focus()
+}
+const jumpToFraction = f => {
+  backLabel = view.lastLocation?.tocItem?.label?.trim() || '原来的位置'
+  pagesSinceJump = 0
+  return view.goToFraction(Math.min(Math.max(f, 0), 1)).catch(e => post({ type: 'error', message: String(e) }))
+}
+$('#goto-input').addEventListener('keydown', e => {
+  if (e.key === 'Escape') return closeGoTo()
   if (e.key !== 'Enter') return
   e.preventDefault()
-  clearTimeout(findTimer)
-  const q = e.target.value.trim()
-  q === find.query ? stepFind(e.shiftKey ? -1 : 1) : runFind(q)
+  const raw = e.target.value.trim()
+  const n = parseFloat(raw)
+  if (Number.isNaN(n)) return
+  // 带 % 或不超过 100 当百分比；更大的数当位置号
+  const total = lastLocation?.location?.total ?? 0
+  const f = raw.endsWith('%') || n <= 100 && !(total && n > 100) ? n / 100 : total ? n / total : NaN
+  if (Number.isNaN(f)) return
+  closeGoTo()
+  jumpToFraction(f)
 })
-$('#find-prev').addEventListener('click', () => stepFind(-1))
-$('#find-next').addEventListener('click', () => stepFind(1))
-$('#find-close').addEventListener('click', closeFind)
+$('#goto-close').addEventListener('click', closeGoTo)
+const scrub = $('#scrub')
+scrub.addEventListener('input', () => { $('#percent').textContent = `${Math.round(scrub.value / 10)}%`; flashStatus() })
+scrub.addEventListener('change', () => jumpToFraction(scrub.value / 1000))
+
+// ---- 图片放大：双击书里的图片，全窗预览 ----
+const openLightbox = src => {
+  $('#lightbox img').src = src
+  $('#lightbox').hidden = false
+}
+const closeLightbox = () => {
+  $('#lightbox').hidden = true
+  $('#lightbox img').removeAttribute('src')
+}
+$('#lightbox').addEventListener('click', closeLightbox)
 listen(document)
 
 let statusTimer
@@ -493,6 +539,7 @@ try {
     sampleSpeed(e.detail)
     lastLocation = e.detail
     $('#chapter').textContent = tocItem?.label ?? ''
+    scrub.value = Math.round((fraction ?? 0) * 1000)
     renderProgress()
     post({ type: 'relocate', cfi, fraction, tocHref: tocItem?.href ?? null })
   })

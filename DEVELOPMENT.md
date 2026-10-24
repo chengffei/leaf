@@ -27,9 +27,9 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 |---|---|---|
 | 文档 | `BookDocument.swift` | `DocumentGroup(viewing:)` 只读；整本读入内存，SHA-256 作为书的身份 |
 | 桥 | `BookSchemeHandler.swift` | `leaf://app/*` 读 bundle 里的 `Web/`；`leaf://app/book` 给出当前书的字节（必须与页面同源，跨 host 会被 fetch 拦截） |
-| 窗口 | `BookWindow.swift` `ReaderModel.swift` | `ZStack`：正文铺满，目录是浮在左侧的玻璃面板 `TOCPanel`（宽 300，`regularMaterial`，不推挤正文、不重排书页；目录由 JS 压平回传，选中态 = 当前章节，点选 = 跳转并收起），头部显示书名与作者；`WindowChrome` 隐藏窗口标题，红绿灯与工具栏仅在目录打开、Aa 面板打开或鼠标停在顶部时淡入；主题的浅 / 深色靠 `.preferredColorScheme` 改窗口外观 |
+| 窗口 | `BookWindow.swift` `ReaderModel.swift` | `ZStack`：正文铺满，左侧浮动玻璃面板 `TOCPanel`（宽 300，`regularMaterial`，不推挤正文、不重排书页）有两页：目录（JS 压平回传，选中态 = 当前章节，点选 = 跳转并收起）和查找（`SearchPanel`：原生输入框，停 300 毫秒即搜，结果按章节分组，JS 以 `search` 消息流式回传）；`WindowChrome` 隐藏窗口标题，红绿灯与工具栏仅在目录打开、Aa 面板打开或鼠标停在顶部时淡入；主题的浅 / 深色靠 `.preferredColorScheme` 改窗口外观 |
 | 视图 | `ReaderView.swift` | `WKWebView`（`ReaderWebView` 子类接管右键菜单：保留系统的拷贝 / 查询 / 翻译，加翻页、目录、查找、设置）；接收 JS 消息：relocate 存进度、外链交给浏览器；只放行 leaf / blob / about / data |
-| 设置 | `ReaderSettings.swift` `SettingsView.swift` `TypographyPanel.swift` | 全局设置，`ReaderPrefs` 整包 JSON 推给页面。`SettingsView` 是「设置… ⌘,」窗口（全部选项）；`TypographyPanel` 是工具栏 Aa 弹层（只有字号和主题）。字号 = 书页根字号 `html { font-size: N% }`（作用于 em / rem / % 字号，写死 px 的书不受影响）；行距三档以 `!important` 覆盖书本；页边距三档 = foliate 的 `gap` / `margin` 属性（数值在 app.js `MARGINS`）；字体 原书 / 黑体 / 宋体 / 任意已安装家族（`NSFontManager`）；版心宽度四档 + 分栏三档 = foliate 的 `max-inline-size` / `max-column-count`；主题四档 |
+| 设置 | `ReaderSettings.swift` `SettingsView.swift` `TypographyPanel.swift` | 全局设置，`ReaderPrefs` 整包 JSON 推给页面。`SettingsView` 是「设置… ⌘,」窗口（全部选项）；`TypographyPanel` 是工具栏 Aa 弹层（只有字号和主题）。字号 = 书页根字号 `html { font-size: N% }`（作用于 em / rem / % 字号，写死 px 的书不受影响）；行距三档以 `!important` 覆盖书本；页边距三档 = foliate 的 `gap` / `margin` 属性（数值在 app.js `MARGINS`）；字体 原书 / 黑体 / 宋体 / 任意已安装家族（`NSFontManager`）；字重 0 到 4 = `-webkit-text-stroke` 描边（任何字体都生效，不抹平标题粗细）；对齐、段距、字距见 app.js `prefsCSS`；版心宽度四档 + 分栏三档 = foliate 的 `max-inline-size` / `max-column-count`；主题四档。`Preset` 是一套排版（不含主题），内置四套在 `Preset.builtins`，自定义存 `UserDefaults["presets"]` |
 | 状态 | `ReadingPosition.swift` | 阅读位置：`UserDefaults["position.<sha256>"] = CFI`。另有两项小状态存在 WebView 的 localStorage（`leaf.progressMode` 进度指示模式、`leaf.readingSpeed` 阅读速度样本），所有书共用 |
 | 渲染 | `Web/app.js` + `Web/foliate/` | [foliate-js](https://github.com/johnfactotum/foliate-js) 内置（版本见 `Web/foliate/VERSION`，移除了 PDF / OPDS / 示例）。**本地补丁只有一处**：`paginator.js` 把 `max-column-count-portrait` 开放为属性（上游写死竖窗 1 栏），升级时要重打 |
 | 图标 | `Leaf/Leaf.icon` | Icon Composer 格式，两层手写 SVG |
@@ -55,7 +55,10 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 - **分栏**：foliate 的栏数 = `min(max-column-count, ceil(宽度 / max-inline-size))`，竖窗另有上限 `--_max-column-count-portrait`（上游写死 1，已补丁为属性）。「双栏」把每栏上限压到半个窗口并在 resize 时重算。
 - **右键菜单**：`WKWebView.willOpenMenu` 里按 identifier 后缀（`Copy` / `LookUp` / `Translate`）筛系统项，其余换成自己的；系统会再追加「服务」子菜单，拦不掉。打开设置窗口只能用 SwiftUI 环境里的 `openSettings`（`BookWindow` 塞进 `ReaderModel`），`NSApp.sendAction(showSettingsWindow:)` 在 macOS 15 上无效。
 - **进度指示**：foliate 的 `relocate` 带 `location`（1 位置 = 1500 字节）和 `time`（按固定 1600 字节/分钟算）。Leaf 把 `time` 换回剩余字节，再除以本人速度：每次亲手翻页（`turn()`）记时刻与字节位置，下一次 relocate 时把间隔（2 秒到 5 分钟之内才算）和推进字节累计进样本；样本不足 3 分钟显示「测算中」，超过 120 分钟按半衰减淡出旧样本。
-- **查找**：`view.search()` 是异步生成器，整本逐节扫；第一处命中立刻跳转，计数边扫边更新；换关键词时用 run 计数器作废旧搜索。
+- **查找**：`view.search()` 是异步生成器，整本逐节扫；第一处命中立刻跳转，结果每 150 毫秒批量回传给面板；换关键词时用 run 计数器作废旧搜索。输入框是原生的（面板查找页），网页里不再有查找条。
+- **跳转**：`⌘L` 弹网页小条（右下角，避开左侧面板），数字不超过 100 当百分比，更大当位置号；状态行悬停出现 `<input type=range>` 滑杆，`change` 时 `goToFraction`。两者都压一条「返回」。
+- **图片放大**：书页 `dblclick` 命中 `<img>` 或 `<svg><image>`（封面常用）就把 blob 地址放进宿主页的 `#lightbox`；网格单元高度不定，图片尺寸要用 `vw` / `vh` 限制。
+- **GUI 测试与中文输入法**：`keystroke` 打英文会被拼音输入法截住（候选条一出，Enter / Esc 都归它）。给输入框赋值用 `scripts/ax.swift settext <文本>`，弹出菜单用 `popup <序号> <菜单项>`。
 - **标题与工具栏**：别用 `.toolbar(removing: .title)`，工具栏会向左收拢、Aa 挤到目录按钮旁；改用 `titleVisibility = .hidden` 加 `ToolbarSpacer(.flexible)`。窗口标题不能露出来：书页自带白底（如封面）会铺到标题下，深色模式的浅色标题字被盖住。
 - **SF Symbol 会随系统语言本地化**（`textformat.size` 在中文下显示「大小」），工具栏按钮固定用英文变体。
 - **放大快捷键绑 `=`**：绑 `+` 时 `⌘=` 不触发。

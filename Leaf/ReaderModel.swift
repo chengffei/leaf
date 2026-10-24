@@ -2,6 +2,26 @@ import Observation
 import SwiftUI
 import WebKit
 
+enum PanelTab: String, CaseIterable, Identifiable {
+    case toc, search
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .toc: "目录"
+        case .search: "查找"
+        }
+    }
+}
+
+struct SearchHit: Identifiable, Hashable {
+    let id: Int
+    let cfi: String
+    let label: String // 所在章节
+    let pre: String
+    let match: String
+    let post: String
+}
+
 struct TOCEntry: Identifiable, Hashable {
     let id: Int
     let label: String
@@ -18,7 +38,12 @@ final class ReaderModel {
     /// 展开着的目录项。目录短就全部展开；长（多本合集等）就只展开当前在读的那一支
     var expanded: Set<TOCEntry.ID> = []
     var currentHref: String?
-    var showsTOC = false
+    var showsTOC = false // 浮动面板开关（目录或查找）
+    var panelTab: PanelTab = .toc
+    var searchQuery = ""
+    var searchHits: [SearchHit] = []
+    var searchIndex = -1
+    var searchStatus = "idle" // idle / searching / done，由 JS 回报
     var title = ""
     var author = ""
     var canGoBack = false
@@ -103,9 +128,23 @@ final class ReaderModel {
     func goForward() { call("leaf.forward()") }
     func previousPage() { call("leaf.prev()") }
     func nextPage() { call("leaf.next()") }
-    func find() { call("leaf.find()") }
+    /// ⌘F：打开面板的查找页；查找框的聚焦由面板自己处理
+    func find() {
+        panelTab = .search
+        showsTOC = true
+    }
+    func toggleTOC() {
+        if showsTOC && panelTab == .toc { showsTOC = false } else { panelTab = .toc; showsTOC = true }
+    }
+    func search(_ query: String) {
+        searchQuery = query
+        guard let arg = try? JSONEncoder().encode(query), let json = String(data: arg, encoding: .utf8) else { return }
+        call("leaf.search(\(json))")
+    }
     func findNext() { call("leaf.findNext(1)") }
     func findPrevious() { call("leaf.findNext(-1)") }
+    func goToHit(_ index: Int) { call("leaf.goToResult(\(index))") }
+    func goToPrompt() { call("leaf.goToPrompt()") }
 
     private func call(_ js: String) { webView?.evaluateJavaScript(js, completionHandler: nil) }
 }

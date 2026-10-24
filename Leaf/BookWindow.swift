@@ -14,13 +14,14 @@ struct BookWindow: View {
                 .ignoresSafeArea(.container, edges: .top)
             if model.showsTOC {
                 TOCPanel(model: model)
+                    .id("panel")
                     .transition(.move(edge: .leading).combined(with: .opacity))
             }
         }
         .animation(.easeOut(duration: 0.2), value: model.showsTOC)
         .toolbar {
             ToolbarItem(placement: .navigation) {
-                Button { model.showsTOC.toggle() } label: {
+                Button { model.toggleTOC() } label: {
                     Image(systemName: "sidebar.leading")
                 }
                 .help("目录 ⌘T")
@@ -52,19 +53,114 @@ struct BookWindow: View {
     }
 }
 
-/// 浮动目录：固定宽度的玻璃面板，贴左侧，上不压标题栏按钮，下不压状态行
+/// 浮动面板：固定宽度的玻璃面板，贴左侧，上不压标题栏按钮，下不压状态行；目录与查找两页
 struct TOCPanel: View {
-    let model: ReaderModel
+    @Bindable var model: ReaderModel
 
     var body: some View {
-        TOCSidebar(model: model)
-            .frame(width: 300)
-            .frame(maxHeight: .infinity)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: .black.opacity(0.18), radius: 24, y: 8)
-            .padding(.leading, 12)
-            .padding(.top, 12)
-            .padding(.bottom, 44)
+        VStack(spacing: 0) {
+            Picker("面板", selection: $model.panelTab) {
+                ForEach(PanelTab.allCases) { Text($0.label).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 6)
+            switch model.panelTab {
+            case .toc: TOCSidebar(model: model)
+            case .search: SearchPanel(model: model)
+            }
+        }
+        .frame(width: 300)
+        .frame(maxHeight: .infinity)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .shadow(color: .black.opacity(0.18), radius: 24, y: 8)
+        .padding(.leading, 12)
+        .padding(.top, 12)
+        .padding(.bottom, 44)
+    }
+}
+
+/// 查找页：输入即搜（停 300 毫秒），Enter 下一处，结果按章节分组，点一条跳过去
+struct SearchPanel: View {
+    @Bindable var model: ReaderModel
+    @State private var text = ""
+    @FocusState private var focused: Bool
+    @State private var debounce: Task<Void, Never>?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                TextField("查找", text: $text)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focused)
+                    .onSubmit { text == model.searchQuery ? model.findNext() : model.search(text) }
+                    .onExitCommand { model.showsTOC = false }
+                Text(countText).font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                    .frame(minWidth: 44, alignment: .trailing)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            if model.searchHits.isEmpty {
+                ContentUnavailableView(
+                    model.searchStatus == "done" && !model.searchQuery.isEmpty ? "没有找到" : "整本书里找",
+                    systemImage: "magnifyingglass"
+                )
+                .frame(maxHeight: .infinity)
+            } else {
+                List(selection: hitSelection) {
+                    ForEach(groups, id: \.label) { group in
+                        Section(group.label) {
+                            ForEach(group.hits) { hit in
+                                excerpt(hit).tag(hit.id).lineLimit(3)
+                            }
+                        }
+                    }
+                }
+                .listStyle(.sidebar)
+                .scrollContentBackground(.hidden)
+            }
+        }
+        .onAppear { text = model.searchQuery; focused = true }
+        .onChange(of: text) { _, new in
+            debounce?.cancel()
+            debounce = Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(300))
+                guard !Task.isCancelled else { return }
+                let q = new.trimmingCharacters(in: .whitespaces)
+                if q != model.searchQuery { model.search(q) }
+            }
+        }
+    }
+
+    private var countText: String {
+        switch model.searchStatus {
+        case "searching": model.searchHits.isEmpty ? "搜索中" : "\(model.searchHits.count)…"
+        case "done": model.searchHits.isEmpty ? "" : "\(model.searchIndex + 1) / \(model.searchHits.count)"
+        default: ""
+        }
+    }
+
+    private struct Group { let label: String; var hits: [SearchHit] }
+    private var groups: [Group] {
+        var out: [Group] = []
+        for hit in model.searchHits {
+            if out.last?.label == hit.label { out[out.count - 1].hits.append(hit) }
+            else { out.append(Group(label: hit.label.isEmpty ? "正文" : hit.label, hits: [hit])) }
+        }
+        return out
+    }
+
+    private func excerpt(_ hit: SearchHit) -> Text {
+        Text(hit.pre).foregroundStyle(.secondary) + Text(hit.match).bold() + Text(hit.post).foregroundStyle(.secondary)
+    }
+
+    private var hitSelection: Binding<Int?> {
+        Binding(
+            get: { model.searchIndex >= 0 ? model.searchIndex : nil },
+            set: { if let i = $0 { model.goToHit(i) } }
+        )
     }
 }
 
@@ -131,7 +227,7 @@ struct TOCSidebar: View {
             .help(model.author.isEmpty ? model.title : "\(model.title)\n\(model.author)")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
-            .padding(.top, 14)
+            .padding(.top, 6)
             .padding(.bottom, 10)
         }
     }
@@ -231,14 +327,18 @@ struct ReaderCommands: Commands {
     var body: some Commands {
         // 侧栏只有目录这一种用途，不再挂系统的「显示边栏」，免得两个菜单项管同一件事
         CommandGroup(before: .toolbar) {
-            Button(reader?.showsTOC == true ? "隐藏目录" : "显示目录") {
-                reader?.showsTOC.toggle()
+            Button(reader?.showsTOC == true && reader?.panelTab == .toc ? "隐藏目录" : "显示目录") {
+                reader?.toggleTOC()
             }
             .keyboardShortcut("t")
             .disabled(reader == nil)
         }
         // 跳转（目录、书内链接、脚注「前往」）之后回到原处；快捷键与 Safari、Books 一致
         CommandMenu("前往") {
+            Button("位置…") { reader?.goToPrompt() }
+                .keyboardShortcut("l")
+                .disabled(reader == nil)
+            Divider()
             Button("返回") { reader?.goBack() }
                 .keyboardShortcut("[")
                 .disabled(reader?.canGoBack != true)

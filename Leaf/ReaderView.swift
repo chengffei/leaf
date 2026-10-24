@@ -81,7 +81,15 @@ struct ReaderView: NSViewRepresentable {
                 model.canGoBack = body["back"] as? Bool ?? false
                 model.canGoForward = body["forward"] as? Bool ?? false
             case "toggleTOC":
-                model.showsTOC.toggle()
+                model.toggleTOC()
+            case "search":
+                model.searchStatus = body["status"] as? String ?? "idle"
+                model.searchIndex = body["index"] as? Int ?? -1
+                let hits = body["results"] as? [[String: Any]] ?? []
+                model.searchHits = hits.enumerated().map { i, h in
+                    SearchHit(id: i, cfi: h["cfi"] as? String ?? "", label: h["label"] as? String ?? "",
+                              pre: h["pre"] as? String ?? "", match: h["match"] as? String ?? "", post: h["post"] as? String ?? "")
+                }
             case "closeTOC":
                 if model.showsTOC { model.showsTOC = false }
             case "link":
@@ -133,7 +141,7 @@ final class ReaderWebView: WKWebView {
             ClosureMenuItem("上一页") { model.previousPage() },
             ClosureMenuItem("下一页") { model.nextPage() },
             .separator(),
-            ClosureMenuItem(model.showsTOC ? "隐藏目录" : "显示目录", key: "t") { model.showsTOC.toggle() },
+            ClosureMenuItem(model.showsTOC && model.panelTab == .toc ? "隐藏目录" : "显示目录", key: "t") { model.toggleTOC() },
             ClosureMenuItem("查找…", key: "f") { model.find() },
         ]
         if model.canGoBack {

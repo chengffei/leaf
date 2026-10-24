@@ -8,14 +8,12 @@
 <body>
 <div id="note" hidden><div id="note-body"></div><button id="note-go" type="button">前往注释所在位置</button></div>
 <button id="back" type="button" hidden></button>
-<div id="find" hidden>
-  <input id="find-input" type="text" placeholder="查找" spellcheck="false" autocomplete="off">
-  <span id="find-count"></span>
-  <button id="find-prev" type="button" title="上一个 ⇧⏎">‹</button>
-  <button id="find-next" type="button" title="下一个 ⏎">›</button>
-  <button id="find-close" type="button">完成</button>
+<div id="goto" hidden>
+  <input id="goto-input" type="text" placeholder="百分比" spellcheck="false" autocomplete="off">
+  <button id="goto-close" type="button">取消</button>
 </div>
-<footer id="status"><span id="chapter" title="目录 ⌘T"></span><span id="percent" title="点击切换：百分比 / 位置 / 本章剩余 / 全书剩余"></span></footer>
+<div id="lightbox" hidden><img alt=""></div>
+<footer id="status"><span id="chapter" title="目录 ⌘T"></span><input id="scrub" type="range" min="0" max="1000" value="0" title="拖动跳转"><span id="percent" title="点击切换：百分比 / 位置 / 本章剩余 / 全书剩余"></span></footer>
 <div id="error" hidden></div>
 <script>
 const report = m => window.webkit?.messageHandlers?.leaf?.postMessage({ type: "error", message: m })

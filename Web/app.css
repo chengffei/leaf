@@ -121,13 +121,12 @@ body:hover #status, #status.show { opacity: 1; }
 #back:hover { background: var(--hover); }
 #back[hidden] { display: none; }
 
-/* 查找浮条：顶部正中，Esc 或「完成」关闭 */
-#find {
+/* 跳转小条：右下角进度指示上方（左侧可能被浮动面板盖住），Esc 或「取消」关闭 */
+#goto {
   position: absolute;
   z-index: 6;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 44px;
+  right: 24px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -137,9 +136,9 @@ body:hover #status, #status.show { opacity: 1; }
   background: var(--bg);
   box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
 }
-#find[hidden] { display: none; }
-#find-input {
-  width: 200px;
+#goto[hidden] { display: none; }
+#goto-input {
+  width: 220px;
   border: 0;
   outline: 0;
   background: none;
@@ -148,26 +147,43 @@ body:hover #status, #status.show { opacity: 1; }
   font-size: 13px;
   -webkit-user-select: text;
 }
-#find-count {
-  min-width: 60px;
-  color: var(--muted);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  white-space: nowrap;
-}
-#find button {
-  min-width: 26px;
+#goto button {
   height: 22px;
   padding: 0 8px;
-  white-space: nowrap;
   border: 0;
   border-radius: 999px;
   background: none;
   color: var(--fg);
   font: inherit;
   font-size: 13px;
+  white-space: nowrap;
   cursor: pointer;
 }
-#find button:hover { background: var(--hover); }
-#find-prev, #find-next { font-size: 18px; line-height: 1; padding-bottom: 2px; }
+#goto button:hover { background: var(--hover); }
+
+/* 进度滑杆：只在鼠标停在状态行上时出现，拖动按比例跳转 */
+#scrub {
+  flex: 1;
+  margin: 0 20px;
+  height: 3px;
+  opacity: 0;
+  transition: opacity .2s;
+  accent-color: var(--muted);
+  cursor: pointer;
+}
+#status:hover #scrub { opacity: 1; }
+
+/* 图片预览：双击书里的图片，点任意处或 Esc 关闭 */
+#lightbox {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: rgba(0, 0, 0, .78);
+  cursor: zoom-out;
+}
+#lightbox[hidden] { display: none; }
+/* 网格单元高度不定，百分比 max-height 不生效，用视口单位 */
+#lightbox img { max-width: calc(100vw - 64px); max-height: calc(100vh - 64px); object-fit: contain; border-radius: 6px; }

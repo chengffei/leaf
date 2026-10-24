@@ -31,6 +31,11 @@ struct TypographyPanel: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
+                Text("排版预设").font(.caption).foregroundStyle(.secondary)
+                PresetPicker(settings: settings).labelsHidden()
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
                 Text("主题").font(.caption).foregroundStyle(.secondary)
                 Picker("主题", selection: $settings.theme) {
                     ForEach(Theme.allCases) { Text($0.label).tag($0) }

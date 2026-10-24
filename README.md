@@ -29,10 +29,13 @@ Most readers ask you to build a library before you can read. Leaf does the oppos
 - **Remembers your place:** books are recognized by content, even after renaming or moving
 - **Floating contents panel:** `⌘T` or click the chapter name in the bottom-left corner; it floats over the page instead of reflowing it, highlights the current chapter, closes when you pick an entry or click the page; long contents (such as box sets) start collapsed to book titles
 - **Footnotes in place:** click a note marker and the note pops up over the page; after following a link or the contents, a **Back** button (or `⌘[`) returns you to where you were
-- **Type controls:** font size 80–200%, three line-spacing presets, three margin presets, any installed font (or the book's own / sans / serif)
+- **Type controls:** font size 80–200%, five weight levels, line / paragraph / letter spacing, margins, justified or left-aligned, any installed font (or the book's own / sans / serif)
+- **Presets:** Compact, Standard, Large and Low Vision built in; save your own by name
 - **Layout:** text width presets, single or two-column, click the left or right edge of the page to turn
+- **Go to:** `⌘L` for a percent or location number; hover the status row for a scrubber
+- **Images:** double-click any picture to view it full size
 - **Themes:** paper, sepia, dark, or follow the system
-- **Find in book:** `⌘F`, with matches highlighted on the page
+- **Find in book:** `⌘F` opens a results list grouped by chapter, with matches highlighted on the page
 - **Reading progress:** click the bottom-right corner to cycle percent, location, time left in chapter and time left in book; the estimate learns from your own page turns
 - **Small and native:** SwiftUI + WebKit, about 2.4 MB download
 
@@ -51,6 +54,7 @@ Requires macOS 15 or later.
 | Contents | `⌘T`, `t`, or click the chapter name bottom-left |
 | Font size | `⌘=` larger · `⌘-` smaller · `⌘0` actual size |
 | Find | `⌘F` · `⌘G` next · `⇧⌘G` previous |
+| Go to | `⌘L` |
 | Size and theme | `Aa` in the top-right corner, or right-click the page |
 | All settings | `⌘,` |
 
@@ -88,10 +92,13 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 - **记住位置**：按文件内容识别，改名、挪位置也认得
 - **浮动目录面板**：`⌘T` 或点左下角章名；浮在正文上，不重排书页；高亮当前章节，选中或点正文即收起；合集等长目录默认只列书名，可逐层展开
 - **脚注就地弹出**：点注释编号直接弹出注释，不离开当前页；点链接或目录跳走后，底部给「返回」，也可按 `⌘[`
-- **字体与行距**：字号 80%–200%，行距三档，页边距三档，字体可选原书 / 黑体 / 宋体或任意已安装字体
+- **字体与行距**：字号 80%–200%，字重五级，行距 / 段距 / 字距，页边距，两端或左对齐，字体可选原书 / 黑体 / 宋体或任意已安装字体
+- **排版预设**：内置紧凑 / 标准 / 大字 / 低视力，也可把当前设置存成自己的预设
 - **版式**：版心宽度四档，单栏 / 双栏，点正文左右两侧翻页
+- **跳转**：`⌘L` 输入百分比或位置号；鼠标停在状态行上出现进度滑杆
+- **看图**：双击书里的图片放大看
 - **主题**：纸白、米黄、深色，或跟随系统
-- **全书查找**：`⌘F`，命中处在页面上高亮
+- **全书查找**：`⌘F` 打开按章节分组的结果列表，命中处在页面上高亮
 - **进度指示**：点右下角循环切换百分比、位置、本章剩余、全书剩余；剩余时间按你自己的翻页速度估算
 - **原生轻量**：SwiftUI + WebKit，安装包约 2.4 MB
 
@@ -111,6 +118,7 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 | 目录 | `⌘T`、`t`，或点左下角章名 |
 | 字号 | `⌘=` 放大 · `⌘-` 缩小 · `⌘0` 还原 |
 | 查找 | `⌘F` · `⌘G` 下一个 · `⇧⌘G` 上一个 |
+| 跳转 | `⌘L` |
 | 字号与主题 | 窗口右上角 `Aa`，或在正文上右键 |
 | 全部设置 | `⌘,` |
 

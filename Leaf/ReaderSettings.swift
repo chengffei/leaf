@@ -3,7 +3,7 @@ import Foundation
 import Observation
 import SwiftUI
 
-enum LineSpacing: Double, CaseIterable, Identifiable {
+enum LineSpacing: Double, CaseIterable, Identifiable, Codable {
     case compact = 1.4, standard = 1.7, loose = 2.0
     var id: Double { rawValue }
     var label: String {
@@ -29,7 +29,7 @@ enum ReaderFont: String, CaseIterable, Identifiable {
 }
 
 /// 页边距：正文四周的留白，左右为主，上下按比例跟着变（具体数值在 app.js 的 MARGINS）
-enum PageMargin: String, CaseIterable, Identifiable {
+enum PageMargin: String, CaseIterable, Identifiable, Codable {
     case narrow, standard, wide
     var id: String { rawValue }
     var label: String {
@@ -42,7 +42,7 @@ enum PageMargin: String, CaseIterable, Identifiable {
 }
 
 /// 版心最大宽度：一栏文字最宽多少像素，窗口再宽也不拉长行；0 = 不限
-enum TextWidth: Int, CaseIterable, Identifiable {
+enum TextWidth: Int, CaseIterable, Identifiable, Codable {
     case narrow = 560, standard = 680, wide = 840, unlimited = 0
     var id: Int { rawValue }
     var label: String {
@@ -56,7 +56,7 @@ enum TextWidth: Int, CaseIterable, Identifiable {
 }
 
 /// 分栏：自动 = 窗口够宽才两栏（foliate 默认）；单栏、双栏强制
-enum Columns: String, CaseIterable, Identifiable {
+enum Columns: String, CaseIterable, Identifiable, Codable {
     case auto, single, double
     var id: String { rawValue }
     var label: String {
@@ -64,6 +64,44 @@ enum Columns: String, CaseIterable, Identifiable {
         case .auto: "自动"
         case .single: "单栏"
         case .double: "双栏"
+        }
+    }
+}
+
+/// 对齐：两端（默认，书多半也这么排）或左对齐
+enum TextAlign: String, CaseIterable, Identifiable, Codable {
+    case justify, left
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .justify: "两端"
+        case .left: "左对齐"
+        }
+    }
+}
+
+/// 段距：原书不动，紧凑 / 宽松强制覆盖
+enum ParagraphSpacing: String, CaseIterable, Identifiable, Codable {
+    case tight, original, loose
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .tight: "紧凑"
+        case .original: "原书"
+        case .loose: "宽松"
+        }
+    }
+}
+
+/// 字距
+enum LetterSpacing: String, CaseIterable, Identifiable, Codable {
+    case tight, standard, loose
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .tight: "紧"
+        case .standard: "标准"
+        case .loose: "松"
         }
     }
 }
@@ -98,6 +136,10 @@ struct ReaderPrefs: Equatable, Encodable {
     let maxWidth: Int
     let columns: String
     let theme: String
+    let weight: Int
+    let align: String
+    let paragraphSpacing: String
+    let letterSpacing: String
 
     var json: String {
         String(data: (try? JSONEncoder().encode(self)) ?? Data("{}".utf8), encoding: .utf8) ?? "{}"
@@ -137,6 +179,24 @@ final class ReaderSettings {
     var theme: Theme {
         didSet { defaults.set(theme.rawValue, forKey: "theme") }
     }
+    /// 字重 0 到 4：0 = 原书，其余按描边加粗（任何字体都生效，不依赖可变字体）
+    var weight: Int {
+        didSet { defaults.set(weight, forKey: "weight") }
+    }
+    var align: TextAlign {
+        didSet { defaults.set(align.rawValue, forKey: "align") }
+    }
+    var paragraphSpacing: ParagraphSpacing {
+        didSet { defaults.set(paragraphSpacing.rawValue, forKey: "paragraphSpacing") }
+    }
+    var letterSpacing: LetterSpacing {
+        didSet { defaults.set(letterSpacing.rawValue, forKey: "letterSpacing") }
+    }
+    /// 自定义排版预设，内置四套在 `Preset.builtins`
+    var customPresets: [Preset] {
+        didSet { defaults.set(try? JSONEncoder().encode(customPresets), forKey: "presets") }
+    }
+    static let weightRange = 0...4
 
     private init() {
         let zoom = defaults.integer(forKey: "zoomPercent")
@@ -149,13 +209,62 @@ final class ReaderSettings {
             : TextWidth(rawValue: defaults.integer(forKey: "textWidth")) ?? .standard
         columns = Columns(rawValue: defaults.string(forKey: "columns") ?? "") ?? .auto
         theme = Theme(rawValue: defaults.string(forKey: "theme") ?? "") ?? .system
+        let w = defaults.integer(forKey: "weight")
+        weight = Self.weightRange.contains(w) ? w : 0
+        align = TextAlign(rawValue: defaults.string(forKey: "align") ?? "") ?? .justify
+        paragraphSpacing = ParagraphSpacing(rawValue: defaults.string(forKey: "paragraphSpacing") ?? "") ?? .original
+        letterSpacing = LetterSpacing(rawValue: defaults.string(forKey: "letterSpacing") ?? "") ?? .standard
+        customPresets = defaults.data(forKey: "presets").flatMap { try? JSONDecoder().decode([Preset].self, from: $0) } ?? []
     }
 
     var prefs: ReaderPrefs {
         ReaderPrefs(
             fontScale: Double(zoomPercent) / 100, lineHeight: lineSpacing.rawValue, font: font,
-            margin: margin.rawValue, maxWidth: textWidth.rawValue, columns: columns.rawValue, theme: theme.rawValue
+            margin: margin.rawValue, maxWidth: textWidth.rawValue, columns: columns.rawValue, theme: theme.rawValue,
+            weight: weight, align: align.rawValue, paragraphSpacing: paragraphSpacing.rawValue, letterSpacing: letterSpacing.rawValue
         )
+    }
+
+    // MARK: 排版预设
+
+    /// 当前设置抓成一份预设（不含主题：底色是另一回事，Kindle 也分开放）
+    func snapshot(named name: String) -> Preset {
+        Preset(
+            name: name, font: font, zoomPercent: zoomPercent, weight: weight, lineSpacing: lineSpacing,
+            paragraphSpacing: paragraphSpacing, letterSpacing: letterSpacing, margin: margin,
+            textWidth: textWidth, columns: columns, align: align
+        )
+    }
+
+    func apply(_ preset: Preset) {
+        if let f = preset.font { font = f }
+        zoomPercent = preset.zoomPercent
+        weight = preset.weight
+        lineSpacing = preset.lineSpacing
+        paragraphSpacing = preset.paragraphSpacing
+        letterSpacing = preset.letterSpacing
+        margin = preset.margin
+        textWidth = preset.textWidth
+        columns = preset.columns
+        align = preset.align
+    }
+
+    var allPresets: [Preset] { Preset.builtins + customPresets }
+
+    /// 当前设置正好等于哪个预设；都不是就 nil（界面显示「自定义」）
+    var currentPreset: Preset? {
+        allPresets.first { $0.matches(self) }
+    }
+
+    func savePreset(named name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        customPresets.removeAll { $0.name == trimmed }
+        customPresets.append(snapshot(named: trimmed))
+    }
+
+    func deletePreset(_ preset: Preset) {
+        customPresets.removeAll { $0.name == preset.name }
     }
 
     var canZoomIn: Bool { zoomPercent < Self.zoomRange.upperBound }
@@ -178,4 +287,40 @@ final class ReaderSettings {
         if let builtin = ReaderFont(rawValue: font) { return builtin.label }
         return Self.installedFonts.first { $0.family == font }?.display ?? font
     }
+}
+
+/// 一套排版：字体可选（内置预设不碰字体），其余都带
+struct Preset: Codable, Identifiable, Hashable {
+    var name: String
+    var font: String?
+    var zoomPercent: Int
+    var weight: Int
+    var lineSpacing: LineSpacing
+    var paragraphSpacing: ParagraphSpacing
+    var letterSpacing: LetterSpacing
+    var margin: PageMargin
+    var textWidth: TextWidth
+    var columns: Columns
+    var align: TextAlign
+
+    var id: String { name }
+
+    @MainActor func matches(_ s: ReaderSettings) -> Bool {
+        (font == nil || font == s.font) && zoomPercent == s.zoomPercent && weight == s.weight
+            && lineSpacing == s.lineSpacing && paragraphSpacing == s.paragraphSpacing
+            && letterSpacing == s.letterSpacing && margin == s.margin && textWidth == s.textWidth
+            && columns == s.columns && align == s.align
+    }
+
+    /// 内置四套，对应 Kindle 的 Compact / Standard / Large / Low Vision
+    static let builtins: [Preset] = [
+        Preset(name: "紧凑", font: nil, zoomPercent: 90, weight: 0, lineSpacing: .compact, paragraphSpacing: .tight,
+               letterSpacing: .standard, margin: .narrow, textWidth: .wide, columns: .auto, align: .justify),
+        Preset(name: "标准", font: nil, zoomPercent: 100, weight: 0, lineSpacing: .standard, paragraphSpacing: .original,
+               letterSpacing: .standard, margin: .standard, textWidth: .standard, columns: .auto, align: .justify),
+        Preset(name: "大字", font: nil, zoomPercent: 130, weight: 1, lineSpacing: .loose, paragraphSpacing: .original,
+               letterSpacing: .standard, margin: .standard, textWidth: .wide, columns: .auto, align: .justify),
+        Preset(name: "低视力", font: nil, zoomPercent: 170, weight: 3, lineSpacing: .loose, paragraphSpacing: .loose,
+               letterSpacing: .loose, margin: .narrow, textWidth: .unlimited, columns: .single, align: .left),
+    ]
 }
