@@ -26,6 +26,8 @@ final class ReaderModel {
     var hoversTop = false // 鼠标在窗口顶部，用来浮现红绿灯与工具栏
     var showsTypography = false // 工具栏 Aa 弹层
     @ObservationIgnored weak var webView: WKWebView?
+    /// 打开「设置」窗口：SwiftUI 的 openSettings 只能从环境里取，由 BookWindow 塞进来给右键菜单用
+    @ObservationIgnored var openSettings: @MainActor () -> Void = {}
 
     var currentID: TOCEntry.ID? {
         guard let currentHref else { return nil }

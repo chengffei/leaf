@@ -53,7 +53,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 - **深色模式白底**：Gutenberg 等书写死 `body { background: white }`，配上上面改白的字就整页看不见。深色（跟随系统或强制）时 `THEME_CSS.dark` 把 `html` 底色压成深灰、`body` 透明；米黄同理染色。
 - **主题切换**：浅 / 深靠 SwiftUI `.preferredColorScheme` 改窗口外观，WebView 的 `prefers-color-scheme` 跟着变。直接改 `NSWindow.appearance` 会被 SwiftUI 覆盖回去，别走那条路。
 - **分栏**：foliate 的栏数 = `min(max-column-count, ceil(宽度 / max-inline-size))`，竖窗另有上限 `--_max-column-count-portrait`（上游写死 1，已补丁为属性）。「双栏」把每栏上限压到半个窗口并在 resize 时重算。
-- **右键菜单**：`WKWebView.willOpenMenu` 里按 identifier 后缀（`Copy` / `LookUp` / `Translate`）筛系统项，其余换成自己的；系统会再追加「服务」子菜单，拦不掉。
+- **右键菜单**：`WKWebView.willOpenMenu` 里按 identifier 后缀（`Copy` / `LookUp` / `Translate`）筛系统项，其余换成自己的；系统会再追加「服务」子菜单，拦不掉。打开设置窗口只能用 SwiftUI 环境里的 `openSettings`（`BookWindow` 塞进 `ReaderModel`），`NSApp.sendAction(showSettingsWindow:)` 在 macOS 15 上无效。
 - **查找**：`view.search()` 是异步生成器，整本逐节扫；第一处命中立刻跳转，计数边扫边更新；换关键词时用 run 计数器作废旧搜索。
 - **标题与工具栏**：别用 `.toolbar(removing: .title)`，工具栏会向左收拢、Aa 挤到目录按钮旁；改用 `titleVisibility = .hidden` 加 `ToolbarSpacer(.flexible)`。窗口标题不能露出来：书页自带白底（如封面）会铺到标题下，深色模式的浅色标题字被盖住。
 - **SF Symbol 会随系统语言本地化**（`textformat.size` 在中文下显示「大小」），工具栏按钮固定用英文变体。

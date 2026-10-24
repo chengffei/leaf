@@ -3,6 +3,7 @@ import SwiftUI
 struct BookWindow: View {
     let book: BookDocument
     @State private var model = ReaderModel()
+    @Environment(\.openSettings) private var openSettings
     private let settings = ReaderSettings.shared
 
     var body: some View {
@@ -36,6 +37,7 @@ struct BookWindow: View {
             .ignoresSafeArea()
         )
         .focusedSceneValue(\.reader, model)
+        .onAppear { model.openSettings = { openSettings() } }
         // 主题的浅色 / 深色：改窗口外观，WebView 的 prefers-color-scheme 跟着窗口走；米黄按浅色
         .preferredColorScheme(settings.theme.colorScheme)
     }

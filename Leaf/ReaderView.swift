@@ -142,9 +142,7 @@ final class ReaderWebView: WKWebView {
         items += [
             .separator(),
             ClosureMenuItem("字体与主题…") { model.showsTypography = true },
-            ClosureMenuItem("设置…", key: ",") {
-                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-            },
+            ClosureMenuItem("设置…", key: ",") { model.openSettings() },
         ]
         menu.items = items
     }
