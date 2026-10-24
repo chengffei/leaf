@@ -1,25 +1,30 @@
 # Leaf
 
-> Leaf is a free, open-source ebook reader for macOS. It opens EPUB, MOBI and AZW3 files directly from Finder without importing them into a library, remembers where you stopped reading, and quits when you close the window. Requires macOS 15 or later. MIT License.
+> Leaf is a free, open-source ebook reader for macOS that aims at the reading experience of a Kindle: tunable typography, time left in the chapter and the book, find in book, with highlights and notes planned. It opens EPUB, MOBI and AZW3 files directly from Finder without a library or account, remembers where you stopped reading, and quits when you close the window. Requires macOS 15 or later. MIT License. Independent project, not affiliated with Amazon.
 
-Leaf is built with SwiftUI and WebKit and uses foliate-js to parse and paginate books. It deliberately has no bookshelf or library: you double-click a file, read, and close the window. MOBI and AZW3 files must be DRM-free; books bought from the Kindle Store usually carry DRM and cannot be opened.
+Leaf is built with SwiftUI and WebKit and uses foliate-js to parse and paginate books. It deliberately has no bookshelf, library, store or sync: you double-click a file, read, and close the window. MOBI and AZW3 files must be DRM-free; books bought from the Kindle Store usually carry DRM and cannot be opened.
 
 ## Key facts
 
 - Formats: EPUB, MOBI, AZW3 (DRM-free)
 - Platform: macOS 15 or later; universal app for Apple silicon and Intel Macs
 - Price: free; source code under the MIT License
-- Download: about 2.4 MB DMG
+- Download: about 2.7 MB DMG
 - Reading position: remembered per book, identified by file content (survives renaming or moving)
-- Contents sidebar: native macOS sidebar, toggled with ⌘T, highlights the current chapter
-- Typography: font size 80–200% (⌘= / ⌘- / ⌘0), three line-spacing presets, original / sans / serif fonts
+- Progress: click the bottom-right corner to cycle percent, location, time left in chapter, time left in book; estimates learn from your own page turns
+- Contents: floating panel (⌘T or click the chapter name), highlights the current chapter, closes on selection
+- Find in book: ⌘F, results listed by chapter with matches highlighted on the page; ⌘L jumps to a percent or location
+- Typography: any installed font or original / sans / serif, size 80–200%, five weight levels, line / paragraph / letter spacing, margins, text width, one or two columns, justified or left; built-in presets Compact / Standard / Large / Low Vision plus custom presets
+- Themes: paper, sepia, dark or follow the system
+- Interface languages: English, Simplified Chinese, Traditional Chinese, Japanese, Korean, French, German, Spanish
+- Not included by design: store, account, sync, library, PDF
 - First launch: Leaf is not notarized by Apple; allow it once in System Settings › Privacy & Security › Open Anyway
 
 ## How it compares
 
 - Apple Books: built into macOS and opens EPUB and PDF, but does not import MOBI or AZW3, and adds books to its library.
 - Calibre: opens MOBI, AZW3 and EPUB and is centered on library management (about 350 MB download, macOS 14+, GPL-3.0); its viewer can also be launched on its own.
-- Leaf: opens all three formats without a library, in a 2.4 MB app.
+- Leaf: opens all three formats without a library, in a 2.7 MB app, with Kindle-style progress, typography presets and find in book.
 
 ## Links
 

@@ -5,8 +5,8 @@
 <h1 align="center">Leaf</h1>
 
 <p align="center">
-  Open. Read. Close. A macOS ebook reader that only reads.<br>
-  打开，阅读，关上。一个只做阅读的 macOS 电子书阅读器。
+  Read like a Kindle. On your Mac. An open-source EPUB, MOBI and AZW3 reader.<br>
+  像 Kindle 一样读书，在 Mac 上。开源的 EPUB、MOBI、AZW3 阅读器。
 </p>
 
 <p align="center">
@@ -21,7 +21,9 @@
 
 ## Why Leaf
 
-Most readers ask you to build a library before you can read. Leaf does the opposite: double-click a book in Finder and it opens; close the window and the app quits. No bookshelf, no importing, no copies of your files — and it remembers where you left off.
+Leaf aims to be the open-source answer to a Kindle: the reading layer — typography you can tune, a sense of how far you are and how long is left, find in book, and soon highlights and notes — without the store, the account or the library. Double-click a book in Finder and it opens; close the window and the app quits. No bookshelf, no importing, no copies of your files.
+
+Leaf is an independent project and is not affiliated with Amazon. Kindle is a trademark of Amazon.com, Inc.
 
 ## Features
 
@@ -38,7 +40,11 @@ Most readers ask you to build a library before you can read. Leaf does the oppos
 - **Find in book:** `⌘F` opens a results list grouped by chapter, with matches highlighted on the page
 - **Reading progress:** click the bottom-right corner to cycle percent, location, time left in chapter and time left in book; the estimate learns from your own page turns
 - **In your language:** English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español; follows the system or pick one in Settings
-- **Small and native:** SwiftUI + WebKit, about 2.4 MB download
+- **Small and native:** SwiftUI + WebKit, about 2.7 MB download
+
+## Roadmap
+
+Highlights and notes, bookmarks, export, one-step dictionary lookup and a vocabulary list are next. Not planned: PDF, a store, an account, sync.
 
 ## Install
 
@@ -85,7 +91,9 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 
 ### 为什么做 Leaf
 
-大多数阅读器先让你建书库、导入、整理，然后才能读。Leaf 反过来：在访达里双击一本书就打开，读完关掉窗口就退出。没有书架，不复制你的文件，下次打开自动回到上次读到的地方。
+Leaf 的目标是做「开源的 Kindle」：要 Kindle 的阅读层，可细调的排版、读到哪和还要读多久、全书查找，接下来是高亮与笔记；不要商店、账号和书库。在访达里双击一本书就打开，读完关掉窗口就退出。没有书架，不复制你的文件。
+
+Leaf 是独立项目，与 Amazon 无关。Kindle 是 Amazon.com, Inc. 的商标。
 
 ### 功能
 
@@ -102,7 +110,11 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 - **全书查找**：`⌘F` 打开按章节分组的结果列表，命中处在页面上高亮
 - **进度指示**：点右下角循环切换百分比、位置、本章剩余、全书剩余；剩余时间按你自己的翻页速度估算
 - **多语言**：英文、简体中文、繁体中文、日文、韩文、法文、德文、西班牙文；跟随系统，也可在设置里单独选
-- **原生轻量**：SwiftUI + WebKit，安装包约 2.4 MB
+- **原生轻量**：SwiftUI + WebKit，安装包约 2.7 MB
+
+### 路线
+
+接下来做高亮与笔记、书签、导出、一步查词、生词本。不做：PDF、商店、账号、同步。
 
 ### 安装
 
