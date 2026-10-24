@@ -46,6 +46,6 @@ struct TypographyPanel: View {
             .font(.callout)
         }
         .padding(16)
-        .frame(width: 280)
+        .frame(width: 340) // 四段中文主题分段控件不会缩，窄了会从左边裁掉
     }
 }
