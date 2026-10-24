@@ -53,6 +53,9 @@ body > foliate-view {
 /* 悬停时常显；打开、翻页、跳转后由 app.js 加 .show 亮 2 秒（:hover 要等鼠标动了才生效，刚打开时看不到） */
 body:hover #status, #status.show { opacity: 1; }
 #chapter { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
+/* 右侧进度指示可点：循环 百分比 / 位置 / 本章剩余 / 全书剩余 */
+#percent { cursor: pointer; white-space: nowrap; padding: 4px 0; }
+#percent:hover { color: var(--fg); }
 
 #error[hidden] { display: none; }
 

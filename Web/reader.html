@@ -15,7 +15,7 @@
   <button id="find-next" type="button" title="下一个 ⏎">›</button>
   <button id="find-close" type="button">完成</button>
 </div>
-<footer id="status"><span id="chapter"></span><span id="percent"></span></footer>
+<footer id="status"><span id="chapter"></span><span id="percent" title="点击切换：百分比 / 位置 / 本章剩余 / 全书剩余"></span></footer>
 <div id="error" hidden></div>
 <script>
 const report = m => window.webkit?.messageHandlers?.leaf?.postMessage({ type: "error", message: m })

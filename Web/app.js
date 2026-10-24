@@ -190,6 +190,7 @@ globalThis.leaf = {
 const turn = go => {
   pagesSinceJump++
   updateBack()
+  lastTurn = { at: Date.now(), bytes: bytesAt(lastLocation) } // 给阅读速度采样
   go()
 }
 const onKey = e => {
@@ -413,6 +414,61 @@ const flashStatus = () => {
   statusTimer = setTimeout(() => $('#status').classList.remove('show'), 2000)
 }
 
+// ---- 进度指示：右下角点按循环 百分比 / 位置 / 本章剩余 / 全书剩余（Kindle 左下角那套） ----
+// 剩余时间按本人翻页速度估：每次亲手翻页到下一次 relocate 的间隔与推进的字节数累计成速度，
+// 太短（误触）或太长（走神）的间隔不算。速度和当前模式存 localStorage，所有书共用
+const MODES = ['percent', 'location', 'chapter', 'book']
+const SIZE_PER_LOC = 1500 // 与 view.js 里 SectionProgress 的参数一致：一个「位置」= 1500 字节
+const DEFAULT_SPEED = 1600 // foliate 默认的每分钟字节数，样本不够时用
+const MIN_SAMPLE_MINUTES = 3
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} },
+}
+let progressMode = MODES.includes(store.get('leaf.progressMode')) ? store.get('leaf.progressMode') : 'percent'
+let speed = store.get('leaf.readingSpeed', { bytes: 0, minutes: 0 })
+let lastTurn = null // { at, bytes }：上次亲手翻页的时刻与当时读到的字节位置
+let lastLocation = null
+const bytesAt = loc => (loc?.fraction ?? 0) * (loc?.location?.total ?? 0) * SIZE_PER_LOC
+const sampleSpeed = loc => {
+  const bytes = bytesAt(loc)
+  if (lastTurn) {
+    const minutes = (Date.now() - lastTurn.at) / 60000
+    const advanced = bytes - lastTurn.bytes
+    if (minutes >= 2 / 60 && minutes <= 5 && advanced > 0) {
+      speed = { bytes: speed.bytes + advanced, minutes: speed.minutes + minutes }
+      if (speed.minutes > 120) speed = { bytes: speed.bytes / 2, minutes: speed.minutes / 2 } // 旧样本慢慢淡出
+      store.set('leaf.readingSpeed', speed)
+    }
+  }
+  lastTurn = null
+}
+const bytesPerMinute = () => speed.minutes >= MIN_SAMPLE_MINUTES ? speed.bytes / speed.minutes : DEFAULT_SPEED
+const fmtMinutes = m => {
+  if (m < 1) return '不到 1 分钟'
+  const h = Math.floor(m / 60), r = Math.round(m % 60)
+  return h ? `${h} 小时${r ? ` ${r} 分钟` : ''}` : `${Math.round(m)} 分钟`
+}
+const progressText = loc => {
+  if (!loc) return ''
+  const learning = speed.minutes < MIN_SAMPLE_MINUTES
+  // foliate 的 time 按 DEFAULT_SPEED 算，换成剩余字节再除以本人速度
+  const left = t => fmtMinutes((t ?? 0) * DEFAULT_SPEED / bytesPerMinute())
+  switch (progressMode) {
+    case 'location': return loc.location ? `位置 ${loc.location.current} / ${loc.location.total}` : `${Math.round((loc.fraction ?? 0) * 100)}%`
+    case 'chapter': return learning ? '本章剩余：测算中' : `本章剩余 ${left(loc.time?.section)}`
+    case 'book': return learning ? '全书剩余：测算中' : `全书剩余 ${left(loc.time?.total)}`
+    default: return `${Math.round((loc.fraction ?? 0) * 100)}%`
+  }
+}
+const renderProgress = () => { $('#percent').textContent = progressText(lastLocation) }
+$('#percent').addEventListener('click', () => {
+  progressMode = MODES[(MODES.indexOf(progressMode) + 1) % MODES.length]
+  store.set('leaf.progressMode', progressMode)
+  renderProgress()
+  flashStatus()
+})
+
 // ---- 打开 ----
 try {
   await view.open('leaf://app/book')
@@ -432,8 +488,10 @@ try {
     closeNote()
     flashStatus()
     const { cfi, fraction, tocItem } = e.detail
+    sampleSpeed(e.detail)
+    lastLocation = e.detail
     $('#chapter').textContent = tocItem?.label ?? ''
-    $('#percent').textContent = `${Math.round((fraction ?? 0) * 100)}%`
+    renderProgress()
     post({ type: 'relocate', cfi, fraction, tocHref: tocItem?.href ?? null })
   })
   view.addEventListener('link', e => {
