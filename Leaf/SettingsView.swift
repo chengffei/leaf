@@ -74,8 +74,8 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 460)
-        .fixedSize(horizontal: false, vertical: true)
+        // 高度固定、内容滚动：按内容撑开会高过小屏，底部被 Dock 盖住
+        .frame(width: 460, height: 720)
         .alert("Preset Name", isPresented: $namingPreset) {
             TextField("Name", text: $presetName)
             Button("Save") { settings.savePreset(named: presetName) }
