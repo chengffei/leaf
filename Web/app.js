@@ -1,7 +1,8 @@
-import './foliate/view.js'
+import { makeBook } from './foliate/view.js'
 import { FootnoteHandler } from './foliate/footnotes.js'
 import { Overlayer } from './foliate/overlayer.js'
 import { STRINGS } from './strings.js'
+import { chunkSections } from './chunks.js'
 
 const $ = s => document.querySelector(s)
 const post = msg => window.webkit?.messageHandlers?.leaf?.postMessage(msg)
@@ -530,7 +531,9 @@ $('#percent').addEventListener('click', () => {
 
 // ---- 打开 ----
 try {
-  await view.open('leaf://app/book')
+  const opened = await makeBook('leaf://app/book')
+  chunkSections(opened)
+  await view.open(opened)
   const { book } = view
   const title = titleOf(book.metadata?.title) || t('Untitled')
   const author = [book.metadata?.author].flat()
