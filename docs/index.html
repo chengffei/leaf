@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leaf — Open-Source Kindle-Style Ebook Reader for Mac</title>
-<meta name="description" content="Leaf is a free, open-source ebook reader for Mac that aims at the Kindle reading experience: tunable typography, time left in chapter, find in book. Opens EPUB, MOBI and AZW3 — no library, no account. Requires macOS 15.">
+<title>Leaf — Kindle-Style Ebook Reader for Mac, No Library</title>
+<meta name="description" content="A free, open-source ebook reader for Mac. Double-click an EPUB, MOBI or AZW3 file to read; close the window to quit. No library, no account. Reads like a Kindle. Native, about 2.7 MB.">
 <link rel="canonical" href="https://chengffei.github.io/leaf/">
 <link rel="alternate" hreflang="en" href="https://chengffei.github.io/leaf/">
 <link rel="alternate" hreflang="zh-Hans" href="https://chengffei.github.io/leaf/zh/">
@@ -14,8 +14,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Leaf">
 <meta property="og:url" content="https://chengffei.github.io/leaf/">
-<meta property="og:title" content="Leaf — Open-Source Kindle-Style Ebook Reader for Mac">
-<meta property="og:description" content="Read like a Kindle on your Mac. An open-source EPUB, MOBI and AZW3 reader with tunable typography, time left in chapter and find in book — no library, no account.">
+<meta property="og:title" content="Leaf — Kindle-Style Ebook Reader for Mac, No Library">
+<meta property="og:description" content="Double-click to read. Close to leave. An open-source Mac ebook reader that reads like a Kindle.">
 <meta property="og:image" content="https://chengffei.github.io/leaf/images/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,8 +23,8 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Leaf — Open-Source Kindle-Style Ebook Reader for Mac">
-<meta name="twitter:description" content="Read like a Kindle on your Mac. An open-source EPUB, MOBI and AZW3 reader with tunable typography, time left in chapter and find in book — no library, no account.">
+<meta name="twitter:title" content="Leaf — Kindle-Style Ebook Reader for Mac, No Library">
+<meta name="twitter:description" content="Double-click to read. Close to leave. An open-source Mac ebook reader that reads like a Kindle.">
 <meta name="twitter:image" content="https://chengffei.github.io/leaf/images/og.png">
 <link rel="icon" type="image/png" sizes="64x64" href="images/favicon.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -33,7 +33,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Leaf",
-  "description": "A free, open-source ebook reader for Mac aiming at the Kindle reading experience. Opens EPUB, MOBI and AZW3 files without a library or account.",
+  "description": "A free, open-source Mac ebook reader for EPUB, MOBI and AZW3. No library, no account. Reads like a Kindle.",
   "applicationCategory": "ProductivityApplication",
   "applicationSubCategory": "Ebook reader",
   "operatingSystem": "macOS 15 or later",
@@ -80,6 +80,22 @@
     },
     {
       "@type": "Question",
+      "name": "Is there a Kindle-like ebook reader for Mac?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Leaf reads DRM-free EPUB, MOBI and AZW3 files the Kindle way: time left from your own reading speed, location numbers, typography presets, footnotes in place and find in book. Highlights and notes come next. No store, no account."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is Leaf different from Readest?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Readest is cross-platform, with a library, sync, highlights and text-to-speech. Leaf is Mac only and does less on purpose: no library, only your reading position, and it quits when you close the book. About 2.7 MB, against 67 MB."
+      }
+    },
+    {
+      "@type": "Question",
       "name": "Is Leaf free?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -115,7 +131,7 @@
       "name": "Does Leaf have a library or bookshelf?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. Leaf opens books where they are, without importing or copying them, and remembers where you stopped reading."
+        "text": "No. Leaf opens books where they are, without importing or copying them. Leaf itself keeps only where you stopped in each book; like any Mac document app, macOS lists recent files under File › Open Recent."
       }
     }
   ]
@@ -175,11 +191,12 @@
   .narrow { max-width: 760px; }
   .definition { font-size: 19px; line-height: 1.7; margin: 0; text-align: left; }
   .table-scroll { overflow-x: auto; }
-  table.compare { max-width: 860px; }
+  table.compare { max-width: 1000px; }
   table.compare th { padding: 16px 24px; text-align: left; font-size: 15px; border-bottom: 1px solid var(--line); }
   table.compare td { text-align: left; color: var(--ink); font-size: 15px; }
   table.compare td:first-child { color: var(--muted); }
-  table.compare th:nth-child(2), table.compare td:nth-child(2) { background: rgba(44, 115, 85, .06); font-weight: 600; white-space: nowrap; }
+  table.compare th:nth-child(2), table.compare td:nth-child(2) { background: rgba(44, 115, 85, .06); font-weight: 600; }
+  table.compare th, table.compare td { padding-left: 18px; padding-right: 18px; }
   .eyebrow { margin: 0 0 14px; font-size: 15px; font-weight: 600; letter-spacing: .02em; color: var(--green); }
   .faq { max-width: 760px; margin: 0 auto; }
   .faq details { background: var(--card); border-radius: 14px; padding: 18px 24px; margin-bottom: 12px; }
@@ -284,10 +301,10 @@
 <header class="hero wrap">
   <img class="icon" src="images/icon-256.png" width="128" height="128" alt="Leaf app icon">
   <p class="eyebrow">Open-source ebook reader for Mac · EPUB · MOBI · AZW3</p>
-  <h1>Read like a Kindle. On your Mac.</h1>
+  <h1>Double-click to read. Close to leave.</h1>
   <p class="lead">
     
-    Leaf aims at the reading experience of a Kindle: typography you can tune, how long is left in the chapter, find in book, and highlights and notes next. Open a file, read, close. No library, no account.
+    One book, one window. No bookshelf, just your place. Reads like a Kindle.
   </p>
   <div class="actions">
     <a class="btn btn-primary" href="https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg">
@@ -299,7 +316,7 @@
   </div>
   <p class="meta">
     
-    Free &amp; open source · macOS 15 or later · about 2.7 MB · 8 languages
+    Free &amp; open source · Native Mac app · about 2.7 MB · macOS 15 or later
   </p>
 </header>
 
@@ -312,47 +329,72 @@
 <section id="about" class="wrap narrow">
   <h2>What is Leaf?</h2>
   <p class="definition">
-    Leaf is a free, open-source ebook reader for macOS that aims to be the open-source answer to a Kindle: the reading layer of a Kindle, without the store, the account or the library. It opens EPUB, MOBI and AZW3 files directly from Finder, remembers where you stopped, estimates how long is left from your own reading speed, and quits when you close the window. Built with SwiftUI and WebKit, rendering by foliate-js, macOS 15 or later. Leaf is independent and not affiliated with Amazon.
+    Leaf is a free, open-source ebook reader for Mac. Double-click an EPUB, MOBI or AZW3 file to read it; close the window and Leaf quits. No library, no copies, no account. It remembers where you stopped, and reads like a Kindle. Native SwiftUI app, about 2.7 MB, macOS 15 or later. Not affiliated with Amazon.
     
   </p>
 </section>
 
 <section id="features" class="wrap">
-  <h2>The reading layer of a Kindle, nothing else</h2>
+  <h2>Just the book.</h2>
   <p class="section-lead">
     
-    Typography, a sense of progress, find, annotations. Get those four right and you have a Kindle in your Mac.
+    No library. No copies. No account.
   </p>
   <div class="grid">
     <div class="card">
-      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
-      <h3>Three formats</h3>
-      <p>Open EPUB, MOBI and AZW3 directly — no conversion needed.</p>
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/><path d="M6 7h.01M8.5 7h.01"/></svg>
+      <h3>One window</h3>
+      <p>Opens like a document. Quits when you close it.</p>
     </div>
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
-      <h3>Picks up where you left off</h3>
-      <p>Books are recognized by content, so renaming or moving a file keeps your place.</p>
-    </div>
-    <div class="card">
-      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M5.5 8h1.5M5.5 11h1.5M5.5 14h1.5"/></svg>
-      <h3>Progress like a Kindle</h3>
-      <p>Click the corner to cycle percent, location, time left in chapter and in book — estimated from your own page turns.</p>
-    </div>
-    <div class="card">
-      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 5l5 14"/><path d="M5.8 14h6.4"/><path d="M15 19l3-8 3 8"/><path d="M16 16.5h4"/></svg>
-      <h3>Type that suits you</h3>
-      <p>Any installed font, five weights, line, paragraph and letter spacing, text width and columns, justified or left — plus presets you can switch in one click.</p>
-    </div>
-    <div class="card">
-      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M14 6l6 6-6 6"/></svg>
-      <h3>Contents and find</h3>
-      <p>A panel that floats over the page instead of reflowing it. Contents follow your chapter; <kbd>⌘F</kbd> searches the whole book, grouped by chapter.</p>
+      <h3>Remembers your place</h3>
+      <p>Even after you rename or move the file.</p>
     </div>
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/></svg>
+      <h3>Native. 2.7 MB.</h3>
+      <p>Real menus, shortcuts, Look Up and Translate. All Mac.</p>
+    </div>
+  </div>
+</section>
+
+<section id="kindle" class="wrap">
+  <h2>Reads like a Kindle.</h2>
+  <p class="section-lead">
+    
+    It’s all in the details.
+  </p>
+  <div class="grid">
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/></svg>
+      <h3>Time left</h3>
+      <p>Estimated from how fast you read.</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 5l5 14"/><path d="M5.8 14h6.4"/><path d="M15 19l3-8 3 8"/><path d="M16 16.5h4"/></svg>
+      <h3>Your type</h3>
+      <p>Fonts, weight, spacing and width. Four presets, plus your own.</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4"/><path d="M8 9h8M8 12h5"/></svg>
+      <h3>Footnotes in place</h3>
+      <p>Click a marker. The note appears right there.</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M14 6l6 6-6 6"/></svg>
+      <h3>Find and go to</h3>
+      <p><kbd>⌘F</kbd> to search the book. <kbd>⌘L</kbd> to jump anywhere.</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
+      <h3>Three formats</h3>
+      <p>EPUB, MOBI and AZW3. No conversion.</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M5.5 8h1.5M5.5 11h1.5M5.5 14h1.5"/></svg>
       <h3>Themes and languages</h3>
-      <p>Paper, sepia, dark or system; the interface speaks English, Chinese, Japanese, Korean, French, German and Spanish. SwiftUI and WebKit, about 2.7 MB.</p>
+      <p>Paper, sepia or dark. Eight languages.</p>
     </div>
   </div>
 </section>
@@ -363,7 +405,7 @@
       <h2>Contents, one key away</h2>
       <p class="section-lead">
         
-        Press <kbd>⌘T</kbd> or click the chapter name in the corner. The panel floats over the page, so nothing reflows; the highlight follows your chapter and the panel tucks away once you pick.
+        Press <kbd>⌘T</kbd>. It floats over the page. Nothing reflows.
       </p>
     </div>
     <div class="shot">
@@ -373,26 +415,30 @@
 </section>
 
 <section id="compare" class="wrap">
-  <h2>Leaf vs Apple Books vs Calibre</h2>
+  <h2>Leaf vs Readest, Apple Books and Calibre</h2>
   <p class="section-lead">
-    Apple Books and Calibre are both good tools. Leaf is for when you only want to open a file and read it.
+    Readest does the most. Apple Books comes with your Mac. Calibre manages collections best. Leaf does one thing: open a book.
     
   </p>
   <div class="table-scroll">
   <table class="compare">
-    <thead><tr><th></th><th>Leaf</th><th>Apple Books</th><th>Calibre</th></tr></thead>
+    <thead><tr><th></th><th>Leaf</th><th>Readest</th><th>Apple Books</th><th>Calibre</th></tr></thead>
     <tbody>
-      <tr><td>EPUB</td><td>✓</td><td>✓</td><td>✓</td></tr>
-      <tr><td>MOBI · AZW3</td><td>✓ (DRM-free)</td><td>Not supported</td><td>✓</td></tr>
-      <tr><td>Opens files without a library</td><td>✓</td><td>Imports into its library</td><td>Library-based; standalone viewer available</td></tr>
-      <tr><td>Download size</td><td>About 2.7 MB</td><td>Built into macOS</td><td>About 350 MB</td></tr>
-      <tr><td>Requires</td><td>macOS 15+</td><td>—</td><td>macOS 14+</td></tr>
-      <tr><td>Price · License</td><td>Free · MIT</td><td>Free · proprietary</td><td>Free · GPL-3.0</td></tr>
+      <tr><td>MOBI · AZW3</td><td>✓ (DRM-free)</td><td>✓</td><td>Not supported</td><td>✓</td></tr>
+      <tr><td>Opening a file</td><td>In place, no library</td><td>In place, added to its library</td><td>Imported into its library</td><td>Library first; viewer can run alone</td></tr>
+      <tr><td>What it keeps</td><td>Reading position only</td><td>Library entry: title, path, cover</td><td>A copy in its library</td><td>Library database</td></tr>
+      <tr><td>Closing the window</td><td>App quits</td><td>Keeps running</td><td>—</td><td>—</td></tr>
+      <tr><td>Highlights and notes</td><td>Next version</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Other platforms</td><td>Mac only</td><td>iOS · Android · Windows · Linux · Web</td><td>iPhone · iPad</td><td>Windows · Linux</td></tr>
+      <tr><td>Interface</td><td>Native (SwiftUI)</td><td>Web (Tauri)</td><td>Native</td><td>Qt</td></tr>
+      <tr><td>Download size</td><td>About 2.7 MB</td><td>About 67 MB</td><td>Built into macOS</td><td>About 350 MB</td></tr>
+      <tr><td>Requires</td><td>macOS 15+</td><td>macOS 12+</td><td>—</td><td>macOS 14+</td></tr>
+      <tr><td>Price · License</td><td>Free · MIT</td><td>Free, optional paid cloud · AGPL-3.0</td><td>Free · proprietary</td><td>Free · GPL-3.0</td></tr>
     </tbody>
   </table>
   </div>
   <p class="note">
-    Checked on 3 October 2026 against <a href="https://support.apple.com/guide/books/import-books-audiobooks-or-pdfs-ibkseed72068/mac">Apple Books Help</a>, <a href="https://calibre-ebook.com/download_osx">calibre 9.15.0 for macOS</a> and the <a href="https://manual.calibre-ebook.com/viewer.html">calibre viewer manual</a>.
+    Readest checked on 30 October 2026: <a href="https://github.com/readest/readest/releases">release 0.12.16</a> and a hands-on test of the macOS app. Apple Books and Calibre checked on 3 October 2026 against <a href="https://support.apple.com/guide/books/import-books-audiobooks-or-pdfs-ibkseed72068/mac">Apple Books Help</a>, <a href="https://calibre-ebook.com/download_osx">calibre 9.15.0 for macOS</a> and the <a href="https://manual.calibre-ebook.com/viewer.html">calibre viewer manual</a>.
     
   </p>
 </section>
@@ -401,7 +447,7 @@
   <h2>Install</h2>
   <p class="section-lead">
     
-    Leaf is an independent open-source project and isn’t notarized by Apple. Allow it once on first launch; after that it opens like any other app.
+    Leaf isn’t notarized by Apple. Allow it once on first launch.
   </p>
   <div class="actions install-download">
     <a class="btn btn-primary" href="https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg">
@@ -450,11 +496,13 @@
   <p class="section-lead">Common questions about installing and using Leaf.</p>
   <div class="faq">
     <details><summary>How do I open MOBI and AZW3 files on a Mac?</summary><p>Install Leaf, then double-click the file in Finder, or right-click it and choose Open With › Leaf. The file must be DRM-free.</p></details>
+    <details><summary>Is there a Kindle-like ebook reader for Mac?</summary><p>Leaf reads DRM-free EPUB, MOBI and AZW3 files the Kindle way: time left from your own reading speed, location numbers, typography presets, footnotes in place and find in book. Highlights and notes come next. No store, no account.</p></details>
+    <details><summary>How is Leaf different from Readest?</summary><p>Readest is cross-platform, with a library, sync, highlights and text-to-speech. Leaf is Mac only and does less on purpose: no library, only your reading position, and it quits when you close the book. About 2.7 MB, against 67 MB.</p></details>
     <details><summary>Is Leaf free?</summary><p>Yes. Leaf is free and open source under the MIT License.</p></details>
     <details><summary>Why does macOS say it can’t verify the developer?</summary><p>Leaf isn’t notarized by Apple. Open it once and dismiss the warning, then go to System Settings › Privacy & Security and click Open Anyway. You only need to do this once.</p></details>
     <details><summary>Can Leaf open Kindle books I bought?</summary><p>Only DRM-free files. Books bought from the Kindle Store usually have DRM, and Leaf can’t open them.</p></details>
     <details><summary>Is Leaf a Kindle app?</summary><p>No. Leaf is an independent open-source project, not affiliated with Amazon. It borrows the reading experience of a Kindle — typography, progress, find, and soon highlights and notes — for DRM-free EPUB, MOBI and AZW3 files on your Mac. There is no store and no account.</p></details>
-    <details><summary>Does Leaf have a library or bookshelf?</summary><p>No. Leaf opens books where they are, without importing or copying them, and remembers where you stopped reading.</p></details>
+    <details><summary>Does Leaf have a library or bookshelf?</summary><p>No. Leaf opens books where they are, without importing or copying them. Leaf itself keeps only where you stopped in each book; like any Mac document app, macOS lists recent files under File › Open Recent.</p></details>
   </div>
 </section>
 

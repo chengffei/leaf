@@ -1,6 +1,6 @@
 # Leaf
 
-> Leaf is a free, open-source ebook reader for macOS that aims at the reading experience of a Kindle: tunable typography, time left in the chapter and the book, find in book, with highlights and notes planned. It opens EPUB, MOBI and AZW3 files directly from Finder without a library or account, remembers where you stopped reading, and quits when you close the window. Requires macOS 15 or later. MIT License. Independent project, not affiliated with Amazon.
+> Leaf is a free, open-source ebook reader for macOS that opens a book like a document: double-click an EPUB, MOBI or AZW3 file in Finder and it opens in its own window; close the window and the app quits. It has no library, no import, no account and makes no copies; the only thing it keeps is the reading position, matched by file content. Inside the window it reads like a Kindle: time left estimated from your own reading speed, location numbers, typography presets, footnotes in place and find in book. Native SwiftUI app, about 2.7 MB, macOS 15 or later. MIT License. Independent project, not affiliated with Amazon.
 
 Leaf is built with SwiftUI and WebKit and uses foliate-js to parse and paginate books. It deliberately has no bookshelf, library, store or sync: you double-click a file, read, and close the window. MOBI and AZW3 files must be DRM-free; books bought from the Kindle Store usually carry DRM and cannot be opened.
 
@@ -22,9 +22,10 @@ Leaf is built with SwiftUI and WebKit and uses foliate-js to parse and paginate 
 
 ## How it compares
 
-- Apple Books: built into macOS and opens EPUB and PDF, but does not import MOBI or AZW3, and adds books to its library.
+- Readest: open-source (AGPL-3.0) and cross-platform, with a library, sync (optional paid cloud), highlights, notes and text-to-speech. It can read a file in place but adds every opened file to its library (title, path, cover) and keeps running after the window closes. About 67 MB download, macOS 12+. Checked 30 October 2026 (release 0.12.16 and a hands-on test).
+- Apple Books: built into macOS and opens EPUB and PDF, but does not import MOBI or AZW3, and copies books into its library.
 - Calibre: opens MOBI, AZW3 and EPUB and is centered on library management (about 350 MB download, macOS 14+, GPL-3.0); its viewer can also be launched on its own.
-- Leaf: opens all three formats without a library, in a 2.7 MB app, with Kindle-style progress, typography presets and find in book.
+- Leaf: opens all three formats like documents, with no library and nothing kept but the reading position, in a 2.7 MB native app. Highlights and notes are not available yet (planned for the next version).
 
 ## Links
 

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leaf — 开源的 Kindle 式 Mac 电子书阅读器</title>
-<meta name="description" content="Leaf 是免费开源的 Mac 电子书阅读器，目标是 Kindle 级的阅读体验：可细调的排版、本章剩余时间、全书查找。直接打开 EPUB、MOBI、AZW3，不用书库、不用账号。需要 macOS 15 或更高版本。">
+<title>Leaf — 不建书库的 Kindle 式 Mac 电子书阅读器</title>
+<meta name="description" content="免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3 即读，关窗即退。没有书库，不用账号。读起来像 Kindle。原生应用，约 2.7 MB。">
 <link rel="canonical" href="https://chengffei.github.io/leaf/zh/">
 <link rel="alternate" hreflang="en" href="https://chengffei.github.io/leaf/">
 <link rel="alternate" hreflang="zh-Hans" href="https://chengffei.github.io/leaf/zh/">
@@ -14,8 +14,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Leaf">
 <meta property="og:url" content="https://chengffei.github.io/leaf/zh/">
-<meta property="og:title" content="Leaf — 开源的 Kindle 式 Mac 电子书阅读器">
-<meta property="og:description" content="像 Kindle 一样在 Mac 上读书。开源的 EPUB、MOBI、AZW3 阅读器，排版可细调，知道本章还要读多久，全书查找。不用书库，不用账号。">
+<meta property="og:title" content="Leaf — 不建书库的 Kindle 式 Mac 电子书阅读器">
+<meta property="og:description" content="双击就读，关窗就走。读起来像 Kindle 的开源 Mac 电子书阅读器。">
 <meta property="og:image" content="https://chengffei.github.io/leaf/images/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,8 +23,8 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Leaf — 开源的 Kindle 式 Mac 电子书阅读器">
-<meta name="twitter:description" content="像 Kindle 一样在 Mac 上读书。开源的 EPUB、MOBI、AZW3 阅读器，排版可细调，知道本章还要读多久，全书查找。不用书库，不用账号。">
+<meta name="twitter:title" content="Leaf — 不建书库的 Kindle 式 Mac 电子书阅读器">
+<meta name="twitter:description" content="双击就读，关窗就走。读起来像 Kindle 的开源 Mac 电子书阅读器。">
 <meta name="twitter:image" content="https://chengffei.github.io/leaf/images/og.png">
 <link rel="icon" type="image/png" sizes="64x64" href="../images/favicon.png">
 <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
@@ -33,7 +33,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Leaf",
-  "description": "免费开源的 Mac 电子书阅读器，目标是 Kindle 级的阅读体验。直接打开 EPUB、MOBI 和 AZW3 文件，不用书库、不用账号。",
+  "description": "免费开源的 Mac 电子书阅读器，打开 EPUB、MOBI、AZW3。没有书库，不用账号，读起来像 Kindle。",
   "applicationCategory": "ProductivityApplication",
   "applicationSubCategory": "Ebook reader",
   "operatingSystem": "macOS 15 or later",
@@ -80,6 +80,22 @@
     },
     {
       "@type": "Question",
+      "name": "Mac 上有像 Kindle 一样的电子书阅读器吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Leaf 用 Kindle 的方式读 Mac 上无 DRM 的 EPUB、MOBI、AZW3：按你的速度估算剩余时间、位置号、排版预设、脚注就地弹出、全书查找。高亮与笔记即将推出。没有商店，不用账号。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Leaf 和 Readest 有什么区别？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Readest 跨平台，有书库、同步、高亮和朗读。Leaf 只做 Mac，有意做得更少：没有书库，只记阅读位置，合上书就退出。约 2.7 MB，Readest 约 67 MB。"
+      }
+    },
+    {
+      "@type": "Question",
       "name": "Leaf 免费吗？",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -115,7 +131,7 @@
       "name": "Leaf 有书架或书库吗？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "没有。Leaf 直接打开书所在的位置，不导入也不复制文件，并记住你读到哪里。"
+        "text": "没有。Leaf 直接打开书所在的位置，不导入也不复制文件。Leaf 自己只记每本读到哪；和其他 Mac 文档应用一样，系统会在「文件 › 打开最近使用」里列出最近的文件。"
       }
     }
   ]
@@ -175,11 +191,12 @@
   .narrow { max-width: 760px; }
   .definition { font-size: 19px; line-height: 1.7; margin: 0; text-align: left; }
   .table-scroll { overflow-x: auto; }
-  table.compare { max-width: 860px; }
+  table.compare { max-width: 1000px; }
   table.compare th { padding: 16px 24px; text-align: left; font-size: 15px; border-bottom: 1px solid var(--line); }
   table.compare td { text-align: left; color: var(--ink); font-size: 15px; }
   table.compare td:first-child { color: var(--muted); }
-  table.compare th:nth-child(2), table.compare td:nth-child(2) { background: rgba(44, 115, 85, .06); font-weight: 600; white-space: nowrap; }
+  table.compare th:nth-child(2), table.compare td:nth-child(2) { background: rgba(44, 115, 85, .06); font-weight: 600; }
+  table.compare th, table.compare td { padding-left: 18px; padding-right: 18px; }
   .eyebrow { margin: 0 0 14px; font-size: 15px; font-weight: 600; letter-spacing: .02em; color: var(--green); }
   .faq { max-width: 760px; margin: 0 auto; }
   .faq details { background: var(--card); border-radius: 14px; padding: 18px 24px; margin-bottom: 12px; }
@@ -284,9 +301,9 @@
 <header class="hero wrap">
   <img class="icon" src="../images/icon-256.png" width="128" height="128" alt="Leaf app icon">
   <p class="eyebrow">开源的 Mac 电子书阅读器 · EPUB · MOBI · AZW3</p>
-  <h1>像 Kindle 一样读书，在 Mac 上。</h1>
+  <h1>双击就读，关窗就走。</h1>
   <p class="lead">
-    Leaf 的目标是 Kindle 级的阅读体验：可细调的排版、本章还要读多久、全书查找，接下来是高亮与笔记。打开文件就读，关窗即退，没有书库，不用账号。
+    一本书，一个窗口。没有书架，只记得你读到哪。读起来，像 Kindle。
     
   </p>
   <div class="actions">
@@ -298,7 +315,7 @@
     </a>
   </div>
   <p class="meta">
-    免费开源 · macOS 15 或更高 · 约 2.7 MB · 8 种界面语言
+    免费开源 · 原生 Mac 应用 · 约 2.7 MB · macOS 15 或更高
     
   </p>
 </header>
@@ -313,46 +330,71 @@
   <h2>Leaf 是什么？</h2>
   <p class="definition">
     
-    Leaf 是免费开源的 macOS 电子书阅读器，目标是做「开源的 Kindle」：要 Kindle 的阅读层，不要商店、账号和书库。它直接从访达打开 EPUB、MOBI 和 AZW3 文件，记住读到哪，按你自己的阅读速度估算还要读多久，关掉窗口即退出。基于 SwiftUI 和 WebKit，排版由 foliate-js 完成，需要 macOS 15 或更高版本。Leaf 是独立项目，与 Amazon 无关。
+    Leaf 是免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI 或 AZW3 文件即可阅读，关窗即退出。没有书库，不复制文件，不要账号。它记得你读到哪，读起来像 Kindle。原生 SwiftUI 应用，约 2.7 MB，需要 macOS 15。与 Amazon 无关。
   </p>
 </section>
 
 <section id="features" class="wrap">
-  <h2>Kindle 的阅读层，别的不要</h2>
+  <h2>只有书。</h2>
   <p class="section-lead">
-    排版、进度感、查找、标注。四块凑齐，就是一台装在 Mac 里的 Kindle。
+    不建书库，不复制文件，不要账号。
     
   </p>
   <div class="grid">
     <div class="card">
-      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
-      <h3>三种格式</h3>
-      <p>EPUB、MOBI、AZW3 都能直接打开，不用先转换。</p>
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/><path d="M6 7h.01M8.5 7h.01"/></svg>
+      <h3>一个窗口</h3>
+      <p>像文档一样打开，关掉就退出。</p>
     </div>
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
-      <h3>记住读到哪</h3>
-      <p>按文件内容识别每本书，改名、换位置后依然回到原处。</p>
+      <h3>记得读到哪</h3>
+      <p>改名、挪位置，也能接着读。</p>
     </div>
     <div class="card">
-      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M5.5 8h1.5M5.5 11h1.5M5.5 14h1.5"/></svg>
-      <h3>进度像 Kindle</h3>
-      <p>点右下角循环：百分比、位置、本章剩余、全书剩余。时间按你自己的翻页速度估。</p>
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/></svg>
+      <h3>原生，2.7 MB</h3>
+      <p>系统菜单、快捷键、查询与翻译，都是 Mac 原装。</p>
+    </div>
+  </div>
+</section>
+
+<section id="kindle" class="wrap">
+  <h2>读起来，像 Kindle。</h2>
+  <p class="section-lead">
+    好读，在于细节。
+    
+  </p>
+  <div class="grid">
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/></svg>
+      <h3>还要读多久</h3>
+      <p>按你自己的阅读速度估算。</p>
     </div>
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 5l5 14"/><path d="M5.8 14h6.4"/><path d="M15 19l3-8 3 8"/><path d="M16 16.5h4"/></svg>
       <h3>排版随你调</h3>
-      <p>任意字体、五级字重、行距段距字距、版心与分栏、两端或左对齐，还有四套预设可一键切换。</p>
+      <p>字体、字重、间距、版心，四套预设，也能存自己的。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4"/><path d="M8 9h8M8 12h5"/></svg>
+      <h3>脚注就地弹出</h3>
+      <p>点一下编号，注释就在当前页弹出。</p>
     </div>
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M14 6l6 6-6 6"/></svg>
-      <h3>目录与查找</h3>
-      <p>浮在正文上的面板，不重排书页。目录高亮当前章节；<kbd>⌘F</kbd> 全书查找，结果按章节列出。</p>
+      <h3>查找与跳转</h3>
+      <p><kbd>⌘F</kbd> 全书查找，<kbd>⌘L</kbd> 跳到任意位置。</p>
     </div>
     <div class="card">
-      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/></svg>
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
+      <h3>三种格式</h3>
+      <p>EPUB、MOBI、AZW3，无需转换。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M5.5 8h1.5M5.5 11h1.5M5.5 14h1.5"/></svg>
       <h3>主题与语言</h3>
-      <p>纸白、米黄、深色或跟随系统；界面有英、中、日、韩、法、德、西 8 种语言。SwiftUI + WebKit，约 2.7 MB。</p>
+      <p>纸白、米黄、深色。8 种界面语言。</p>
     </div>
   </div>
 </section>
@@ -362,7 +404,7 @@
     <div>
       <h2>目录随手可得</h2>
       <p class="section-lead">
-        <kbd>⌘T</kbd> 或点左下角章名。面板浮在正文上，书页不会重排；高亮跟着当前章节走，选中一条就收起。
+        <kbd>⌘T</kbd> 打开。浮在页面上，书页不动。
         
       </p>
     </div>
@@ -373,34 +415,38 @@
 </section>
 
 <section id="compare" class="wrap">
-  <h2>Leaf、Apple Books 与 Calibre 对比</h2>
+  <h2>Leaf 与 Readest、Apple Books、Calibre 对比</h2>
   <p class="section-lead">
     
-    Apple Books 和 Calibre 都是好工具。只想打开一个文件读一读时，选 Leaf。
+    Readest 功能最全，Apple Books 随系统附带，Calibre 最会管书。Leaf 只做一件事：打开一本书。
   </p>
   <div class="table-scroll">
   <table class="compare">
-    <thead><tr><th></th><th>Leaf</th><th>Apple Books</th><th>Calibre</th></tr></thead>
+    <thead><tr><th></th><th>Leaf</th><th>Readest</th><th>Apple Books</th><th>Calibre</th></tr></thead>
     <tbody>
-      <tr><td>EPUB</td><td>✓</td><td>✓</td><td>✓</td></tr>
-      <tr><td>MOBI · AZW3</td><td>✓ （无 DRM）</td><td>不支持</td><td>✓</td></tr>
-      <tr><td>不建书库直接打开</td><td>✓</td><td>需导入书库</td><td>以书库为主，阅读器可单独启动</td></tr>
-      <tr><td>安装包大小</td><td>约 2.7 MB</td><td>系统自带</td><td>约 350 MB</td></tr>
-      <tr><td>系统要求</td><td>macOS 15+</td><td>—</td><td>macOS 14+</td></tr>
-      <tr><td>价格 · 协议</td><td>免费 · MIT</td><td>免费 · 闭源</td><td>免费 · GPL-3.0</td></tr>
+      <tr><td>MOBI · AZW3</td><td>✓ （无 DRM）</td><td>✓</td><td>不支持</td><td>✓</td></tr>
+      <tr><td>打开文件</td><td>原地打开，不建书库</td><td>原地打开，记入书库</td><td>导入书库</td><td>以书库为主，阅读器可单独启动</td></tr>
+      <tr><td>会留下什么</td><td>只有阅读位置</td><td>书库条目：书名、路径、封面</td><td>书库里的副本</td><td>书库数据库</td></tr>
+      <tr><td>关掉窗口后</td><td>应用退出</td><td>继续在后台运行</td><td>—</td><td>—</td></tr>
+      <tr><td>高亮与笔记</td><td>下个版本</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>其他平台</td><td>只有 Mac</td><td>iOS · Android · Windows · Linux · Web</td><td>iPhone · iPad</td><td>Windows · Linux</td></tr>
+      <tr><td>界面</td><td>原生（SwiftUI）</td><td>网页技术（Tauri）</td><td>原生</td><td>Qt</td></tr>
+      <tr><td>安装包大小</td><td>约 2.7 MB</td><td>约 67 MB</td><td>系统自带</td><td>约 350 MB</td></tr>
+      <tr><td>系统要求</td><td>macOS 15+</td><td>macOS 12+</td><td>—</td><td>macOS 14+</td></tr>
+      <tr><td>价格 · 协议</td><td>免费 · MIT</td><td>免费，云同步可选付费 · AGPL-3.0</td><td>免费 · 闭源</td><td>免费 · GPL-3.0</td></tr>
     </tbody>
   </table>
   </div>
   <p class="note">
     
-    以上信息于 2026 年 10 月 3 日核对，来源：<a href="https://support.apple.com/guide/books/import-books-audiobooks-or-pdfs-ibkseed72068/mac">Apple Books 帮助</a>、<a href="https://calibre-ebook.com/download_osx">calibre 9.15.0 macOS 下载页</a>、<a href="https://manual.calibre-ebook.com/viewer.html">calibre 阅读器手册</a>。
+    Readest 于 2026 年 10 月 30 日核对：<a href="https://github.com/readest/readest/releases">0.12.16 发布页</a>及 macOS 版实测。Apple Books 与 Calibre 于 2026 年 10 月 3 日核对，来源：<a href="https://support.apple.com/guide/books/import-books-audiobooks-or-pdfs-ibkseed72068/mac">Apple Books 帮助</a>、<a href="https://calibre-ebook.com/download_osx">calibre 9.15.0 macOS 下载页</a>、<a href="https://manual.calibre-ebook.com/viewer.html">calibre 阅读器手册</a>。
   </p>
 </section>
 
 <section id="install" class="wrap">
   <h2>安装</h2>
   <p class="section-lead">
-    Leaf 是个人开源项目，没有经过 Apple 公证。第一次打开需要手动放行一次，之后就和普通 App 一样。
+    Leaf 没有经过 Apple 公证，第一次打开需要放行一次。
     
   </p>
   <div class="actions install-download">
@@ -450,11 +496,13 @@
   <p class="section-lead">安装和使用中最常被问到的几件事。</p>
   <div class="faq">
     <details><summary>怎么在 Mac 上打开 MOBI 和 AZW3 文件？</summary><p>装好 Leaf 后，在访达里双击文件，或右键选「打开方式 › Leaf」。文件需要无 DRM。</p></details>
+    <details><summary>Mac 上有像 Kindle 一样的电子书阅读器吗？</summary><p>Leaf 用 Kindle 的方式读 Mac 上无 DRM 的 EPUB、MOBI、AZW3：按你的速度估算剩余时间、位置号、排版预设、脚注就地弹出、全书查找。高亮与笔记即将推出。没有商店，不用账号。</p></details>
+    <details><summary>Leaf 和 Readest 有什么区别？</summary><p>Readest 跨平台，有书库、同步、高亮和朗读。Leaf 只做 Mac，有意做得更少：没有书库，只记阅读位置，合上书就退出。约 2.7 MB，Readest 约 67 MB。</p></details>
     <details><summary>Leaf 免费吗？</summary><p>免费，并以 MIT 协议开源。</p></details>
     <details><summary>为什么 macOS 提示无法验证开发者？</summary><p>Leaf 没有经过 Apple 公证。先打开一次并关掉提示，再到「系统设置 › 隐私与安全性」点「仍要打开」。只需操作一次。</p></details>
     <details><summary>能打开在 Kindle 商店买的书吗？</summary><p>只能打开无 DRM 的文件。Kindle 商店购买的书通常带 DRM，Leaf 打不开。</p></details>
     <details><summary>Leaf 是 Kindle 的 app 吗？</summary><p>不是。Leaf 是独立的开源项目，与 Amazon 无关。它借鉴的是 Kindle 的阅读体验：排版、进度、查找，接下来是高亮与笔记，用来读 Mac 上无 DRM 的 EPUB、MOBI、AZW3。没有商店，不用账号。</p></details>
-    <details><summary>Leaf 有书架或书库吗？</summary><p>没有。Leaf 直接打开书所在的位置，不导入也不复制文件，并记住你读到哪里。</p></details>
+    <details><summary>Leaf 有书架或书库吗？</summary><p>没有。Leaf 直接打开书所在的位置，不导入也不复制文件。Leaf 自己只记每本读到哪；和其他 Mac 文档应用一样，系统会在「文件 › 打开最近使用」里列出最近的文件。</p></details>
   </div>
 </section>
 

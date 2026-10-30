@@ -5,8 +5,10 @@
 <h1 align="center">Leaf</h1>
 
 <p align="center">
-  Read like a Kindle. On your Mac. An open-source EPUB, MOBI and AZW3 reader.<br>
-  像 Kindle 一样读书，在 Mac 上。开源的 EPUB、MOBI、AZW3 阅读器。
+  Double-click to read. Close to leave.<br>
+  双击就读，关窗就走。<br><br>
+  An open-source EPUB, MOBI and AZW3 reader for Mac that reads like a Kindle.<br>
+  开源的 Mac 电子书阅读器，读起来像 Kindle。
 </p>
 
 <p align="center">
@@ -21,26 +23,31 @@
 
 ## Why Leaf
 
-Leaf aims to be the open-source answer to a Kindle: the reading layer — typography you can tune, a sense of how far you are and how long is left, find in book, and soon highlights and notes — without the store, the account or the library. Double-click a book in Finder and it opens; close the window and the app quits. No bookshelf, no importing, no copies of your files.
+One book, one window. Double-click a book in Finder to read it; close the window and Leaf quits.
+
+- **No library:** no import, no copies, no account
+- **Remembers your place:** even after you rename or move the file
+- **Native, 2.7 MB:** real Mac menus, shortcuts, Look Up and Translate
 
 Leaf is an independent project and is not affiliated with Amazon. Kindle is a trademark of Amazon.com, Inc.
 
-## Features
+## Reads like a Kindle
 
-- **Three formats:** EPUB, MOBI and AZW3 (MOBI/AZW3 must be DRM-free)
-- **Remembers your place:** books are recognized by content, even after renaming or moving
-- **Floating contents panel:** `⌘T` or click the chapter name in the bottom-left corner; it floats over the page instead of reflowing it, highlights the current chapter, closes when you pick an entry or click the page; long contents (such as box sets) start collapsed to book titles
-- **Footnotes in place:** click a note marker and the note pops up over the page; after following a link or the contents, a **Back** button (or `⌘[`) returns you to where you were
-- **Type controls:** font size 80–200%, five weight levels, line / paragraph / letter spacing, margins, justified or left-aligned, any installed font (or the book's own / sans / serif)
-- **Presets:** Compact, Standard, Large and Low Vision built in; save your own by name
-- **Layout:** text width presets, single or two-column, click the left or right edge of the page to turn
-- **Go to:** `⌘L` for a percent or location number; hover the status row for a scrubber
-- **Images:** double-click any picture to view it full size
-- **Themes:** paper, sepia, dark, or follow the system
-- **Find in book:** `⌘F` opens a results list grouped by chapter, with matches highlighted on the page
-- **Reading progress:** click the bottom-right corner to cycle percent, location, time left in chapter and time left in book; the estimate learns from your own page turns
-- **In your language:** English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español; follows the system or pick one in Settings
-- **Small and native:** SwiftUI + WebKit, about 2.7 MB download
+- **Time left:** click the bottom-right corner to cycle percent, location, time left in chapter and in book, estimated from how fast you read
+- **Your type:** any font, size 80–200%, five weights, line / paragraph / letter spacing, margins, alignment
+- **Presets:** Compact, Standard, Large, Low Vision, plus your own
+- **Footnotes in place:** click a marker and the note pops up; **Back** or `⌘[` returns from any jump
+- **Find and go to:** `⌘F` lists results by chapter; `⌘L` jumps to a percent or location
+- **Floating contents:** `⌘T`; it floats over the page, so nothing reflows
+- **Layout:** text width, one or two columns, click the page edges to turn
+- **Three formats:** EPUB, MOBI and AZW3, no conversion (MOBI/AZW3 must be DRM-free)
+- **Images:** double-click to view full size
+- **Themes:** paper, sepia, dark or system
+- **Eight languages:** English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español
+
+## How it compares
+
+[Readest](https://github.com/readest/readest) does the most. Apple Books comes with your Mac. Calibre manages collections best. Leaf does one thing: open a book. See the [full table](https://chengffei.github.io/leaf/#compare).
 
 ## Roadmap
 
@@ -91,26 +98,31 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 
 ### 为什么做 Leaf
 
-Leaf 的目标是做「开源的 Kindle」：要 Kindle 的阅读层，可细调的排版、读到哪和还要读多久、全书查找，接下来是高亮与笔记；不要商店、账号和书库。在访达里双击一本书就打开，读完关掉窗口就退出。没有书架，不复制你的文件。
+一本书，一个窗口。在访达里双击就读，关掉窗口，Leaf 就退出。
+
+- **没有书库**：不导入，不复制文件，不要账号
+- **记得读到哪**：改名、挪位置，也能接着读
+- **原生，2.7 MB**：系统菜单、快捷键、查询与翻译，都是 Mac 原装
 
 Leaf 是独立项目，与 Amazon 无关。Kindle 是 Amazon.com, Inc. 的商标。
 
-### 功能
+### 读起来像 Kindle
 
-- **三种格式**：EPUB、MOBI、AZW3（AZW3/MOBI 须无 DRM）
-- **记住位置**：按文件内容识别，改名、挪位置也认得
-- **浮动目录面板**：`⌘T` 或点左下角章名；浮在正文上，不重排书页；高亮当前章节，选中或点正文即收起；合集等长目录默认只列书名，可逐层展开
-- **脚注就地弹出**：点注释编号直接弹出注释，不离开当前页；点链接或目录跳走后，底部给「返回」，也可按 `⌘[`
-- **字体与行距**：字号 80%–200%，字重五级，行距 / 段距 / 字距，页边距，两端或左对齐，字体可选原书 / 黑体 / 宋体或任意已安装字体
-- **排版预设**：内置紧凑 / 标准 / 大字 / 低视力，也可把当前设置存成自己的预设
-- **版式**：版心宽度四档，单栏 / 双栏，点正文左右两侧翻页
-- **跳转**：`⌘L` 输入百分比或位置号；鼠标停在状态行上出现进度滑杆
-- **看图**：双击书里的图片放大看
-- **主题**：纸白、米黄、深色，或跟随系统
-- **全书查找**：`⌘F` 打开按章节分组的结果列表，命中处在页面上高亮
-- **进度指示**：点右下角循环切换百分比、位置、本章剩余、全书剩余；剩余时间按你自己的翻页速度估算
-- **多语言**：英文、简体中文、繁体中文、日文、韩文、法文、德文、西班牙文；跟随系统，也可在设置里单独选
-- **原生轻量**：SwiftUI + WebKit，安装包约 2.7 MB
+- **还要读多久**：点右下角循环百分比、位置、本章剩余、全书剩余，按你的阅读速度估算
+- **排版随你调**：任意字体，字号 80%–200%，字重五级，行距、段距、字距，页边距，对齐方式
+- **排版预设**：紧凑、标准、大字、低视力，也能存自己的
+- **脚注就地弹出**：点编号即弹出注释；跳转后按「返回」或 `⌘[` 回原处
+- **查找与跳转**：`⌘F` 按章节列出结果；`⌘L` 跳到百分比或位置号
+- **浮动目录**：`⌘T` 打开，浮在页面上，书页不动
+- **版式**：版心宽度，单栏或双栏，点页面两侧翻页
+- **三种格式**：EPUB、MOBI、AZW3，无需转换（MOBI/AZW3 须无 DRM）
+- **看图**：双击放大
+- **主题**：纸白、米黄、深色或跟随系统
+- **8 种语言**：英文、简体中文、繁体中文、日文、韩文、法文、德文、西班牙文
+
+### 对比
+
+[Readest](https://github.com/readest/readest) 功能最全，Apple Books 随系统附带，Calibre 最会管书。Leaf 只做一件事：打开一本书。完整对比见[介绍页](https://chengffei.github.io/leaf/zh/#compare)。
 
 ### 路线
 
