@@ -313,6 +313,18 @@ html, body { margin: 0 !important; padding: 0 !important; }
 body > :first-child, body > :first-child > :first-child { margin-top: 0 !important; }
 body > :last-child, body > :last-child > :last-child { margin-bottom: 0 !important; }
 `
+// 注释卡片的字号钉在正文的 0.9 倍：片段被单独拿出来渲染，脱离了原书给正文套的容器和 class，
+// 会按根字号（含用户放大）显示，比正文大一圈、行距也没套上（11-02 Felix 报）。上下标仍按比例缩小
+const NOTE_SCALE = 0.9
+const mainTextPx = () => {
+  const doc = view.renderer?.getContents?.()?.[0]?.doc
+  const p = doc && [...doc.querySelectorAll('p')].find(p => p.textContent.trim().length > 20)
+  return (p && parseFloat(doc.defaultView.getComputedStyle(p).fontSize)) || 16 * prefs.fontScale
+}
+const noteSizeCSS = () => `
+body, body * { font-size: ${(mainTextPx() * NOTE_SCALE).toFixed(1)}px !important; line-height: 1.6 !important; }
+body sup, body sub { font-size: 0.75em !important; line-height: 0 !important; }
+`
 const footnotes = new FootnoteHandler()
 const closeNote = () => {
   if ($('#note').hidden) return
@@ -330,7 +342,7 @@ footnotes.addEventListener('before-render', e => {
   note.renderer.setAttribute('flow', 'scrolled')
   note.renderer.setAttribute('margin', '0px')
   note.renderer.setAttribute('gap', '0%')
-  note.renderer.setStyles(bookCSS + prefsCSS(prefs) + noteCSS)
+  note.renderer.setStyles(bookCSS + prefsCSS(prefs) + noteCSS + noteSizeCSS())
   note.addEventListener('load', e => {
     markDarkText(e.detail.doc)
     e.detail.doc.addEventListener('keydown', e => e.key === 'Escape' && closeNote())
