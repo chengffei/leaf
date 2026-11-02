@@ -276,7 +276,11 @@ const windowPoint = e => {
 // 点正文翻页，照 Kindle：左边一窄条上一页，其余地方都是下一页；拖选、点链接不算。
 // 按阅读方向而不是左右：竖排、从右往左的书也是「左条 = 上一页」，和 Kindle 一致
 // 这次点击是来收起东西的（注释卡片、选区、浮动面板），就只收起不翻页
+// Mac 上双击选词：中间区域的单击要等一个双击间隔，第二下来了就取消翻页；两侧各 20% 立即翻
 const BACK_ZONE = 0.2
+const FORWARD_ZONE = 0.8
+const DOUBLE_CLICK_MS = 250
+let pendingTurn = null
 let panelOpen = false
 let dismissing = false
 const listen = target => {
@@ -295,13 +299,15 @@ const listen = target => {
     if (src) openLightbox(src)
   })
   target.addEventListener('click', e => {
+    clearTimeout(pendingTurn) // 双击的第二下：选词，不翻页（选中后下面的选区判断会先 return）
     if (e.button !== 0 || e.target.closest?.(`a, img, image, ${CHROME}`)) return
     if (!e.target.ownerDocument.getSelection()?.isCollapsed) return
     const { x, y } = windowPoint(e)
     if (Math.hypot(x - lastPoint.x, y - lastPoint.y) > 4) return
-    if (dismissing) return
+    if (dismissing || e.detail > 1) return
     if (x < innerWidth * BACK_ZONE) turn(() => view.prev())
-    else turn(() => view.next())
+    else if (x > innerWidth * FORWARD_ZONE) turn(() => view.next())
+    else pendingTurn = setTimeout(() => turn(() => view.next()), DOUBLE_CLICK_MS)
   })
   target.addEventListener('wheel', onWheel, { passive: false })
 }

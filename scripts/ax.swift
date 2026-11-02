@@ -29,6 +29,17 @@ if CommandLine.arguments.count > 1, ["clickpage", "clickat", "rightclick", "dblc
     var p = CGPoint.zero, sz = CGSize.zero
     AXValueGetValue(pos, .cgPoint, &p); AXValueGetValue(size, .cgSize, &sz)
     let pt = CGPoint(x: p.x + sz.width * fx, y: p.y + sz.height * fy)
+    // 安全闸二：点下去的位置最上层必须是 Leaf 自己的窗口（11-02 别的窗口盖在测试窗口上，点击落到了用户的视频播放器）
+    app.activate()
+    usleep(300_000)
+    let wins = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
+    let top = wins.first { w in
+        guard (w[kCGWindowLayer as String] as? Int) == 0, let b = w[kCGWindowBounds as String] as? [String: CGFloat] else { return false }
+        return CGRect(x: b["X"] ?? 0, y: b["Y"] ?? 0, width: b["Width"] ?? 0, height: b["Height"] ?? 0).contains(pt)
+    }
+    guard (top?[kCGWindowOwnerPID as String] as? Int32) == app.processIdentifier else {
+        print("ABORT: window at \(pt) belongs to \(top?[kCGWindowOwnerName as String] ?? "nobody")"); exit(1)
+    }
     let right = a[1] == "rightclick"
     let clicks = a[1] == "dblclick" ? 2 : 1
     for n in 1...clicks {
