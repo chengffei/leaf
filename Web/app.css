@@ -22,6 +22,14 @@
   --line: rgba(91, 70, 54, .18);
   --hover: #eadfc4;
 }
+/* 墨水屏：偏暖浅灰底、近黑字，对比度比纸白低一档 */
+:root[data-theme="eink"] {
+  --bg: #eceae4;
+  --fg: #1f1f1f;
+  --muted: #6e6e6b;
+  --line: rgba(0, 0, 0, .12);
+  --hover: #e0ded7;
+}
 html, body {
   margin: 0;
   height: 100%;

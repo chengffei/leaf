@@ -38,7 +38,10 @@ final class ReaderModel {
     /// 展开着的目录项。目录短就全部展开；长（多本合集等）就只展开当前在读的那一支
     var expanded: Set<TOCEntry.ID> = []
     var currentHref: String?
-    var showsTOC = false // 浮动面板开关（目录或查找）
+    /// 浮动面板开关（目录或查找）。告诉 JS：面板开着时点正文只收面板，不翻页
+    var showsTOC = false {
+        didSet { if showsTOC != oldValue { call("leaf.setPanelOpen(\(showsTOC))") } }
+    }
     var panelTab: PanelTab = .toc
     var searchQuery = ""
     var searchHits: [SearchHit] = []

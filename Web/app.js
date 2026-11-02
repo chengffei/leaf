@@ -51,12 +51,21 @@ aside[epub|type~="note"], aside[epub|type~="rearnote"] { display: none; }
 const FONTS = {
   sans: '-apple-system, "PingFang SC", sans-serif',
   serif: 'ui-serif, "New York", "Songti SC", serif',
+  literata: '"Literata", "Songti SC", serif',
 }
+// Literata 随包在 Web/fonts（书页 iframe 与 leaf://app 同源，直接引用）；只在选了它时才声明
+const fontURL = name => new URL(`fonts/${name}`, location.href).href
+const LITERATA_FACES = ['normal', 'italic'].map(style => `@font-face {
+  font-family: "Literata"; font-style: ${style}; font-weight: 200 900;
+  src: url("${fontURL(style === 'italic' ? 'Literata-Italic.ttf' : 'Literata.ttf')}") format("truetype");
+}`).join('\n')
 const fontStack = font => font === 'original' ? '' : FONTS[font] ?? `"${font.replace(/["\\]/g, '')}", -apple-system, "PingFang SC", sans-serif`
 // 主题。浅色 / 深色由窗口外观决定（跟随系统 = 不动窗口外观），这里只补书页的底色：
 // 深色：书里常写死 body{background:white}，配上 markDarkText 改白的字就整页看不见，底色一并压掉
 // 米黄：浅色外观之上染底色；深灰到黑的字（markDarkText 标记）换成棕色，彩色强调不动
+// 墨水屏：同米黄的做法，换成偏暖浅灰底、近黑字；链接和正文同色加下划线，像电子墨水屏那样只有灰阶
 const SEPIA = { bg: '#f4ecd8', fg: '#5b4636', link: '#8a5a2b' }
+const EINK = { bg: '#eceae4', fg: '#1f1f1f' }
 const DARK_BG = '#1c1c1e'
 const darkMedia = matchMedia('(prefers-color-scheme: dark)')
 const effectiveTheme = () => prefs.theme === 'system' ? (darkMedia.matches ? 'dark' : 'light') : prefs.theme
@@ -72,6 +81,12 @@ body { background-color: transparent !important; }
 [data-leaf-dark]:not(a) { color: ${SEPIA.fg} !important; }
 a:link { color: ${SEPIA.link}; }
 `,
+  eink: `
+html { color-scheme: light !important; background-color: ${EINK.bg} !important; color: ${EINK.fg}; }
+body { background-color: transparent !important; }
+[data-leaf-dark]:not(a) { color: ${EINK.fg} !important; }
+a:link, a:visited { color: ${EINK.fg} !important; text-decoration: underline; }
+`,
 }
 // 字重：描边加粗，任何字体都生效（font-weight 只对可变字体有 5 级，还会抹平标题的原有粗细）
 const WEIGHT_EM = [0, 0.012, 0.024, 0.036, 0.05]
@@ -79,6 +94,7 @@ const PARAGRAPH = { tight: '0.25em', loose: '1em' } // original = 不动
 const LETTER = { tight: '-0.01em', loose: '0.05em' } // standard = 不动
 const TEXT = 'p, li, blockquote, dd, dt, td, th'
 const prefsCSS = ({ fontScale, lineHeight, font, weight, align, paragraphSpacing, letterSpacing }) => `
+${font === 'literata' ? LITERATA_FACES : ''}
 html { font-size: ${fontScale * 100}% !important; }
 p, li, blockquote, dd, dt, div, td, th { line-height: ${lineHeight} !important; }
 ${fontStack(font) ? `body, body :not(pre):not(code):not(kbd):not(samp):not(tt) {
@@ -194,6 +210,7 @@ const flatTOC = (items, depth = 0, out = []) => {
 // Swift 侧调用的入口
 globalThis.leaf = {
   goTo(href) { jumpTo(href) },
+  setPanelOpen(open) { panelOpen = open },
   setPrefs(next) {
     prefs = { ...prefs, ...next }
     applyStyles()
@@ -256,13 +273,18 @@ const windowPoint = e => {
   const frame = e.view?.frameElement?.getBoundingClientRect()
   return { x: e.clientX + (frame?.left ?? 0), y: e.clientY + (frame?.top ?? 0) }
 }
-// 点正文左右两侧翻页：外侧各 15%，中间不动（留给选字）；拖选、点链接不算
-const EDGE = 0.15
+// 点正文翻页，照 Kindle：左边一窄条上一页，其余地方都是下一页；拖选、点链接不算。
+// 按阅读方向而不是左右：竖排、从右往左的书也是「左条 = 上一页」，和 Kindle 一致
+// 这次点击是来收起东西的（注释卡片、选区、浮动面板），就只收起不翻页
+const BACK_ZONE = 0.2
+let panelOpen = false
+let dismissing = false
 const listen = target => {
   target.addEventListener('keydown', onKey)
   target.addEventListener('mousedown', e => {
     if (e.target.closest?.(CHROME)) return // 点卡片里的按钮不算点正文
     lastPoint = windowPoint(e)
+    dismissing = panelOpen || !$('#note').hidden || !e.target.ownerDocument.getSelection()?.isCollapsed
     closeNote()
     post({ type: 'closeTOC' }) // 点正文 = 收起目录
   })
@@ -277,9 +299,9 @@ const listen = target => {
     if (!e.target.ownerDocument.getSelection()?.isCollapsed) return
     const { x, y } = windowPoint(e)
     if (Math.hypot(x - lastPoint.x, y - lastPoint.y) > 4) return
-    const edge = innerWidth * EDGE
-    if (x < edge) turn(() => view.goLeft())
-    else if (x > innerWidth - edge) turn(() => view.goRight())
+    if (dismissing) return
+    if (x < innerWidth * BACK_ZONE) turn(() => view.prev())
+    else turn(() => view.next())
   })
   target.addEventListener('wheel', onWheel, { passive: false })
 }

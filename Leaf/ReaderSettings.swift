@@ -17,10 +17,11 @@ enum LineSpacing: Double, CaseIterable, Identifiable, Codable {
 
 /// 内置的三种字体选项；除此之外 `ReaderSettings.font` 还可以是任意已安装字体的家族名
 enum ReaderFont: String, CaseIterable, Identifiable {
-    case original, sans, serif
+    case original, sans, serif, literata
     var id: String { rawValue }
     var label: String {
         switch self {
+        case .literata: "Literata" // 随包内置（Web/fonts，OFL），气质接近 Kindle 的 Bookerly
         case .original: String(localized: "Original")
         case .sans: String(localized: "Sans-serif")
         case .serif: String(localized: "Serif")
@@ -106,22 +107,23 @@ enum LetterSpacing: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-/// 主题：浅色 / 深色靠窗口外观（WebView 的 prefers-color-scheme 跟着窗口走），米黄在此之上再染色
-enum Theme: String, CaseIterable, Identifiable {
-    case system, light, sepia, dark
+/// 主题：浅色 / 深色靠窗口外观（WebView 的 prefers-color-scheme 跟着窗口走），米黄、墨水屏在此之上再染色
+enum Theme: String, CaseIterable, Identifiable, Codable {
+    case system, light, sepia, eink, dark
     var id: String { rawValue }
     var label: String {
         switch self {
         case .system: String(localized: "System")
         case .light: String(localized: "Paper")
         case .sepia: String(localized: "Sepia")
+        case .eink: String(localized: "E-ink")
         case .dark: String(localized: "Dark")
         }
     }
     var colorScheme: ColorScheme? {
         switch self {
         case .system: nil
-        case .light, .sepia: .light
+        case .light, .sepia, .eink: .light
         case .dark: .dark
         }
     }
@@ -265,6 +267,7 @@ final class ReaderSettings {
 
     func apply(_ preset: Preset) {
         if let f = preset.font { font = f }
+        if let t = preset.theme { theme = t }
         zoomPercent = preset.zoomPercent
         weight = preset.weight
         lineSpacing = preset.lineSpacing
@@ -316,7 +319,7 @@ final class ReaderSettings {
     }
 }
 
-/// 一套排版：字体可选（内置预设不碰字体），其余都带
+/// 一套排版：字体、主题可选（nil = 不碰，自定义预设不存主题），其余都带
 struct Preset: Codable, Identifiable, Hashable {
     var name: String
     var font: String?
@@ -329,6 +332,7 @@ struct Preset: Codable, Identifiable, Hashable {
     var textWidth: TextWidth
     var columns: Columns
     var align: TextAlign
+    var theme: Theme? = nil
 
     var id: String { name }
     /// 内置预设的名字是英文 key，显示时翻译；自定义的照原样
@@ -340,10 +344,11 @@ struct Preset: Codable, Identifiable, Hashable {
         (font == nil || font == s.font) && zoomPercent == s.zoomPercent && weight == s.weight
             && lineSpacing == s.lineSpacing && paragraphSpacing == s.paragraphSpacing
             && letterSpacing == s.letterSpacing && margin == s.margin && textWidth == s.textWidth
-            && columns == s.columns && align == s.align
+            && columns == s.columns && align == s.align && (theme == nil || theme == s.theme)
     }
 
-    /// 内置四套，对应 Kindle 的 Compact / Standard / Large / Low Vision
+    /// 内置四套对应 Kindle 的 Compact / Standard / Large / Low Vision；墨水屏一套是 Kindle 的整体观感：
+    /// Literata、单栏窄版心、墨水屏底色。不叫 Kindle（商标），叫 E-ink
     static let builtins: [Preset] = [
         Preset(name: "Compact", font: nil, zoomPercent: 90, weight: 0, lineSpacing: .compact, paragraphSpacing: .tight,
                letterSpacing: .standard, margin: .narrow, textWidth: .wide, columns: .auto, align: .justify),
@@ -353,5 +358,8 @@ struct Preset: Codable, Identifiable, Hashable {
                letterSpacing: .standard, margin: .standard, textWidth: .wide, columns: .auto, align: .justify),
         Preset(name: "Low Vision", font: nil, zoomPercent: 170, weight: 3, lineSpacing: .loose, paragraphSpacing: .loose,
                letterSpacing: .loose, margin: .narrow, textWidth: .unlimited, columns: .single, align: .left),
+        Preset(name: "E-ink", font: ReaderFont.literata.rawValue, zoomPercent: 100, weight: 1, lineSpacing: .standard,
+               paragraphSpacing: .original, letterSpacing: .standard, margin: .standard, textWidth: .narrow,
+               columns: .single, align: .justify, theme: .eink),
     ]
 }
