@@ -2,11 +2,17 @@ import SwiftUI
 
 /// 工具栏 Aa 弹层：只放最常碰的字号、主题、预设，其余在「设置…」
 struct TypographyPanel: View {
+    let model: ReaderModel
     @Bindable var settings = ReaderSettings.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            SizeStepper(settings: settings)
+            if model.isPDF {
+                SizeStepper(percent: model.pdfZoom, canZoomOut: model.canZoomOut, canZoomIn: model.canZoomIn,
+                            zoomOut: model.zoomOut, zoomIn: model.zoomIn, reset: model.resetZoom)
+            } else {
+                SizeStepper(settings: settings)
+            }
 
             HStack(spacing: 0) {
                 ForEach(Theme.allCases) { theme in
@@ -16,6 +22,8 @@ struct TypographyPanel: View {
             }
 
             VStack(spacing: 0) {
+                // PDF 是固定版式，排版预设对它无效
+                if !model.isPDF {
                 Divider()
                 HStack {
                     Text("Layout Preset")
@@ -27,6 +35,7 @@ struct TypographyPanel: View {
                         .fixedSize()
                 }
                 .frame(height: 36)
+                }
                 Divider()
                 SettingsLink {
                     HStack {
@@ -48,16 +57,36 @@ struct TypographyPanel: View {
     }
 }
 
-/// 字号：一条胶囊里放「小 A ｜ 百分比 ｜ 大 A」，百分比点一下复位
+/// 字号：一条胶囊里放「小 A ｜ 百分比 ｜ 大 A」，百分比点一下复位。PDF 窗口拿它调页面缩放
 struct SizeStepper: View {
-    @Bindable var settings: ReaderSettings
+    let percent: Int
+    let canZoomOut: Bool
+    let canZoomIn: Bool
+    let zoomOut: () -> Void
+    let zoomIn: () -> Void
+    let reset: () -> Void
+
+    init(percent: Int, canZoomOut: Bool, canZoomIn: Bool,
+         zoomOut: @escaping () -> Void, zoomIn: @escaping () -> Void, reset: @escaping () -> Void) {
+        self.percent = percent
+        self.canZoomOut = canZoomOut
+        self.canZoomIn = canZoomIn
+        self.zoomOut = zoomOut
+        self.zoomIn = zoomIn
+        self.reset = reset
+    }
+
+    init(settings: ReaderSettings) {
+        self.init(percent: settings.zoomPercent, canZoomOut: settings.canZoomOut, canZoomIn: settings.canZoomIn,
+                  zoomOut: settings.zoomOut, zoomIn: settings.zoomIn, reset: settings.resetZoom)
+    }
 
     var body: some View {
         HStack(spacing: 0) {
-            step(size: 13, enabled: settings.canZoomOut, label: "Zoom Out", help: "Smaller ⌘-") { settings.zoomOut() }
+            step(size: 13, enabled: canZoomOut, label: "Zoom Out", help: "Smaller ⌘-", action: zoomOut)
             Divider().frame(height: 18)
-            Button { settings.resetZoom() } label: {
-                Text("\(settings.zoomPercent)%")
+            Button(action: reset) {
+                Text("\(percent)%")
                     .font(.callout).monospacedDigit()
                     .foregroundStyle(.secondary)
                     .frame(width: 64, height: 34)
@@ -66,9 +95,9 @@ struct SizeStepper: View {
             .buttonStyle(.plain)
             .help("Reset ⌘0")
             .accessibilityLabel("Actual Size")
-            .accessibilityValue("\(settings.zoomPercent)%")
+            .accessibilityValue("\(percent)%")
             Divider().frame(height: 18)
-            step(size: 20, enabled: settings.canZoomIn, label: "Zoom In", help: "Larger ⌘=") { settings.zoomIn() }
+            step(size: 20, enabled: canZoomIn, label: "Zoom In", help: "Larger ⌘=", action: zoomIn)
         }
         .background(.quaternary.opacity(0.6), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
     }

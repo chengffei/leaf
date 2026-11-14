@@ -11,9 +11,24 @@ struct BookWindow: View {
     var body: some View {
         // 目录是浮动面板，盖在正文上：推挤式侧栏会让书重新分页，读者刚看到的那页就变了
         ZStack(alignment: .topLeading) {
-            ReaderView(book: book, model: model, prefs: settings.prefs)
-                // 铺到窗口顶部（标题文字已移除，按钮悬停才浮现）
-                .ignoresSafeArea(.container, edges: .top)
+            Group {
+                if book.isPDF {
+                    PDFReaderView(book: book, model: model, theme: settings.theme, zoom: model.pdfZoom)
+                        .overlay(alignment: .bottomTrailing) {
+                            Text(model.pageLabel)
+                                .font(.caption).monospacedDigit()
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 10).padding(.vertical, 4)
+                                .background(.regularMaterial, in: Capsule())
+                                .padding(12)
+                                .allowsHitTesting(false)
+                        }
+                } else {
+                    ReaderView(book: book, model: model, prefs: settings.prefs)
+                }
+            }
+            // 铺到窗口顶部（标题文字已移除，按钮悬停才浮现）
+            .ignoresSafeArea(.container, edges: .top)
             if model.showsTOC {
                 TOCPanel(model: model)
                     .id("panel")
@@ -39,7 +54,7 @@ struct BookWindow: View {
                 .help("Size and Theme")
                 .accessibilityLabel("Size and Theme")
                 .popover(isPresented: $model.showsTypography, arrowEdge: .bottom) {
-                    TypographyPanel()
+                    TypographyPanel(model: model)
                 }
             }
         }
@@ -344,7 +359,7 @@ struct ReaderCommands: Commands {
         CommandMenu("Go") {
             Button("Location…") { reader?.goToPrompt() }
                 .keyboardShortcut("l")
-                .disabled(reader == nil)
+                .disabled(reader == nil || reader?.isPDF == true)
             Divider()
             Button("Back") { reader?.goBack() }
                 .keyboardShortcut("[")
@@ -365,14 +380,14 @@ struct ReaderCommands: Commands {
                 .disabled(reader == nil)
         }
         CommandGroup(after: .toolbar) {
-            let settings = ReaderSettings.shared
-            Button("Zoom In") { settings.zoomIn() }
+            // PDF 窗口缩放页面，其余调全局字号
+            Button("Zoom In") { reader?.zoomIn() ?? ReaderSettings.shared.zoomIn() }
                 .keyboardShortcut("=") // 实际按键 ⌘=，与 Safari 等一致
-                .disabled(!settings.canZoomIn)
-            Button("Zoom Out") { settings.zoomOut() }
+                .disabled(!(reader?.canZoomIn ?? ReaderSettings.shared.canZoomIn))
+            Button("Zoom Out") { reader?.zoomOut() ?? ReaderSettings.shared.zoomOut() }
                 .keyboardShortcut("-")
-                .disabled(!settings.canZoomOut)
-            Button("Actual Size") { settings.resetZoom() }
+                .disabled(!(reader?.canZoomOut ?? ReaderSettings.shared.canZoomOut))
+            Button("Actual Size") { reader?.resetZoom() ?? ReaderSettings.shared.resetZoom() }
                 .keyboardShortcut("0")
         }
     }
