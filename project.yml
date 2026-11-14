@@ -37,6 +37,8 @@ targets:
             LSItemContentTypes: [org.idpf.epub-container]
           - CFBundleTypeName: PDF Document
             CFBundleTypeRole: Viewer
+            # PDF 有系统自带的类型图标，Leaf 不自带文档图标的话，就算设成默认打开方式 Finder 也不换图标
+            CFBundleTypeIconFile: PDFDocument
             LSHandlerRank: Alternate
             LSItemContentTypes: [com.adobe.pdf]
           - CFBundleTypeName: Kindle Book
