@@ -54,7 +54,7 @@ struct SizeStepper: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            step(size: 13, enabled: settings.canZoomOut, help: "Smaller ⌘-") { settings.zoomOut() }
+            step(size: 13, enabled: settings.canZoomOut, label: "Zoom Out", help: "Smaller ⌘-") { settings.zoomOut() }
             Divider().frame(height: 18)
             Button { settings.resetZoom() } label: {
                 Text("\(settings.zoomPercent)%")
@@ -65,23 +65,26 @@ struct SizeStepper: View {
             }
             .buttonStyle(.plain)
             .help("Reset ⌘0")
+            .accessibilityLabel("Actual Size")
+            .accessibilityValue("\(settings.zoomPercent)%")
             Divider().frame(height: 18)
-            step(size: 20, enabled: settings.canZoomIn, help: "Larger ⌘=") { settings.zoomIn() }
+            step(size: 20, enabled: settings.canZoomIn, label: "Zoom In", help: "Larger ⌘=") { settings.zoomIn() }
         }
         .background(.quaternary.opacity(0.6), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
     }
 
-    private func step(size: CGFloat, enabled: Bool, help: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+    private func step(size: CGFloat, enabled: Bool, label: LocalizedStringKey, help: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(verbatim: "A")
                 .font(.system(size: size, design: .serif))
+                .foregroundStyle(enabled ? .primary : .tertiary)
                 .frame(maxWidth: .infinity, minHeight: 34)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .opacity(enabled ? 1 : 0.3)
         .disabled(!enabled)
         .help(help)
+        .accessibilityLabel(label)
     }
 }
 
@@ -119,7 +122,7 @@ struct ThemeSwatch: View {
                         .foregroundStyle(theme == .system ? Color.gray : colors.fg)
                 }
                 .frame(width: 38, height: 38)
-                .overlay(Circle().strokeBorder(.black.opacity(0.1), lineWidth: 0.5))
+                .overlay(Circle().strokeBorder(.primary.opacity(0.15), lineWidth: 0.5))
                 .padding(3)
                 .overlay(Circle().strokeBorder(selected ? Color.accentColor : .clear, lineWidth: 2))
 
@@ -133,6 +136,9 @@ struct ThemeSwatch: View {
         }
         .buttonStyle(.plain)
         .help(theme.label)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(theme.label)
+        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
     }
 }
 

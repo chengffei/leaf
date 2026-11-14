@@ -3,6 +3,8 @@ import SwiftUI
 struct BookWindow: View {
     let book: BookDocument
     @State private var model = ReaderModel()
+    /// 开书先亮出红绿灯与工具栏 3 秒再淡出，让人知道按钮在哪
+    @State private var introducing = true
     @Environment(\.openSettings) private var openSettings
     private let settings = ReaderSettings.shared
 
@@ -35,17 +37,22 @@ struct BookWindow: View {
                         .font(.system(size: 18, design: .serif))
                 }
                 .help("Size and Theme")
+                .accessibilityLabel("Size and Theme")
                 .popover(isPresented: $model.showsTypography, arrowEdge: .bottom) {
                     TypographyPanel()
                 }
             }
         }
         .background(
-            WindowChrome(visible: model.showsTOC || model.hoversTop || model.showsTypography) { hovering in
+            WindowChrome(visible: introducing || model.showsTOC || model.hoversTop || model.showsTypography) { hovering in
                 if model.hoversTop != hovering { model.hoversTop = hovering }
             }
             .ignoresSafeArea()
         )
+        .task {
+            try? await Task.sleep(for: .seconds(3))
+            introducing = false
+        }
         .focusedSceneValue(\.reader, model)
         .onAppear { model.openSettings = { openSettings() } }
         // 主题的浅色 / 深色：改窗口外观，WebView 的 prefers-color-scheme 跟着窗口走；米黄按浅色
@@ -86,17 +93,17 @@ struct TOCPanel: View {
 struct SearchPanel: View {
     @Bindable var model: ReaderModel
     @State private var text = ""
-    @FocusState private var focused: Bool
     @State private var debounce: Task<Void, Never>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                TextField("Find", text: $text)
-                    .textFieldStyle(.roundedBorder)
-                    .focused($focused)
-                    .onSubmit { text == model.searchQuery ? model.findNext() : model.search(text) }
-                    .onExitCommand { model.showsTOC = false }
+                // 系统搜索框：带放大镜与清除按钮；Esc 先清空，空了再按关掉面板
+                SearchField(text: $text, prompt: String(localized: "Find")) {
+                    text == model.searchQuery ? model.findNext() : model.search(text)
+                } onCancel: {
+                    model.showsTOC = false
+                }
                 Text(countText).font(.caption).foregroundStyle(.secondary).monospacedDigit()
                     .frame(minWidth: 44, alignment: .trailing)
             }
@@ -122,7 +129,7 @@ struct SearchPanel: View {
                 .scrollContentBackground(.hidden)
             }
         }
-        .onAppear { text = model.searchQuery; focused = true }
+        .onAppear { text = model.searchQuery }
         .onChange(of: text) { _, new in
             debounce?.cancel()
             debounce = Task { @MainActor in
@@ -367,6 +374,52 @@ struct ReaderCommands: Commands {
                 .disabled(!settings.canZoomOut)
             Button("Actual Size") { settings.resetZoom() }
                 .keyboardShortcut("0")
+        }
+    }
+}
+
+/// NSSearchField 包一层：SwiftUI 在 macOS 上没有独立的搜索框控件
+struct SearchField: NSViewRepresentable {
+    @Binding var text: String
+    let prompt: String
+    let onSubmit: () -> Void
+    let onCancel: () -> Void
+
+    func makeNSView(context: Context) -> NSSearchField {
+        let field = NSSearchField()
+        field.placeholderString = prompt
+        field.delegate = context.coordinator
+        field.stringValue = text
+        DispatchQueue.main.async { field.window?.makeFirstResponder(field) }
+        return field
+    }
+
+    func updateNSView(_ field: NSSearchField, context: Context) {
+        context.coordinator.parent = self
+        if field.stringValue != text { field.stringValue = text }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
+
+    final class Coordinator: NSObject, NSSearchFieldDelegate {
+        var parent: SearchField
+        init(parent: SearchField) { self.parent = parent }
+
+        func controlTextDidChange(_ note: Notification) {
+            guard let field = note.object as? NSSearchField else { return }
+            parent.text = field.stringValue
+        }
+
+        func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
+            switch selector {
+            case #selector(NSResponder.insertNewline(_:)):
+                parent.onSubmit(); return true
+            case #selector(NSResponder.cancelOperation(_:)):
+                if parent.text.isEmpty { parent.onCancel(); return true }
+                return false // 交给搜索框自己清空
+            default:
+                return false
+            }
         }
     }
 }

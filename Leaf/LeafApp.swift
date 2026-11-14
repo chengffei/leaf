@@ -17,7 +17,8 @@ struct LeafApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    // 接了鼠标时系统用常驻的粗滚动条；阅读器里一律用细的、停下就隐藏的悬浮滚动条
+    // 系统偏好是「自动」时，接了鼠标会用常驻的粗滚动条；Leaf 改用细的、停下就隐藏的悬浮滚动条。
+    // 用户明确选了「始终」（常为辅助功能）就照用户的来
     func applicationWillFinishLaunching(_ notification: Notification) {
         if let system = class_getClassMethod(NSScroller.self, #selector(getter: NSScroller.preferredScrollerStyle)),
            let overlay = class_getClassMethod(NSScroller.self, #selector(getter: NSScroller.leafOverlayStyle)) {
@@ -45,5 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 private extension NSScroller {
-    @objc class var leafOverlayStyle: NSScroller.Style { .overlay }
+    @objc class var leafOverlayStyle: NSScroller.Style {
+        UserDefaults.standard.string(forKey: "AppleShowScrollBars") == "Always" ? .legacy : .overlay
+    }
 }
