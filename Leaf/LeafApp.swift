@@ -17,6 +17,14 @@ struct LeafApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    // 接了鼠标时系统用常驻的粗滚动条；阅读器里一律用细的、停下就隐藏的悬浮滚动条
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        if let system = class_getClassMethod(NSScroller.self, #selector(getter: NSScroller.preferredScrollerStyle)),
+           let overlay = class_getClassMethod(NSScroller.self, #selector(getter: NSScroller.leafOverlayStyle)) {
+            method_exchangeImplementations(system, overlay)
+        }
+    }
+
     // 关掉最后一本书 = 退出，不留空壳进程。
     // 不能用 applicationShouldTerminateAfterLastWindowClosed：打开面板也算窗口，
     // 面板一关（取消或选好书、书窗还没出来）就会被当成「最后一个窗口」而退出。
@@ -34,4 +42,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
+}
+
+private extension NSScroller {
+    @objc class var leafOverlayStyle: NSScroller.Style { .overlay }
 }
