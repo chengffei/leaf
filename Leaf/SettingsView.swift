@@ -1,20 +1,33 @@
 import SwiftUI
 
 /// 「Leaf › 设置… ⌘,」：全部阅读偏好，改动即时生效
+/// 分两页：阅读（由整体到局部：预设 → 外观 → 文字 → 间距 → 版式）、通用（语言）
 struct SettingsView: View {
+    var body: some View {
+        TabView {
+            ReadingSettings()
+                .tabItem { Label("Reading", systemImage: "book") }
+            GeneralSettings()
+                .tabItem { Label("General", systemImage: "gearshape") }
+        }
+    }
+}
+
+private struct ReadingSettings: View {
     @Bindable var settings = ReaderSettings.shared
     @State private var namingPreset = false
     @State private var presetName = ""
-    /// 启动时的语言设置；改了且没重开，就显示「重新打开」
-    @State private var launchedLanguage = ReaderSettings.shared.uiLanguage
 
     var body: some View {
         Form {
-            Section("Presets") {
-                PresetPicker(settings: settings)
-                HStack {
-                    Button("Save Current Settings as Preset…") { presetName = ""; namingPreset = true }
-                    Spacer()
+            Section {
+                LabeledContent("Layout Preset") {
+                    HStack(spacing: 10) {
+                        PresetPicker(settings: settings)
+                            .labelsHidden()
+                            .fixedSize()
+                        Button("Save as Preset…") { presetName = ""; namingPreset = true }
+                    }
                 }
                 ForEach(settings.customPresets) { preset in
                     LabeledContent(preset.displayName) {
@@ -24,6 +37,15 @@ struct SettingsView: View {
                     }
                 }
             }
+            Section("Appearance") {
+                HStack(spacing: 0) {
+                    ForEach(Theme.allCases) { theme in
+                        ThemeSwatch(theme: theme, selected: settings.theme == theme) { settings.theme = theme }
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
             Section("Text") {
                 Picker("Font", selection: $settings.font) {
                     ForEach(ReaderFont.allCases) { Text($0.label).tag($0.rawValue) }
@@ -32,33 +54,62 @@ struct SettingsView: View {
                         Text(font.display).tag(font.family)
                     }
                 }
-                LabeledContent("Size") {
-                    HStack(spacing: 8) {
-                        Text("\(settings.zoomPercent)%").monospacedDigit()
-                        Stepper("Size", value: $settings.zoomPercent, in: ReaderSettings.zoomRange, step: ReaderSettings.zoomStep)
-                            .labelsHidden()
-                    }
+                // 不用 LabeledContent：控件比一行高时，它把标签顶到上沿
+                HStack {
+                    Text("Size")
+                    Spacer()
+                    SizeStepper(settings: settings).frame(width: 180)
                 }
                 LabeledContent("Weight") {
                     HStack(spacing: 8) {
-                        Text(settings.weight == 0 ? String(localized: "Original") : "+\(settings.weight)").monospacedDigit()
+                        Text(settings.weight == 0 ? String(localized: "Original") : "+\(settings.weight)")
+                            .monospacedDigit().foregroundStyle(.secondary)
                         Stepper("Weight", value: $settings.weight, in: ReaderSettings.weightRange).labelsHidden()
                     }
                 }
-                segmented("Line Spacing", $settings.lineSpacing, LineSpacing.allCases)
-                segmented("Paragraph Spacing", $settings.paragraphSpacing, ParagraphSpacing.allCases)
-                segmented("Letter Spacing", $settings.letterSpacing, LetterSpacing.allCases)
+            }
+            Section("Spacing") {
+                menu("Line Spacing", $settings.lineSpacing, LineSpacing.allCases)
+                menu("Paragraph Spacing", $settings.paragraphSpacing, ParagraphSpacing.allCases)
+                menu("Letter Spacing", $settings.letterSpacing, LetterSpacing.allCases)
             }
             Section("Layout") {
-                segmented("Alignment", $settings.align, TextAlign.allCases)
-                segmented("Margins", $settings.margin, PageMargin.allCases)
-                segmented("Text Width", $settings.textWidth, TextWidth.allCases)
-                segmented("Columns", $settings.columns, Columns.allCases)
+                menu("Alignment", $settings.align, TextAlign.allCases)
+                menu("Margins", $settings.margin, PageMargin.allCases)
+                menu("Text Width", $settings.textWidth, TextWidth.allCases)
+                menu("Columns", $settings.columns, Columns.allCases)
             }
-            Section("Appearance") {
-                segmented("Theme", $settings.theme, Theme.allCases)
-            }
-            Section("Language") {
+        }
+        .formStyle(.grouped)
+        // 高度固定、内容滚动：按内容撑开会高过小屏，底部被 Dock 盖住
+        .frame(width: 460, height: 640)
+        .alert("Preset Name", isPresented: $namingPreset) {
+            TextField("Name", text: $presetName)
+            Button("Save") { settings.savePreset(named: presetName) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Saves font, size, weight, spacing, margins, text width, columns and alignment. Theme is kept separate.")
+        }
+    }
+
+    // 标题类型必须是 LocalizedStringKey，用 String 就不会查翻译表
+    private func menu<T: Hashable & Identifiable>(_ title: LocalizedStringKey, _ selection: Binding<T>, _ cases: [T]) -> some View
+        where T: LabeledCase {
+        Picker(title, selection: selection) {
+            ForEach(cases) { Text($0.label).tag($0) }
+        }
+        .pickerStyle(.menu)
+    }
+}
+
+private struct GeneralSettings: View {
+    @Bindable var settings = ReaderSettings.shared
+    /// 启动时的语言设置；改了且没重开，就显示「重新打开」
+    @State private var launchedLanguage = ReaderSettings.shared.uiLanguage
+
+    var body: some View {
+        Form {
+            Section {
                 Picker("Language", selection: $settings.uiLanguage) {
                     Text("Follow System").tag("")
                     Divider()
@@ -74,24 +125,8 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        // 高度固定、内容滚动：按内容撑开会高过小屏，底部被 Dock 盖住
-        .frame(width: 460, height: 720)
-        .alert("Preset Name", isPresented: $namingPreset) {
-            TextField("Name", text: $presetName)
-            Button("Save") { settings.savePreset(named: presetName) }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Saves font, size, weight, spacing, margins, text width, columns and alignment. Theme is kept separate.")
-        }
-    }
-
-    // 标题类型必须是 LocalizedStringKey，用 String 就不会查翻译表
-    private func segmented<T: Hashable & Identifiable>(_ title: LocalizedStringKey, _ selection: Binding<T>, _ cases: [T]) -> some View
-        where T: LabeledCase {
-        Picker(title, selection: selection) {
-            ForEach(cases) { Text($0.label).tag($0) }
-        }
-        .pickerStyle(.segmented)
+        .scrollDisabled(true)
+        .frame(width: 460, height: 150)
     }
 }
 

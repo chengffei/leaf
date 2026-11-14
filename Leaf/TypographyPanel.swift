@@ -49,7 +49,7 @@ struct TypographyPanel: View {
 }
 
 /// 字号：一条胶囊里放「小 A ｜ 百分比 ｜ 大 A」，百分比点一下复位
-private struct SizeStepper: View {
+struct SizeStepper: View {
     @Bindable var settings: ReaderSettings
 
     var body: some View {
@@ -86,7 +86,7 @@ private struct SizeStepper: View {
 }
 
 /// 主题色样：圆里用该主题的底色和字色写 Aa，跟随系统画成浅深各半
-private struct ThemeSwatch: View {
+struct ThemeSwatch: View {
     let theme: Theme
     let selected: Bool
     let action: () -> Void

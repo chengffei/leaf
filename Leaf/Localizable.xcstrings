@@ -1565,6 +1565,52 @@
         }
       }
     },
+    "General": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allgemein"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Général"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一般"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일반"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通用"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一般"
+          }
+        }
+      }
+    },
     "Go": {
       "localizations": {
         "de": {
@@ -3129,6 +3175,52 @@
         }
       }
     },
+    "Reading": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lesen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lectura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lecture"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "読書"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "읽기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阅读"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閱讀"
+          }
+        }
+      }
+    },
     "Reopen Now": {
       "localizations": {
         "de": {
@@ -3313,48 +3405,48 @@
         }
       }
     },
-    "Save Current Settings as Preset…": {
+    "Save as Preset…": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aktuelle Einstellungen als Voreinstellung sichern …"
+            "value": "Als Voreinstellung sichern …"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardar ajustes actuales como predefinido…"
+            "value": "Guardar como ajuste…"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enregistrer les réglages actuels comme préréglage…"
+            "value": "Enregistrer comme préréglage…"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "現在の設定をプリセットとして保存…"
+            "value": "プリセットとして保存…"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "현재 설정을 프리셋으로 저장…"
+            "value": "프리셋으로 저장…"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "把当前设置存为预设…"
+            "value": "存为预设…"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "將目前設定存為預設…"
+            "value": "存為預設…"
           }
         }
       }
@@ -3815,6 +3907,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "縮小 ⌘-"
+          }
+        }
+      }
+    },
+    "Spacing": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abstände"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espaciado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espacement"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "間隔"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "간격"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "间距"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "間距"
           }
         }
       }
