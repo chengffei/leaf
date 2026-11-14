@@ -84,7 +84,7 @@ def head(lang, page, faq):
         "fileFormat": ["application/epub+zip", "application/x-mobipocket-ebook", "application/vnd.amazon.mobi8-ebook", "application/pdf"],
         "screenshot": SITE + "images/reading.png",
         "image": SITE + "images/icon.png",
-        "license": "https://opensource.org/licenses/MIT",
+        "license": "https://www.gnu.org/licenses/gpl-3.0.html",
         "isAccessibleForFree": True,
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
         "author": {"@type": "Person", "name": "Felix", "url": "https://github.com/chengffei"},

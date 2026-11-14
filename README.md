@@ -88,9 +88,13 @@ Architecture notes and known pitfalls are in [DEVELOPMENT.md](DEVELOPMENT.md) (C
 
 Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/foliate-js) (MIT). Sample books in `TestBooks/` are from [Project Gutenberg](https://www.gutenberg.org/) and in the public domain.
 
+## Contributing
+
+Contributions are welcome. Code contributions require agreeing to the [Contributor License Agreement](CLA.md).
+
 ## License
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE). foliate-js keeps its MIT license in `Web/foliate/LICENSE`.
 
 ---
 
@@ -164,6 +168,10 @@ xcodegen generate
 
 排版与格式解析由 [foliate-js](https://github.com/johnfactotum/foliate-js)（MIT）完成。`TestBooks/` 中的样书来自 [Project Gutenberg](https://www.gutenberg.org/)，属公有领域。
 
+### 参与贡献
+
+欢迎贡献。提交代码前需要同意[贡献者许可协议](CLA.md)。
+
 ### 协议
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE)。foliate-js 仍按其 MIT 协议，见 `Web/foliate/LICENSE`。
