@@ -9,6 +9,8 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>EPUBDocument</string>
 			<key>CFBundleTypeName</key>
 			<string>EPUB Book</string>
 			<key>CFBundleTypeRole</key>
@@ -35,6 +37,8 @@
 			</array>
 		</dict>
 		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>KindleDocument</string>
 			<key>CFBundleTypeName</key>
 			<string>Kindle Book</string>
 			<key>CFBundleTypeRole</key>
@@ -48,6 +52,8 @@
 			</array>
 		</dict>
 		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>KindleDocument</string>
 			<key>CFBundleTypeName</key>
 			<string>Kindle Book</string>
 			<key>CFBundleTypeRole</key>

@@ -33,22 +33,25 @@ targets:
         CFBundleDocumentTypes:
           - CFBundleTypeName: EPUB Book
             CFBundleTypeRole: Viewer
+            CFBundleTypeIconFile: EPUBDocument
             LSHandlerRank: Alternate
             LSItemContentTypes: [org.idpf.epub-container]
           - CFBundleTypeName: PDF Document
             CFBundleTypeRole: Viewer
-            # PDF 有系统自带的类型图标，Leaf 不自带文档图标的话，就算设成默认打开方式 Finder 也不换图标
+            # 文档图标由 scripts/docicons/gen.swift 生成。PDF 有系统自带的类型图标，Leaf 不自带的话，设成默认打开方式 Finder 也不换
             CFBundleTypeIconFile: PDFDocument
             LSHandlerRank: Alternate
             LSItemContentTypes: [com.adobe.pdf]
           - CFBundleTypeName: Kindle Book
             CFBundleTypeRole: Viewer
+            CFBundleTypeIconFile: KindleDocument
             LSHandlerRank: Owner
             LSItemContentTypes: [com.chengffei.leaf.mobi, com.chengffei.leaf.azw3]
           # calibre、Kindle 等装过的话，.mobi/.azw3/.azw 会被系统认成它们登记的 com.amazon.* 类型，
           # 只认自家类型时 Leaf 设成默认打开也不生效
           - CFBundleTypeName: Kindle Book
             CFBundleTypeRole: Viewer
+            CFBundleTypeIconFile: KindleDocument
             LSHandlerRank: Default
             LSItemContentTypes: [com.amazon.mobi, com.amazon.azw3, com.amazon.azw]
         UTImportedTypeDeclarations:
