@@ -7,7 +7,7 @@
 <p align="center">
   Double-click to read. Close to leave.<br>
   双击就读，关窗就走。<br><br>
-  An open-source EPUB, MOBI, AZW3 and PDF reader for Mac that reads like a Kindle.<br>
+  An open-source EPUB, MOBI, AZW3, PDF, FB2 and CBZ reader for Mac that reads like a Kindle.<br>
   开源的 Mac 电子书阅读器，读起来像 Kindle。
 </p>
 
@@ -40,7 +40,7 @@ Leaf is an independent project and is not affiliated with Amazon. Kindle is a tr
 - **Find and go to:** `⌘F` lists results by chapter; `⌘L` jumps to a percent or location
 - **Floating contents:** `⌘T`; it floats over the page, so nothing reflows
 - **Layout:** text width, one or two columns, click the page edges to turn
-- **Four formats:** EPUB, MOBI, AZW3 and PDF, no conversion (MOBI/AZW3 must be DRM-free; PDF keeps its own page layout)
+- **Six formats:** EPUB, MOBI, AZW3, PDF, FB2 (and zipped FBZ) and CBZ comics, no conversion (MOBI/AZW3 must be DRM-free; PDF keeps its own page layout)
 - **Images:** double-click to view full size
 - **Themes:** paper, sepia, dark or system
 - **Eight languages:** English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español
@@ -119,7 +119,7 @@ Leaf 是独立项目，与 Amazon 无关。Kindle 是 Amazon.com, Inc. 的商标
 - **查找与跳转**：`⌘F` 按章节列出结果；`⌘L` 跳到百分比或位置号
 - **浮动目录**：`⌘T` 打开，浮在页面上，书页不动
 - **版式**：版心宽度，单栏或双栏，点页面两侧翻页
-- **四种格式**：EPUB、MOBI、AZW3、PDF，无需转换（MOBI/AZW3 须无 DRM；PDF 保持原版式）
+- **六种格式**：EPUB、MOBI、AZW3、PDF、FB2（含压缩的 FBZ）、CBZ 漫画，无需转换（MOBI/AZW3 须无 DRM；PDF 保持原版式）
 - **看图**：双击放大
 - **主题**：纸白、米黄、深色或跟随系统
 - **8 种语言**：英文、简体中文、繁体中文、日文、韩文、法文、德文、西班牙文

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaf — 不建书库的 Kindle 式 Mac 电子书阅读器</title>
-<meta name="description" content="免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3、PDF 即读，关窗即退。没有书库，不用账号。读起来像 Kindle。原生应用，约 5 MB。">
+<meta name="description" content="免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3、PDF、FB2、CBZ 即读，关窗即退。没有书库，不用账号。读起来像 Kindle。原生应用，约 5 MB。">
 <link rel="canonical" href="https://chengffei.github.io/leaf/zh/">
 <link rel="alternate" hreflang="en" href="https://chengffei.github.io/leaf/">
 <link rel="alternate" hreflang="zh-Hans" href="https://chengffei.github.io/leaf/zh/">
@@ -33,11 +33,11 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Leaf",
-  "description": "免费开源的 Mac 电子书阅读器，打开 EPUB、MOBI、AZW3、PDF。没有书库，不用账号，读起来像 Kindle。",
+  "description": "免费开源的 Mac 电子书阅读器，打开 EPUB、MOBI、AZW3、PDF、FB2、CBZ。没有书库，不用账号，读起来像 Kindle。",
   "applicationCategory": "ProductivityApplication",
   "applicationSubCategory": "Ebook reader",
   "operatingSystem": "macOS 15 or later",
-  "softwareVersion": "0.4.1",
+  "softwareVersion": "0.4.2",
   "dateModified": "2026-11-14",
   "inLanguage": "zh-Hans",
   "url": "https://chengffei.github.io/leaf/zh/",
@@ -46,7 +46,9 @@
     "application/epub+zip",
     "application/x-mobipocket-ebook",
     "application/vnd.amazon.mobi8-ebook",
-    "application/pdf"
+    "application/pdf",
+    "application/x-fictionbook+xml",
+    "application/vnd.comicbook+zip"
   ],
   "screenshot": "https://chengffei.github.io/leaf/images/reading.png",
   "image": "https://chengffei.github.io/leaf/images/icon.png",
@@ -301,7 +303,7 @@
 
 <header class="hero wrap">
   <img class="icon" src="../images/icon-256.png" width="128" height="128" alt="Leaf app icon">
-  <p class="eyebrow">开源的 Mac 电子书阅读器 · EPUB · MOBI · AZW3 · PDF</p>
+  <p class="eyebrow">开源的 Mac 电子书阅读器 · EPUB · MOBI · AZW3 · PDF · FB2 · CBZ</p>
   <h1>双击就读，关窗就走。</h1>
   <p class="lead">
     一本书，一个窗口。没有书架，只记得你读到哪。读起来，像 Kindle。
@@ -331,7 +333,7 @@
   <h2>Leaf 是什么？</h2>
   <p class="definition">
     
-    Leaf 是免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3 或 PDF 文件即可阅读，关窗即退出。没有书库，不复制文件，不要账号。它记得你读到哪，读起来像 Kindle。原生 SwiftUI 应用，约 5 MB，需要 macOS 15。与 Amazon 无关。
+    Leaf 是免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3、PDF、FB2 或 CBZ 文件即可阅读，关窗即退出。没有书库，不复制文件，不要账号。它记得你读到哪，读起来像 Kindle。原生 SwiftUI 应用，约 5 MB，需要 macOS 15。与 Amazon 无关。
   </p>
 </section>
 
@@ -389,8 +391,8 @@
     </div>
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
-      <h3>三种格式</h3>
-      <p>EPUB、MOBI、AZW3，无需转换。</p>
+      <h3>六种格式</h3>
+      <p>EPUB、MOBI、AZW3、PDF、FB2、CBZ，无需转换。</p>
     </div>
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M5.5 8h1.5M5.5 11h1.5M5.5 14h1.5"/></svg>
@@ -515,7 +517,7 @@
   <p><a href="https://github.com/chengffei/leaf">github.com/chengffei/leaf</a></p>
   <p>
     
-    作者 <a href="https://github.com/chengffei">Felix</a> · 版本 0.4.1 · 最后更新 <time datetime="2026-11-14">2026 年 11 月 14 日</time>
+    作者 <a href="https://github.com/chengffei">Felix</a> · 版本 0.4.2 · 最后更新 <time datetime="2026-11-14">2026 年 11 月 14 日</time>
   </p>
 </footer>
 
