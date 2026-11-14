@@ -15,15 +15,7 @@ struct BookWindow: View {
             Group {
                 if book.isPDF {
                     PDFReaderView(book: book, model: model, theme: settings.theme, zoom: model.pdfZoom)
-                        .overlay(alignment: .bottomTrailing) {
-                            Text(model.pageLabel)
-                                .font(.caption).monospacedDigit()
-                                .foregroundStyle(.secondary)
-                                .padding(.horizontal, 10).padding(.vertical, 4)
-                                .background(.regularMaterial, in: Capsule())
-                                .padding(12)
-                                .allowsHitTesting(false)
-                        }
+                        .overlay(alignment: .bottomTrailing) { PageLabel(model: model) }
                 } else {
                     ReaderView(book: book, model: model, prefs: settings.prefs)
                 }
@@ -80,6 +72,21 @@ struct BookWindow: View {
         .onAppear { model.openSettings = { openSettings() } }
         // 主题的浅色 / 深色：改窗口外观，WebView 的 prefers-color-scheme 跟着窗口走；米黄按浅色
         .preferredColorScheme(settings.theme.colorScheme)
+    }
+}
+
+/// PDF 页码：单独成视图，滚动翻页时只重绘这一小块，不连带整个窗口
+struct PageLabel: View {
+    let model: ReaderModel
+
+    var body: some View {
+        Text(model.pageLabel)
+            .font(.caption).monospacedDigit()
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 10).padding(.vertical, 4)
+            .background(.regularMaterial, in: Capsule())
+            .padding(12)
+            .allowsHitTesting(false)
     }
 }
 
@@ -140,8 +147,8 @@ struct SearchPanel: View {
                 .frame(maxHeight: .infinity)
             } else {
                 List(selection: hitSelection) {
-                    ForEach(groups, id: \.label) { group in
-                        Section(group.label) {
+                    ForEach(groups, id: \.first) { group in
+                        Section(group.label.isEmpty ? String(localized: "Body") : group.label) {
                             ForEach(group.hits) { hit in
                                 excerpt(hit).tag(hit.id).lineLimit(3)
                             }
@@ -167,17 +174,19 @@ struct SearchPanel: View {
     private var countText: String {
         switch model.searchStatus {
         case "searching": model.searchHits.isEmpty ? String(localized: "Searching") : "\(model.searchHits.count)…"
-        case "done": model.searchHits.isEmpty ? "" : "\(model.searchIndex + 1) / \(model.searchHits.count)"
+        case "done": model.searchHits.isEmpty ? "" : "\(model.searchIndex + 1) / \(model.searchHits.count)\(model.searchTruncated ? "+" : "")"
         default: ""
         }
     }
 
-    private struct Group { let label: String; var hits: [SearchHit] }
+    // 按原始章名分组：比较时别用替换成「正文」后的名字，否则没有章名的命中会各成一组；
+    // 不同位置可能出现同名章节，分组的 id 用首条命中的序号
+    private struct Group { let label: String; let first: Int; var hits: [SearchHit] }
     private var groups: [Group] {
         var out: [Group] = []
         for hit in model.searchHits {
             if out.last?.label == hit.label { out[out.count - 1].hits.append(hit) }
-            else { out.append(Group(label: hit.label.isEmpty ? String(localized: "Body") : hit.label, hits: [hit])) }
+            else { out.append(Group(label: hit.label, first: hit.id, hits: [hit])) }
         }
         return out
     }

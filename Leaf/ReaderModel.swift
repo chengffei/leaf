@@ -46,6 +46,8 @@ final class ReaderModel {
     var searchQuery = ""
     var searchHits: [SearchHit] = []
     var searchIndex = -1
+    /// 命中太多，只列了前面一部分（EPUB、PDF 都是 500 处）
+    var searchTruncated = false
     var searchStatus = "idle" // idle / searching / done，由 JS 回报
     var title = ""
     var author = ""
@@ -75,9 +77,12 @@ final class ReaderModel {
     /// 打开「设置」窗口：SwiftUI 的 openSettings 只能从环境里取，由 BookWindow 塞进来给右键菜单用
     @ObservationIgnored var openSettings: @MainActor () -> Void = {}
 
+    /// href → 目录项；合集目录上千条，每次翻页、每次重绘都线性找一遍太浪费
+    @ObservationIgnored private var tocIndex: [String: TOCEntry.ID] = [:]
+
     var currentID: TOCEntry.ID? {
         guard let currentHref else { return nil }
-        return toc.first { $0.href == currentHref }?.id
+        return tocIndex[currentHref]
     }
 
     static let collapseThreshold = 50
@@ -94,6 +99,8 @@ final class ReaderModel {
             }
             stack.append(i)
         }
+        tocIndex = [:]
+        for entry in result where tocIndex[entry.href] == nil { tocIndex[entry.href] = entry.id } // 同一 href 取第一条，和原来的 first 一致
         toc = result
         expanded = result.count > Self.collapseThreshold
             ? [] : Set(result.filter(\.hasChildren).map(\.id))

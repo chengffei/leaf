@@ -208,6 +208,7 @@ final class PDFController: NSObject, PDFDocumentDelegate {
         hits = []
         pendingHits = []
         model.searchHits = []
+        model.searchTruncated = false
         model.searchIndex = -1
         view.highlightedSelections = nil
         view.setCurrentSelection(nil, animate: false)
@@ -218,6 +219,7 @@ final class PDFController: NSObject, PDFDocumentDelegate {
 
     private func found(_ selection: PDFSelection) {
         guard model != nil, hits.count < Self.maxHits else {
+            model?.searchTruncated = true
             document?.cancelFindString()
             return
         }

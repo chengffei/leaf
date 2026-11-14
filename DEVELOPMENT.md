@@ -57,7 +57,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 - **分栏**：foliate 的栏数 = `min(max-column-count, ceil(宽度 / max-inline-size))`，竖窗另有上限 `--_max-column-count-portrait`（上游写死 1，已补丁为属性）。「双栏」把每栏上限压到半个窗口并在 resize 时重算。
 - **右键菜单**：`WKWebView.willOpenMenu` 里按 identifier 后缀（`Copy` / `LookUp` / `Translate`）筛系统项，其余换成自己的；系统会再追加「服务」子菜单，拦不掉。打开设置窗口只能用 SwiftUI 环境里的 `openSettings`（`BookWindow` 塞进 `ReaderModel`），`NSApp.sendAction(showSettingsWindow:)` 在 macOS 15 上无效。
 - **进度指示**：foliate 的 `relocate` 带 `location`（1 位置 = 1500 字节）和 `time`（按固定 1600 字节/分钟算）。Leaf 把 `time` 换回剩余字节，再除以本人速度：每次亲手翻页（`turn()`）记时刻与字节位置，下一次 relocate 时把间隔（2 秒到 5 分钟之内才算）和推进字节累计进样本；样本不足 3 分钟显示「测算中」，超过 120 分钟按半衰减淡出旧样本。
-- **查找**：`view.search()` 是异步生成器，整本逐节扫；第一处命中立刻跳转，结果每 150 毫秒批量回传给面板；换关键词时用 run 计数器作废旧搜索。输入框是原生的（面板查找页），网页里不再有查找条。
+- **查找**：`view.search()` 是异步生成器，整本逐节扫；第一处命中立刻跳转，结果每 150 毫秒批量回传给面板，只推新增的那段（`offset` 起），跳到第几处只推序号；最多 500 处（与 PDF 一致），满了就停扫，计数显示「500+」。常用字一搜上万处，整表重推曾让每次回传卡住主线程约 0.5 秒。换关键词时用 run 计数器作废旧搜索。输入框是原生的（面板查找页），网页里不再有查找条。
 - **大章节分块**：WebKit 多栏排版耗时随章节体积线性增长（1.2MB 单章开书约 3 秒）。`chunks.js` 只改书对象：`sections` 换成虚拟章节，`resolveHref` / `resolveCFI` 先按原章节解析再定位到块，foliate 不打补丁。块外节点不删，元素清空、去掉属性并挪到页面外，文本置空，所以 DOM 路径与原章节一致，CFI 照旧按原章节生成，老进度直接可用。占位别用 `display: none`（矩形在原点，会被 foliate 算进第一页的可见范围），也别用原位零高块（会被算进最后一页）；两种都会让章节名标错。目录片段落在块外时，占位里留同 id 的空 `span`，目录进度才能按文档顺序比较。代价：块边界强制换页，上一块末页可能半页留白。MOBI / AZW3 和固定版式不切
 - **跳转**：`⌘L` 弹网页小条（右下角，避开左侧面板），数字不超过 100 当百分比，更大当位置号；状态行悬停出现 `<input type=range>` 滑杆，`change` 时 `goToFraction`。两者都压一条「返回」。
 - **图片放大**：书页 `dblclick` 命中 `<img>` 或 `<svg><image>`（封面常用）就把 blob 地址放进宿主页的 `#lightbox`；网格单元高度不定，图片尺寸要用 `vw` / `vh` 限制。

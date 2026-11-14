@@ -409,16 +409,25 @@ $('#back').addEventListener('click', () => {
 })
 // ---- 查找：输入框和结果列表在原生面板里，这里只管搜、画高亮、跳 ----
 // view.search() 是异步生成器，整本逐节扫；换关键词用 run 计数器作废旧搜索
-const find = { query: '', results: [], index: -1, run: 0 }
-const postFind = (status) => post({
-  type: 'search', query: find.query, status, index: find.index,
-  results: find.results.map(({ cfi, label, excerpt }) => ({ cfi, label, ...excerpt })),
-})
+// 结果只推新增的那段（offset 起），跳到第几处只推序号：常用字一搜上万处，每次整表重推会卡住原生列表
+// 最多 MAX_HITS 处，和 PDF 一致；再多列表没法看，整本扫完也要好几秒
+const MAX_HITS = 500
+const find = { query: '', results: [], index: -1, run: 0, sent: 0, truncated: false }
+const postFind = (status) => {
+  const offset = find.sent
+  find.sent = find.results.length
+  post({
+    type: 'search', query: find.query, status, index: find.index, offset, truncated: find.truncated,
+    results: find.results.slice(offset).map(({ cfi, label, excerpt }) => ({ cfi, label, ...excerpt })),
+  })
+}
 const closeFind = () => {
   find.run++
   find.query = ''
   find.results = []
   find.index = -1
+  find.sent = 0
+  find.truncated = false
   view.clearSearch()
 }
 const runFind = async query => {
@@ -426,6 +435,8 @@ const runFind = async query => {
   find.query = query
   find.results = []
   find.index = -1
+  find.sent = 0
+  find.truncated = false
   view.clearSearch()
   if (!query) return postFind('idle')
   postFind('searching')
@@ -438,9 +449,11 @@ const runFind = async query => {
     if (run !== find.run) return gen.return()
     if (r === 'done') break
     if (r.subitems) {
-      find.results.push(...r.subitems.map(({ cfi, excerpt }) => ({ cfi, label: r.label, excerpt })))
+      find.results.push(...r.subitems.slice(0, MAX_HITS - find.results.length)
+        .map(({ cfi, excerpt }) => ({ cfi, label: r.label, excerpt })))
       if (first) { first = false; stepFind(1) } // 第一处命中立刻跳过去，不等整本搜完
       else if (Date.now() - lastPost > 150) { lastPost = Date.now(); postFind('searching') }
+      if (find.results.length >= MAX_HITS) { find.truncated = true; break } // break 会关掉生成器，停止扫描
     }
   }
   postFind('done')

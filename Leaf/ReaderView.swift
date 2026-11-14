@@ -90,13 +90,20 @@ struct ReaderView: NSViewRepresentable {
             case "toggleTOC":
                 model.toggleTOC()
             case "search":
-                model.searchStatus = body["status"] as? String ?? "idle"
-                model.searchIndex = body["index"] as? Int ?? -1
-                let hits = body["results"] as? [[String: Any]] ?? []
-                model.searchHits = hits.enumerated().map { i, h in
-                    SearchHit(id: i, cfi: h["cfi"] as? String ?? "", label: h["label"] as? String ?? "",
+                // @Observable 每次赋值都会让面板重绘，值没变就不写
+                let status = body["status"] as? String ?? "idle", index = body["index"] as? Int ?? -1
+                let truncated = body["truncated"] as? Bool ?? false
+                if model.searchStatus != status { model.searchStatus = status }
+                if model.searchIndex != index { model.searchIndex = index }
+                if model.searchTruncated != truncated { model.searchTruncated = truncated }
+                // 页面只推新增的结果；offset 对不上（中途换了关键词）就整表重来
+                let offset = body["offset"] as? Int ?? 0
+                let hits = (body["results"] as? [[String: Any]] ?? []).enumerated().map { i, h in
+                    SearchHit(id: offset + i, cfi: h["cfi"] as? String ?? "", label: h["label"] as? String ?? "",
                               pre: h["pre"] as? String ?? "", match: h["match"] as? String ?? "", post: h["post"] as? String ?? "")
                 }
+                if offset == 0 { model.searchHits = hits }
+                else if offset == model.searchHits.count { if !hits.isEmpty { model.searchHits.append(contentsOf: hits) } }
             case "closeTOC":
                 if model.showsTOC { model.showsTOC = false }
             case "link":
