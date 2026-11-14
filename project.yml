@@ -45,6 +45,12 @@ targets:
             CFBundleTypeRole: Viewer
             LSHandlerRank: Owner
             LSItemContentTypes: [com.chengffei.leaf.mobi, com.chengffei.leaf.azw3]
+          # calibre、Kindle 等装过的话，.mobi/.azw3/.azw 会被系统认成它们登记的 com.amazon.* 类型，
+          # 只认自家类型时 Leaf 设成默认打开也不生效
+          - CFBundleTypeName: Kindle Book
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Default
+            LSItemContentTypes: [com.amazon.mobi, com.amazon.azw3, com.amazon.azw]
         UTImportedTypeDeclarations:
           - UTTypeIdentifier: com.chengffei.leaf.mobi
             UTTypeDescription: Mobipocket Book
