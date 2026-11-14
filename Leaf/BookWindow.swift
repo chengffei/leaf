@@ -30,9 +30,9 @@ struct BookWindow: View {
             if #available(macOS 26.0, *) { ToolbarSpacer(.flexible) }
             ToolbarItem(placement: .primaryAction) {
                 Button { model.showsTypography.toggle() } label: {
-                    // 该符号随系统语言本地化（中文显示「大小」），固定用英文变体「Aa」
-                    Image(systemName: "textformat.size")
-                        .environment(\.locale, Locale(identifier: "en"))
+                    // 衬线 Aa：比 SF Symbol 的大小两个 A 轻，也更像阅读器；不随语言本地化
+                    Text(verbatim: "Aa")
+                        .font(.system(size: 18, design: .serif))
                 }
                 .help("Size and Theme")
                 .popover(isPresented: $model.showsTypography, arrowEdge: .bottom) {
