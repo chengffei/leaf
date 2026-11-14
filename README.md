@@ -7,7 +7,7 @@
 <p align="center">
   Double-click to read. Close to leave.<br>
   双击就读，关窗就走。<br><br>
-  An open-source EPUB, MOBI and AZW3 reader for Mac that reads like a Kindle.<br>
+  An open-source EPUB, MOBI, AZW3 and PDF reader for Mac that reads like a Kindle.<br>
   开源的 Mac 电子书阅读器，读起来像 Kindle。
 </p>
 
@@ -27,7 +27,7 @@ One book, one window. Double-click a book in Finder to read it; close the window
 
 - **No library:** no import, no copies, no account
 - **Remembers your place:** even after you rename or move the file
-- **Native, 2.7 MB:** real Mac menus, shortcuts, Look Up and Translate
+- **Native, 5 MB:** real Mac menus, shortcuts, Look Up and Translate
 
 Leaf is an independent project and is not affiliated with Amazon. Kindle is a trademark of Amazon.com, Inc.
 
@@ -40,7 +40,7 @@ Leaf is an independent project and is not affiliated with Amazon. Kindle is a tr
 - **Find and go to:** `⌘F` lists results by chapter; `⌘L` jumps to a percent or location
 - **Floating contents:** `⌘T`; it floats over the page, so nothing reflows
 - **Layout:** text width, one or two columns, click the page edges to turn
-- **Three formats:** EPUB, MOBI and AZW3, no conversion (MOBI/AZW3 must be DRM-free)
+- **Four formats:** EPUB, MOBI, AZW3 and PDF, no conversion (MOBI/AZW3 must be DRM-free; PDF keeps its own page layout)
 - **Images:** double-click to view full size
 - **Themes:** paper, sepia, dark or system
 - **Eight languages:** English, 简体中文, 繁體中文, 日本語, 한국어, Français, Deutsch, Español
@@ -51,7 +51,7 @@ Leaf is an independent project and is not affiliated with Amazon. Kindle is a tr
 
 ## Roadmap
 
-Highlights and notes, bookmarks, export, one-step dictionary lookup and a vocabulary list are next. Not planned: PDF, a store, an account, sync.
+Highlights and notes, bookmarks, export, one-step dictionary lookup and a vocabulary list are next. Not planned: a store, an account, sync.
 
 ## Install
 
@@ -102,7 +102,7 @@ Rendering and format parsing by [foliate-js](https://github.com/johnfactotum/fol
 
 - **没有书库**：不导入，不复制文件，不要账号
 - **记得读到哪**：改名、挪位置，也能接着读
-- **原生，2.7 MB**：系统菜单、快捷键、查询与翻译，都是 Mac 原装
+- **原生，5 MB**：系统菜单、快捷键、查询与翻译，都是 Mac 原装
 
 Leaf 是独立项目，与 Amazon 无关。Kindle 是 Amazon.com, Inc. 的商标。
 
@@ -115,7 +115,7 @@ Leaf 是独立项目，与 Amazon 无关。Kindle 是 Amazon.com, Inc. 的商标
 - **查找与跳转**：`⌘F` 按章节列出结果；`⌘L` 跳到百分比或位置号
 - **浮动目录**：`⌘T` 打开，浮在页面上，书页不动
 - **版式**：版心宽度，单栏或双栏，点页面两侧翻页
-- **三种格式**：EPUB、MOBI、AZW3，无需转换（MOBI/AZW3 须无 DRM）
+- **四种格式**：EPUB、MOBI、AZW3、PDF，无需转换（MOBI/AZW3 须无 DRM；PDF 保持原版式）
 - **看图**：双击放大
 - **主题**：纸白、米黄、深色或跟随系统
 - **8 种语言**：英文、简体中文、繁体中文、日文、韩文、法文、德文、西班牙文
@@ -126,7 +126,7 @@ Leaf 是独立项目，与 Amazon 无关。Kindle 是 Amazon.com, Inc. 的商标
 
 ### 路线
 
-接下来做高亮与笔记、书签、导出、一步查词、生词本。不做：PDF、商店、账号、同步。
+接下来做高亮与笔记、书签、导出、一步查词、生词本。不做：商店、账号、同步。
 
 ### 安装
 

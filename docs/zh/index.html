@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaf — 不建书库的 Kindle 式 Mac 电子书阅读器</title>
-<meta name="description" content="免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3 即读，关窗即退。没有书库，不用账号。读起来像 Kindle。原生应用，约 2.7 MB。">
+<meta name="description" content="免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3、PDF 即读，关窗即退。没有书库，不用账号。读起来像 Kindle。原生应用，约 5 MB。">
 <link rel="canonical" href="https://chengffei.github.io/leaf/zh/">
 <link rel="alternate" hreflang="en" href="https://chengffei.github.io/leaf/">
 <link rel="alternate" hreflang="zh-Hans" href="https://chengffei.github.io/leaf/zh/">
@@ -33,19 +33,20 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Leaf",
-  "description": "免费开源的 Mac 电子书阅读器，打开 EPUB、MOBI、AZW3。没有书库，不用账号，读起来像 Kindle。",
+  "description": "免费开源的 Mac 电子书阅读器，打开 EPUB、MOBI、AZW3、PDF。没有书库，不用账号，读起来像 Kindle。",
   "applicationCategory": "ProductivityApplication",
   "applicationSubCategory": "Ebook reader",
   "operatingSystem": "macOS 15 or later",
-  "softwareVersion": "0.3.2",
-  "dateModified": "2026-11-02",
+  "softwareVersion": "0.4.0",
+  "dateModified": "2026-11-14",
   "inLanguage": "zh-Hans",
   "url": "https://chengffei.github.io/leaf/zh/",
   "downloadUrl": "https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg",
   "fileFormat": [
     "application/epub+zip",
     "application/x-mobipocket-ebook",
-    "application/vnd.amazon.mobi8-ebook"
+    "application/vnd.amazon.mobi8-ebook",
+    "application/pdf"
   ],
   "screenshot": "https://chengffei.github.io/leaf/images/reading.png",
   "image": "https://chengffei.github.io/leaf/images/icon.png",
@@ -91,7 +92,7 @@
       "name": "Leaf 和 Readest 有什么区别？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Readest 跨平台，有书库、同步、高亮和朗读。Leaf 只做 Mac，有意做得更少：没有书库，只记阅读位置，合上书就退出。约 2.7 MB，Readest 约 67 MB。"
+        "text": "Readest 跨平台，有书库、同步、高亮和朗读。Leaf 只做 Mac，有意做得更少：没有书库，只记阅读位置，合上书就退出。约 5 MB，Readest 约 67 MB。"
       }
     },
     {
@@ -300,7 +301,7 @@
 
 <header class="hero wrap">
   <img class="icon" src="../images/icon-256.png" width="128" height="128" alt="Leaf app icon">
-  <p class="eyebrow">开源的 Mac 电子书阅读器 · EPUB · MOBI · AZW3</p>
+  <p class="eyebrow">开源的 Mac 电子书阅读器 · EPUB · MOBI · AZW3 · PDF</p>
   <h1>双击就读，关窗就走。</h1>
   <p class="lead">
     一本书，一个窗口。没有书架，只记得你读到哪。读起来，像 Kindle。
@@ -315,7 +316,7 @@
     </a>
   </div>
   <p class="meta">
-    免费开源 · 原生 Mac 应用 · 约 2.7 MB · macOS 15 或更高
+    免费开源 · 原生 Mac 应用 · 约 5 MB · macOS 15 或更高
     
   </p>
 </header>
@@ -330,7 +331,7 @@
   <h2>Leaf 是什么？</h2>
   <p class="definition">
     
-    Leaf 是免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI 或 AZW3 文件即可阅读，关窗即退出。没有书库，不复制文件，不要账号。它记得你读到哪，读起来像 Kindle。原生 SwiftUI 应用，约 2.7 MB，需要 macOS 15。与 Amazon 无关。
+    Leaf 是免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3 或 PDF 文件即可阅读，关窗即退出。没有书库，不复制文件，不要账号。它记得你读到哪，读起来像 Kindle。原生 SwiftUI 应用，约 5 MB，需要 macOS 15。与 Amazon 无关。
   </p>
 </section>
 
@@ -353,7 +354,7 @@
     </div>
     <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/></svg>
-      <h3>原生，2.7 MB</h3>
+      <h3>原生，5 MB</h3>
       <p>系统菜单、快捷键、查询与翻译，都是 Mac 原装。</p>
     </div>
   </div>
@@ -431,7 +432,7 @@
       <tr><td>高亮与笔记</td><td>下个版本</td><td>✓</td><td>✓</td><td>✓</td></tr>
       <tr><td>其他平台</td><td>只有 Mac</td><td>iOS · Android · Windows · Linux · Web</td><td>iPhone · iPad</td><td>Windows · Linux</td></tr>
       <tr><td>界面</td><td>原生（SwiftUI）</td><td>网页技术（Tauri）</td><td>原生</td><td>Qt</td></tr>
-      <tr><td>安装包大小</td><td>约 2.7 MB</td><td>约 67 MB</td><td>系统自带</td><td>约 350 MB</td></tr>
+      <tr><td>安装包大小</td><td>约 5 MB</td><td>约 67 MB</td><td>系统自带</td><td>约 350 MB</td></tr>
       <tr><td>系统要求</td><td>macOS 15+</td><td>macOS 12+</td><td>—</td><td>macOS 14+</td></tr>
       <tr><td>价格 · 协议</td><td>免费 · MIT</td><td>免费，云同步可选付费 · AGPL-3.0</td><td>免费 · 闭源</td><td>免费 · GPL-3.0</td></tr>
     </tbody>
@@ -497,7 +498,7 @@
   <div class="faq">
     <details><summary>怎么在 Mac 上打开 MOBI 和 AZW3 文件？</summary><p>装好 Leaf 后，在访达里双击文件，或右键选「打开方式 › Leaf」。文件需要无 DRM。</p></details>
     <details><summary>Mac 上有像 Kindle 一样的电子书阅读器吗？</summary><p>Leaf 用 Kindle 的方式读 Mac 上无 DRM 的 EPUB、MOBI、AZW3：按你的速度估算剩余时间、位置号、排版预设、脚注就地弹出、全书查找。高亮与笔记即将推出。没有商店，不用账号。</p></details>
-    <details><summary>Leaf 和 Readest 有什么区别？</summary><p>Readest 跨平台，有书库、同步、高亮和朗读。Leaf 只做 Mac，有意做得更少：没有书库，只记阅读位置，合上书就退出。约 2.7 MB，Readest 约 67 MB。</p></details>
+    <details><summary>Leaf 和 Readest 有什么区别？</summary><p>Readest 跨平台，有书库、同步、高亮和朗读。Leaf 只做 Mac，有意做得更少：没有书库，只记阅读位置，合上书就退出。约 5 MB，Readest 约 67 MB。</p></details>
     <details><summary>Leaf 免费吗？</summary><p>免费，并以 MIT 协议开源。</p></details>
     <details><summary>为什么 macOS 提示无法验证开发者？</summary><p>Leaf 没有经过 Apple 公证。先打开一次并关掉提示，再到「系统设置 › 隐私与安全性」点「仍要打开」。只需操作一次。</p></details>
     <details><summary>能打开在 Kindle 商店买的书吗？</summary><p>只能打开无 DRM 的文件。Kindle 商店购买的书通常带 DRM，Leaf 打不开。</p></details>
@@ -514,7 +515,7 @@
   <p><a href="https://github.com/chengffei/leaf">github.com/chengffei/leaf</a></p>
   <p>
     
-    作者 <a href="https://github.com/chengffei">Felix</a> · 版本 0.3.2 · 最后更新 <time datetime="2026-11-02">2026 年 11 月 2 日</time>
+    作者 <a href="https://github.com/chengffei">Felix</a> · 版本 0.4.0 · 最后更新 <time datetime="2026-11-14">2026 年 11 月 14 日</time>
   </p>
 </footer>
 
