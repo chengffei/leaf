@@ -1,7 +1,7 @@
 :root {
   --bg: #fbfaf7;
   --fg: #1d1d1f;
-  --muted: #86868b;
+  --muted: #6e6e73; /* 小字对比度 ≥ 4.5:1（HIG）；原 #86868b 只有约 3.4:1 */
   --line: rgba(0, 0, 0, .1);
   --hover: #f0eee9;
 }
@@ -18,7 +18,7 @@
 :root[data-theme="sepia"] {
   --bg: #f4ecd8;
   --fg: #5b4636;
-  --muted: #9a8468;
+  --muted: #7a6650;
   --line: rgba(91, 70, 54, .18);
   --hover: #eadfc4;
 }

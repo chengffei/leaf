@@ -150,8 +150,8 @@ const applyStyles = () => {
   setAttr('margin', margin)
   applyLayout()
   view.renderer?.setStyles?.(bookCSS + prefsCSS(prefs))
-  // 回报实际生效的排版，供日志验收
-  requestAnimationFrame(() => {
+  // 回报实际生效的排版，供日志验收；只有 Debug 构建（带 debug 参数）才量，正式版省掉每次的样式计算
+  if (query.has('debug')) requestAnimationFrame(() => {
     const doc = view.renderer?.getContents?.()?.[0]?.doc
     const p = doc?.querySelector('p')
     const cs = p && doc.defaultView.getComputedStyle(p)
@@ -222,9 +222,7 @@ globalThis.leaf = {
   search(query) { runFind(query) },
   findNext(step) { stepFind(step) },
   goToResult(i) { goToFindResult(i) },
-  clearSearch() { closeFind() },
   goToPrompt() { openGoTo() },
-  goToFraction(f) { jumpToFraction(f) },
 }
 
 // ---- 翻页输入：键盘 + 触控板（一次手势只翻一页） ----

@@ -64,6 +64,9 @@ final class PDFController: NSObject, PDFDocumentDelegate {
     /// 目录项对应的大纲节点与起始页，下标即 TOCEntry.id
     private var outline: [(item: PDFOutline, page: Int)] = []
     private var hits: [PDFSelection] = []
+    /// 命中先攒着，最多每 150 毫秒推一次给列表，免得每条命中都重排一遍 SwiftUI 列表
+    private var pendingHits: [SearchHit] = []
+    private var flushScheduled = false
     private var observers: [NSObjectProtocol] = []
     private var appliedTheme: Theme?
     private var appliedDark: Bool?
@@ -175,7 +178,7 @@ final class PDFController: NSObject, PDFDocumentDelegate {
                 MainActor.assumeIsolated { if let selection { self?.found(selection) } }
             },
             center.addObserver(forName: .PDFDocumentDidEndFind, object: document, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.model?.searchStatus = "done" }
+                MainActor.assumeIsolated { self?.flushHits(); self?.model?.searchStatus = "done" }
             },
         ]
     }
@@ -183,6 +186,13 @@ final class PDFController: NSObject, PDFDocumentDelegate {
     private func historyChanged() {
         model?.canGoBack = view.canGoBack
         model?.canGoForward = view.canGoForward
+    }
+
+    var pageCount: Int { document?.pageCount ?? 0 }
+    func goToPage(_ index: Int) {
+        guard let document, let page = document.page(at: min(max(index, 0), document.pageCount - 1)) else { return }
+        view.go(to: page)
+        view.window?.makeFirstResponder(view)
     }
 
     func goBack() { view.goBack(nil) }
@@ -196,6 +206,7 @@ final class PDFController: NSObject, PDFDocumentDelegate {
         guard let document, let model else { return }
         document.cancelFindString()
         hits = []
+        pendingHits = []
         model.searchHits = []
         model.searchIndex = -1
         view.highlightedSelections = nil
@@ -206,22 +217,35 @@ final class PDFController: NSObject, PDFDocumentDelegate {
     }
 
     private func found(_ selection: PDFSelection) {
-        guard let model, hits.count < Self.maxHits else {
+        guard model != nil, hits.count < Self.maxHits else {
             document?.cancelFindString()
             return
         }
         let id = hits.count
         hits.append(selection)
+        // 上下文按这一处命中往两边各扩几十个字，不按整行找：同一行有两处命中时，按行找会两条都标成第一处
         let match = selection.string ?? ""
-        let line = (selection.copy() as? PDFSelection).map { $0.extendForLineBoundaries(); return $0.string ?? "" } ?? ""
-        var pre = "", post = ""
-        if let range = line.range(of: match, options: [.caseInsensitive, .diacriticInsensitive]) {
-            pre = String(line[..<range.lowerBound].suffix(30))
-            post = String(line[range.upperBound...].prefix(40))
+        func around(start: Int, end: Int) -> String {
+            guard let copy = selection.copy() as? PDFSelection else { return match }
+            copy.extend(atStart: start)
+            copy.extend(atEnd: end)
+            return (copy.string ?? match).replacingOccurrences(of: "\n", with: " ")
         }
+        let pre = String(around(start: 30, end: 0).dropLast(match.count))
+        let post = String(around(start: 0, end: 40).dropFirst(match.count))
         let label = document?.outlineItem(for: selection)?.label ?? ""
-        model.searchHits.append(SearchHit(id: id, cfi: "", label: label, pre: pre, match: match, post: post))
-        if id == 0 { goToHit(0) }
+        pendingHits.append(SearchHit(id: id, cfi: "", label: label, pre: pre, match: match, post: post))
+        if id == 0 { flushHits(); goToHit(0); return }
+        guard !flushScheduled else { return }
+        flushScheduled = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in self?.flushHits() }
+    }
+
+    private func flushHits() {
+        flushScheduled = false
+        guard !pendingHits.isEmpty else { return }
+        model?.searchHits.append(contentsOf: pendingHits)
+        pendingHits = []
     }
 
     func goToHit(_ index: Int) {
@@ -327,7 +351,7 @@ final class LeafPDFView: PDFView {
             ClosureMenuItem(String(localized: model.showsTOC && model.panelTab == .toc ? "Hide Contents" : "Show Contents"), key: "t") { model.toggleTOC() },
             ClosureMenuItem(String(localized: "Find…"), key: "f") { model.find() },
             .separator(),
-            ClosureMenuItem(String(localized: "Font and Theme…")) { model.showsTypography = true },
+            ClosureMenuItem(String(localized: "Size and Theme…")) { model.showsTypography = true },
             ClosureMenuItem(String(localized: "Settings…"), key: ",") { model.openSettings() },
         ]
         return menu

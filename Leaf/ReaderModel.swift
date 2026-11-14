@@ -167,7 +167,14 @@ final class ReaderModel {
     func findNext() { if let pdf { pdf.findNext(1) } else { call("leaf.findNext(1)") } }
     func findPrevious() { if let pdf { pdf.findNext(-1) } else { call("leaf.findNext(-1)") } }
     func goToHit(_ index: Int) { if let pdf { pdf.goToHit(index) } else { call("leaf.goToResult(\(index))") } }
-    func goToPrompt() { call("leaf.goToPrompt()") }
+    /// ⌘L：EPUB 由页面弹跳转小条；PDF 弹原生对话框输页码
+    func goToPrompt() { if isPDF { showsPageJump = true } else { call("leaf.goToPrompt()") } }
+    var showsPageJump = false
+    var pageCount: Int { pdf?.pageCount ?? 0 }
+    func goToPage(_ text: String) {
+        guard let n = Int(text.trimmingCharacters(in: .whitespaces)) else { return }
+        pdf?.goToPage(n - 1)
+    }
 
     private func call(_ js: String) { webView?.evaluateJavaScript(js, completionHandler: nil) }
 }

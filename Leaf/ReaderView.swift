@@ -28,6 +28,9 @@ struct ReaderView: NSViewRepresentable {
         var url = URLComponents(string: "\(BookSchemeHandler.scheme)://app/reader.html")!
         // 首屏就按当前排版渲染，避免先按默认排一遍再跳
         url.queryItems = [URLQueryItem(name: "prefs", value: prefs.json)]
+        #if DEBUG
+        url.queryItems?.append(URLQueryItem(name: "debug", value: "1")) // 页面回报实际排版（styled 日志）
+        #endif
         if let cfi = ReadingPosition.load(book.id) {
             url.queryItems?.append(URLQueryItem(name: "cfi", value: cfi))
         }
@@ -149,7 +152,7 @@ final class ReaderWebView: WKWebView {
         }
         items += [
             .separator(),
-            ClosureMenuItem(String(localized: "Font and Theme…")) { model.showsTypography = true },
+            ClosureMenuItem(String(localized: "Size and Theme…")) { model.showsTypography = true },
             ClosureMenuItem(String(localized: "Settings…"), key: ",") { model.openSettings() },
         ]
         menu.items = items

@@ -5,6 +5,7 @@ struct BookWindow: View {
     @State private var model = ReaderModel()
     /// 开书先亮出红绿灯与工具栏 3 秒再淡出，让人知道按钮在哪
     @State private var introducing = true
+    @State private var pageText = ""
     @Environment(\.openSettings) private var openSettings
     private let settings = ReaderSettings.shared
 
@@ -67,6 +68,13 @@ struct BookWindow: View {
         .task {
             try? await Task.sleep(for: .seconds(3))
             introducing = false
+        }
+        .alert("Go to Page", isPresented: $model.showsPageJump) {
+            TextField("", text: $pageText)
+            Button("Go") { model.goToPage(pageText); pageText = "" }
+            Button("Cancel", role: .cancel) { pageText = "" }
+        } message: {
+            Text("Page 1 to \(model.pageCount)")
         }
         .focusedSceneValue(\.reader, model)
         .onAppear { model.openSettings = { openSettings() } }
@@ -359,7 +367,7 @@ struct ReaderCommands: Commands {
         CommandMenu("Go") {
             Button("Location…") { reader?.goToPrompt() }
                 .keyboardShortcut("l")
-                .disabled(reader == nil || reader?.isPDF == true)
+                .disabled(reader == nil)
             Divider()
             Button("Back") { reader?.goBack() }
                 .keyboardShortcut("[")
