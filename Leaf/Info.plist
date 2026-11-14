@@ -67,6 +67,35 @@
 				<string>com.amazon.azw</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>FB2Document</string>
+			<key>CFBundleTypeName</key>
+			<string>FictionBook</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.chengffei.leaf.fb2</string>
+				<string>com.chengffei.leaf.fbz</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>CBZDocument</string>
+			<key>CFBundleTypeName</key>
+			<string>Comic Book Archive</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.chengffei.leaf.cbz</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
@@ -133,6 +162,72 @@
 				<key>public.mime-type</key>
 				<array>
 					<string>application/vnd.amazon.mobi8-ebook</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.xml</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>FictionBook</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.chengffei.leaf.fb2</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>fb2</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-fictionbook+xml</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Zipped FictionBook</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.chengffei.leaf.fbz</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>fbz</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-zip-compressed-fb2</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Comic Book Archive</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.chengffei.leaf.cbz</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>cbz</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/vnd.comicbook+zip</string>
 				</array>
 			</dict>
 		</dict>

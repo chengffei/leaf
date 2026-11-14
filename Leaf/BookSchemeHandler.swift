@@ -2,7 +2,7 @@ import Foundation
 import UniformTypeIdentifiers
 import WebKit
 
-/// `leaf://app/…` 读 bundle 里的 Web 目录，`leaf://app/book` 给出当前这本书的字节（同源，fetch 才不被拦）。
+/// `leaf://app/…` 读 bundle 里的 Web 目录，`leaf://app/book`（可带扩展名，如 `book.cbz`）给出当前这本书的字节（同源，fetch 才不被拦）。
 @MainActor
 final class BookSchemeHandler: NSObject, WKURLSchemeHandler {
     static let scheme = "leaf"
@@ -18,7 +18,7 @@ final class BookSchemeHandler: NSObject, WKURLSchemeHandler {
         guard let url = task.request.url else { return }
         let body: Data?
         let mime: String
-        if url.path == "/book" {
+        if url.path == "/book" || url.path.hasPrefix("/book.") {
             body = book
             mime = "application/octet-stream"
         } else {

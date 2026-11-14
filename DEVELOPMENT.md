@@ -26,7 +26,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 | 层 | 文件 | 职责 |
 |---|---|---|
 | 文档 | `BookDocument.swift` | `DocumentGroup(viewing:)` 只读；整本读入内存，SHA-256 作为书的身份 |
-| 桥 | `BookSchemeHandler.swift` | `leaf://app/*` 读 bundle 里的 `Web/`；`leaf://app/book` 给出当前书的字节（必须与页面同源，跨 host 会被 fetch 拦截） |
+| 桥 | `BookSchemeHandler.swift` | `leaf://app/*` 读 bundle 里的 `Web/`；`leaf://app/book` 给出当前书的字节（必须与页面同源，跨 host 会被 fetch 拦截）；FB2、FBZ、CBZ 带扩展名请求（`book.cbz`），foliate 只能靠文件名认这三种 |
 | 窗口 | `BookWindow.swift` `ReaderModel.swift` | `ZStack`：正文铺满，左侧浮动玻璃面板 `TOCPanel`（宽 300，`regularMaterial`，不推挤正文、不重排书页）有两页：目录（JS 压平回传，选中态 = 当前章节，点选 = 跳转并收起）和查找（`SearchPanel`：原生输入框，停 300 毫秒即搜，结果按章节分组，JS 以 `search` 消息流式回传）；`WindowChrome` 隐藏窗口标题，红绿灯与工具栏仅在目录打开、Aa 面板打开或鼠标停在顶部时淡入；主题的浅 / 深色靠 `.preferredColorScheme` 改窗口外观 |
 | 视图 | `ReaderView.swift` | `WKWebView`（`ReaderWebView` 子类接管右键菜单：保留系统的拷贝 / 查询 / 翻译，加翻页、目录、查找、设置）；接收 JS 消息：relocate 存进度、外链交给浏览器；只放行 leaf / blob / about / data |
 | 设置 | `ReaderSettings.swift` `SettingsView.swift` `TypographyPanel.swift` | 全局设置，`ReaderPrefs` 整包 JSON 推给页面。`SettingsView` 是「设置… ⌘,」窗口（全部选项）；`TypographyPanel` 是工具栏 Aa 弹层（只有字号和主题）。字号 = 书页根字号 `html { font-size: N% }`（作用于 em / rem / % 字号，写死 px 的书不受影响）；行距三档以 `!important` 覆盖书本；页边距三档 = foliate 的 `gap` / `margin` 属性（数值在 app.js `MARGINS`）；字体 原书 / 黑体 / 宋体 / 任意已安装家族（`NSFontManager`）；字重 0 到 4 = `-webkit-text-stroke` 描边（任何字体都生效，不抹平标题粗细）；对齐、段距、字距见 app.js `prefsCSS`；版心宽度四档 + 分栏三档 = foliate 的 `max-inline-size` / `max-column-count`；主题四档。`Preset` 是一套排版（不含主题），内置四套在 `Preset.builtins`，自定义存 `UserDefaults["presets"]` |
@@ -67,6 +67,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 - **放大快捷键绑 `=`**：绑 `+` 时 `⌘=` 不触发。
 - **构建目录里的 .app 会被 LaunchServices 登记**，Finder 可能打开旧版；`install.sh` 会注销它们并刷新图标缓存。
 - **GUI 自动化测试**（`scripts/ax.swift`）会真实点击窗口：启动时加 `--args -ApplePersistenceIgnoreState YES` 避免恢复你正在读的书，脚本只对标题以 `alice` / `hongloumeng` 开头的窗口动手。
+- **CBZ 和 EPUB 都是 zip，FB2 没有魔数**：foliate 按文件名区分。`BookDocument.format` 带进页面网址，`app.js` 再拿 `book.<ext>` 去取书；不带扩展名时 CBZ 会被当成 EPUB 打开失败。`.fb2.zip` 不登记，按扩展名系统只认得 `.zip`
 - 下载的测试书可能不完整：先 `unzip -t`（EPUB）或检查 PDB 末记录偏移（MOBI/AZW3），再怀疑代码。
 
 ## 测试书

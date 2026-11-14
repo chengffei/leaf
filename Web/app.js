@@ -569,7 +569,10 @@ $('#percent').addEventListener('click', () => {
 
 // ---- 打开 ----
 try {
-  const opened = await makeBook('leaf://app/book')
+  // FB2、FBZ、CBZ 只能靠扩展名认出来，网址带上扩展名
+  const format = query.get('format')
+  const opened = await makeBook(`leaf://app/book${format ? `.${format}` : ''}`)
+  if (format === 'cbz') opened.metadata.title = query.get('title') // 漫画没有元数据，foliate 拿文件名当标题
   chunkSections(opened)
   await view.open(opened)
   const { book } = view

@@ -54,6 +54,16 @@ targets:
             CFBundleTypeIconFile: KindleDocument
             LSHandlerRank: Default
             LSItemContentTypes: [com.amazon.mobi, com.amazon.azw3, com.amazon.azw]
+          - CFBundleTypeName: FictionBook
+            CFBundleTypeRole: Viewer
+            CFBundleTypeIconFile: FB2Document
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.chengffei.leaf.fb2, com.chengffei.leaf.fbz]
+          - CFBundleTypeName: Comic Book Archive
+            CFBundleTypeRole: Viewer
+            CFBundleTypeIconFile: CBZDocument
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.chengffei.leaf.cbz]
         UTImportedTypeDeclarations:
           - UTTypeIdentifier: com.chengffei.leaf.mobi
             UTTypeDescription: Mobipocket Book
@@ -67,6 +77,25 @@ targets:
             UTTypeTagSpecification:
               public.filename-extension: [azw3, azw]
               public.mime-type: [application/vnd.amazon.mobi8-ebook]
+          # .fb2.zip 不登记：按扩展名系统只认得 .zip，登记了等于接管所有压缩包
+          - UTTypeIdentifier: com.chengffei.leaf.fb2
+            UTTypeDescription: FictionBook
+            UTTypeConformsTo: [public.xml, public.content]
+            UTTypeTagSpecification:
+              public.filename-extension: [fb2]
+              public.mime-type: [application/x-fictionbook+xml]
+          - UTTypeIdentifier: com.chengffei.leaf.fbz
+            UTTypeDescription: Zipped FictionBook
+            UTTypeConformsTo: [public.data, public.content]
+            UTTypeTagSpecification:
+              public.filename-extension: [fbz]
+              public.mime-type: [application/x-zip-compressed-fb2]
+          - UTTypeIdentifier: com.chengffei.leaf.cbz
+            UTTypeDescription: Comic Book Archive
+            UTTypeConformsTo: [public.data, public.content]
+            UTTypeTagSpecification:
+              public.filename-extension: [cbz]
+              public.mime-type: [application/vnd.comicbook+zip]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.chengffei.leaf

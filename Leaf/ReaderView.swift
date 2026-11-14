@@ -31,6 +31,10 @@ struct ReaderView: NSViewRepresentable {
         #if DEBUG
         url.queryItems?.append(URLQueryItem(name: "debug", value: "1")) // 页面回报实际排版（styled 日志）
         #endif
+        if !book.format.isEmpty {
+            url.queryItems?.append(URLQueryItem(name: "format", value: book.format))
+            url.queryItems?.append(URLQueryItem(name: "title", value: book.title))
+        }
         if let cfi = ReadingPosition.load(book.id) {
             url.queryItems?.append(URLQueryItem(name: "cfi", value: cfi))
         }
