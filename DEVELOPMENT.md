@@ -30,7 +30,7 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 | 窗口 | `BookWindow.swift` `ReaderModel.swift` | `ZStack`：正文铺满，左侧浮动玻璃面板 `TOCPanel`（宽 300，`regularMaterial`，不推挤正文、不重排书页）有两页：目录（JS 压平回传，选中态 = 当前章节，点选 = 跳转并收起）和查找（`SearchPanel`：原生输入框，停 300 毫秒即搜，结果按章节分组，JS 以 `search` 消息流式回传）；`WindowChrome` 隐藏窗口标题，红绿灯与工具栏仅在目录打开、Aa 面板打开或鼠标停在顶部时淡入；主题的浅 / 深色靠 `.preferredColorScheme` 改窗口外观 |
 | 视图 | `ReaderView.swift` | `WKWebView`（`ReaderWebView` 子类接管右键菜单：保留系统的拷贝 / 查询 / 翻译，加翻页、目录、查找、设置）；接收 JS 消息：relocate 存进度、外链交给浏览器；只放行 leaf / blob / about / data |
 | 设置 | `ReaderSettings.swift` `SettingsView.swift` `TypographyPanel.swift` | 全局设置，`ReaderPrefs` 整包 JSON 推给页面。`SettingsView` 是「设置… ⌘,」窗口（全部选项）；`TypographyPanel` 是工具栏 Aa 弹层（只有字号和主题）。字号 = 书页根字号 `html { font-size: N% }`（作用于 em / rem / % 字号，写死 px 的书不受影响）；行距三档以 `!important` 覆盖书本；页边距三档 = foliate 的 `gap` / `margin` 属性（数值在 app.js `MARGINS`）；字体 原书 / 黑体 / 宋体 / 任意已安装家族（`NSFontManager`）；字重 0 到 4 = `-webkit-text-stroke` 描边（任何字体都生效，不抹平标题粗细）；对齐、段距、字距见 app.js `prefsCSS`；版心宽度四档 + 分栏三档 = foliate 的 `max-inline-size` / `max-column-count`；主题四档。`Preset` 是一套排版（不含主题），内置四套在 `Preset.builtins`，自定义存 `UserDefaults["presets"]` |
-| 状态 | `ReadingPosition.swift` | 阅读位置：`UserDefaults["position.<sha256>"] = CFI`。另有两项小状态存在 WebView 的 localStorage（`leaf.progressMode` 进度指示模式、`leaf.readingSpeed` 阅读速度样本），所有书共用 |
+| 状态 | `ReadingPosition.swift` | 阅读位置：`UserDefaults["position.<sha256>"] = CFI`。另有两项小状态存在 WebView 的 localStorage（`leaf.progressMode` 进度指示模式、`leaf.readingSpeed` 阅读速度样本），所有书共用。设置「通用 › 阅读记录」一键清除：删全部 `position.*`，清 localStorage，再通知开着的书 `leaf.resetSpeed()`（否则下次翻页把内存里的速度写回去）。窗口只记一份 `bookWindowFrame`（全局，不按书）；`askedDefaultEPUB` 记是否问过设为 EPUB 默认阅读器 |
 | PDF | `Leaf/PDFReader.swift` | PDF 不走 WebView，用 PDFKit 连续滚动：目录取 PDF 大纲，查找用 `beginFindString`（最多 500 条，150 ms 批量推给列表），缩放是每窗口「适合宽度」的 50–300%，主题由 `ThemedPage` 画完原页再用混合模式着色，进度存 `pdf:<页码>` |
 | 渲染 | `Web/app.js` + `Web/foliate/` | [foliate-js](https://github.com/johnfactotum/foliate-js) 内置（版本见 `Web/foliate/VERSION`，移除了 PDF / OPDS / 示例）。**本地补丁只有一处**：`paginator.js` 把 `max-column-count-portrait` 开放为属性（上游写死竖窗 1 栏），升级时要重打。`Web/chunks.js` 在交给 foliate 前把 EPUB 里超过 128KB 的章节切成约 64KB 一块的虚拟章节（见下「大章节分块」） |
 | 本地化 | `Leaf/Localizable.xcstrings` `Web/strings.js` | 源语言英文，另 7 种（zh-Hans、zh-Hant、ja、ko、fr、de、es）。Swift 侧：SwiftUI 的 `Text` / `Button` / `.help` 等直接写英文 key；枚举标签和 `NSMenuItem` 用 `String(localized:)`；自定义辅助函数的标题参数必须是 `LocalizedStringKey`，用 `String` 就不查表。网页侧：`ReaderPrefs.lang` 带上 app 实际用的本地化，`strings.js` 里 `t(key, ...args)` 按 `%@` 替换；两张表的 key 都是英文原文，加文案要两边都加。设置里的「语言」项写 `AppleLanguages`（跟随系统 = 删掉这个键），下次启动生效；「立即重新打开」用 `open -n` 带上当前打开的书再 `terminate` |
@@ -68,6 +68,10 @@ xcodebuild -project Leaf.xcodeproj -scheme Leaf -configuration Debug \
 - **构建目录里的 .app 会被 LaunchServices 登记**，Finder 可能打开旧版；`install.sh` 会注销它们并刷新图标缓存。
 - **GUI 自动化测试**（`scripts/ax.swift`）会真实点击窗口：启动时加 `--args -ApplePersistenceIgnoreState YES` 避免恢复你正在读的书，脚本只对标题以 `alice` / `hongloumeng` 开头的窗口动手。
 - **CBZ 和 EPUB 都是 zip，FB2 没有魔数**：foliate 按文件名区分。`BookDocument.format` 带进页面网址，`app.js` 再拿 `book.<ext>` 去取书；不带扩展名时 CBZ 会被当成 EPUB 打开失败。`.fb2.zip` 不登记，按扩展名系统只认得 `.zip`
+- **DRM**：foliate 遇到不认识的加密只 `console.warn`，照样渲染出乱码或空白。`app.js` 开书前自查：MOBI / AZW3 看记录 0 第 12 字节的 PalmDOC 加密类型；EPUB 有 `rights.xml`（Adobe）、`sinf.xml`（Apple），或 `encryption.xml` 里有字体混淆以外的算法，就显示「这本书有 DRM 保护」。zip 里没有的文件 `loadText` 直接返回 `null`（不是 Promise），别链 `.catch`
+- **窗口位置**：`WindowChrome` 挂上窗口时先同步读出 `bookWindowFrame`，下一轮主循环再套用并注册 didMove / didResize / didEndLiveResize 监听；先注册会把 SwiftUI 摆放时的默认尺寸存回去。已有书窗口时只沿用大小，位置交给系统错开
+- **默认打开方式**：EPUB、PDF 登记的是 Alternate，装着「图书」「预览」的 Mac 上双击不进 Leaf。第一次在 Leaf 里读 EPUB 时底部提示一次（`DefaultReader`），点了调 `NSWorkspace.setDefaultApplication`，系统会弹确认。Debug 构建加启动参数 `-LeafForceDefaultPrompt YES` 可强制显示
+- **GUI 测试会写真实数据**：Debug 版和正式版同一个 bundle id，共用偏好和 WebKit 数据。测清除阅读记录前要备份偏好（`defaults export <容器 plist>`）和 `Library/WebKit/WebsiteData`
 - 下载的测试书可能不完整：先 `unzip -t`（EPUB）或检查 PDB 末记录偏移（MOBI/AZW3），再怀疑代码。
 
 ## 测试书

@@ -1,4 +1,5 @@
 import SwiftUI
+import WebKit
 
 /// 「Leaf › 设置… ⌘,」：全部阅读偏好，改动即时生效
 /// 分两页：阅读（由整体到局部：预设 → 外观 → 文字 → 间距 → 版式）、通用（语言）
@@ -106,6 +107,8 @@ private struct GeneralSettings: View {
     @Bindable var settings = ReaderSettings.shared
     /// 启动时的语言设置；改了且没重开，就显示「重新打开」
     @State private var launchedLanguage = ReaderSettings.shared.uiLanguage
+    @State private var historyCount = ReadingPosition.count
+    @State private var confirmsClear = false
 
     var body: some View {
         Form {
@@ -123,11 +126,45 @@ private struct GeneralSettings: View {
                     }
                 }
             }
+            Section {
+                LabeledContent {
+                    Button("Clear…") { confirmsClear = true }
+                        .disabled(historyCount == 0)
+                } label: {
+                    Text("Reading History")
+                    if historyCount == 0 {
+                        Text("No reading history.")
+                    } else {
+                        Text("Leaf remembers your place in \(historyCount) books.")
+                    }
+                }
+            }
         }
         .formStyle(.grouped)
         .scrollDisabled(true)
-        .frame(width: 460, height: 150)
+        .frame(width: 460, height: 200)
+        .onAppear { historyCount = ReadingPosition.count }
+        .alert("Clear Reading History?", isPresented: $confirmsClear) {
+            Button("Clear", role: .destructive) { clearHistory() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Leaf will forget where you stopped in every book and how fast you read. Your books stay as they are.")
+        }
     }
+
+    /// 位置存在 UserDefaults，阅读速度存在网页的 localStorage。
+    /// 先清 localStorage，再通知开着的书把内存里的速度也归零，否则下一次翻页会写回去
+    private func clearHistory() {
+        ReadingPosition.clearAll()
+        historyCount = 0
+        WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeLocalStorage], modifiedSince: .distantPast) {
+            NotificationCenter.default.post(name: .readingHistoryCleared, object: nil)
+        }
+    }
+}
+
+extension Notification.Name {
+    static let readingHistoryCleared = Notification.Name("LeafReadingHistoryCleared")
 }
 
 /// 预设下拉：内置四套在前，自定义在后；当前设置不等于任何预设时显示「自定义」

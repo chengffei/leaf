@@ -21,6 +21,8 @@ struct BookDocument: FileDocument {
     let id: String
     /// PDF 走原生 PDFKit，其余走 WebView
     let isPDF: Bool
+    /// EPUB 的默认打开方式通常是「图书」，首次读 EPUB 时问一次要不要改成 Leaf
+    let isEPUB: Bool
     /// 文件名去掉扩展名：PDF 没有标题元数据时用它
     let title: String
     /// foliate 靠文件名认 FB2、FBZ、CBZ（CBZ 和 EPUB 都是 zip，FB2 没有魔数），其余格式为空
@@ -33,6 +35,7 @@ struct BookDocument: FileDocument {
         self.data = data
         id = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
         isPDF = configuration.contentType.conforms(to: .pdf)
+        isEPUB = configuration.contentType.conforms(to: .epub)
         title = ((configuration.file.filename ?? "") as NSString).deletingPathExtension
         let type = configuration.contentType
         format = [(UTType.fb2, "fb2"), (.fbz, "fbz"), (.cbz, "cbz")].first { type.conforms(to: $0.0) }?.1 ?? ""

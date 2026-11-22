@@ -1,4 +1,5 @@
 import { makeBook } from './foliate/view.js'
+import { EPUB } from './foliate/epub.js'
 import { FootnoteHandler } from './foliate/footnotes.js'
 import { Overlayer } from './foliate/overlayer.js'
 import { STRINGS } from './strings.js'
@@ -211,6 +212,8 @@ const flatTOC = (items, depth = 0, out = []) => {
 globalThis.leaf = {
   goTo(href) { jumpTo(href) },
   setPanelOpen(open) { panelOpen = open },
+  // 设置里清除了阅读记录：内存里的速度样本也归零，否则下次翻页写回 localStorage
+  resetSpeed() { speed = { bytes: 0, minutes: 0 }; store.set('leaf.readingSpeed', speed); if (lastLocation) renderProgress() },
   setPrefs(next) {
     prefs = { ...prefs, ...next }
     applyStyles()
@@ -580,11 +583,50 @@ $('#percent').addEventListener('click', () => {
   flashStatus()
 })
 
+// ---- DRM ----
+// foliate 遇到不认识的加密只打一条警告，照样渲染，书页是乱码或空白。开书前先查，查到就直说
+class DRMError extends Error {}
+// 字体混淆不是 DRM，正常书里常见
+const FONT_OBFUSCATION = ['http://www.idpf.org/2008/embedding', 'http://ns.adobe.com/pdf/enc#RC']
+
+// MOBI、AZW3：PDB 头 60 起是类型与创建者，78 起是第一条记录的偏移；记录 0 的第 12 字节是 PalmDOC 加密类型
+const checkMOBI = async file => {
+  const head = new DataView(await file.slice(0, 86).arrayBuffer())
+  if (head.byteLength < 86) return
+  const type = new TextDecoder().decode(new Uint8Array(head.buffer, 60, 8))
+  if (type !== 'BOOKMOBI' && type !== 'TEXtREAd') return
+  const record0 = head.getUint32(78)
+  const enc = new DataView(await file.slice(record0 + 12, record0 + 14).arrayBuffer())
+  if (enc.byteLength === 2 && enc.getUint16(0) !== 0) throw new DRMError()
+}
+
+// EPUB：Adobe 带 rights.xml，Apple 带 sinf.xml；encryption.xml 里出现字体混淆以外的算法也算
+const checkEPUB = async book => {
+  // zip 里没有这个文件时 loadText 直接返回 null，不是 Promise
+  const read = async name => { try { return await book.loadText(name) } catch { return null } }
+  if (await read('META-INF/rights.xml') || await read('META-INF/sinf.xml')) throw new DRMError()
+  const xml = await read('META-INF/encryption.xml')
+  if (!xml) return
+  const doc = new DOMParser().parseFromString(xml, 'application/xml')
+  const algorithms = [...doc.getElementsByTagNameNS('*', 'EncryptionMethod')].map(el => el.getAttribute('Algorithm'))
+  if (algorithms.some(a => !FONT_OBFUSCATION.includes(a))) throw new DRMError()
+}
+
+// 和 foliate 的 fetchFile 一样：文件名取网址路径，foliate 靠它认 FB2、FBZ、CBZ
+const fetchBook = async url => {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+  return new File([await res.blob()], new URL(res.url).pathname)
+}
+
 // ---- 打开 ----
 try {
   // FB2、FBZ、CBZ 只能靠扩展名认出来，网址带上扩展名
   const format = query.get('format')
-  const opened = await makeBook(`leaf://app/book${format ? `.${format}` : ''}`)
+  const file = await fetchBook(`leaf://app/book${format ? `.${format}` : ''}`)
+  await checkMOBI(file)
+  const opened = await makeBook(file)
+  if (opened instanceof EPUB) await checkEPUB(opened)
   if (format === 'cbz') opened.metadata.title = query.get('title') // 漫画没有元数据，foliate 拿文件名当标题
   chunkSections(opened)
   await view.open(opened)
@@ -651,6 +693,8 @@ try {
   })
 } catch (e) {
   $('#error').hidden = false
-  $('#error').textContent = `${t('Can’t open this book')}\n\n${e?.message ?? e}`
+  $('#error').textContent = e instanceof DRMError
+    ? `${t('Can’t open this book')}\n\n${t('This book is protected by DRM. Leaf can only open DRM-free books.')}`
+    : `${t('Can’t open this book')}\n\n${e?.message ?? e}`
   post({ type: 'error', message: `${e?.name}: ${e?.message}\n${e?.stack}` })
 }

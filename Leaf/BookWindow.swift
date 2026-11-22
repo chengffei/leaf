@@ -6,6 +6,7 @@ struct BookWindow: View {
     /// 开书先亮出红绿灯与工具栏 3 秒再淡出，让人知道按钮在哪
     @State private var introducing = true
     @State private var pageText = ""
+    @State private var asksDefault = false
     @Environment(\.openSettings) private var openSettings
     private let settings = ReaderSettings.shared
 
@@ -28,7 +29,14 @@ struct BookWindow: View {
                     .transition(.move(edge: .leading).combined(with: .opacity))
             }
         }
+        .overlay(alignment: .bottom) {
+            if asksDefault {
+                DefaultReaderPrompt { asksDefault = false }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
         .animation(.easeOut(duration: 0.2), value: model.showsTOC)
+        .animation(.easeOut(duration: 0.25), value: asksDefault)
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 Button { model.toggleTOC() } label: {
@@ -52,7 +60,10 @@ struct BookWindow: View {
             }
         }
         .background(
-            WindowChrome(visible: introducing || model.showsTOC || model.hoversTop || model.showsTypography) { hovering in
+            WindowChrome(
+                visible: introducing || model.showsTOC || model.hoversTop || model.showsTypography,
+                title: model.title
+            ) { hovering in
                 if model.hoversTop != hovering { model.hoversTop = hovering }
             }
             .ignoresSafeArea()
@@ -60,6 +71,13 @@ struct BookWindow: View {
         .task {
             try? await Task.sleep(for: .seconds(3))
             introducing = false
+        }
+        .task {
+            // 等书翻开、工具栏淡出后再问，别和开书抢注意力
+            guard book.isEPUB, DefaultReader.shouldAsk else { return }
+            try? await Task.sleep(for: .seconds(3.5))
+            DefaultReader.markAsked()
+            asksDefault = true
         }
         .alert("Go to Page", isPresented: $model.showsPageJump) {
             TextField("", text: $pageText)
@@ -72,6 +90,52 @@ struct BookWindow: View {
         .onAppear { model.openSettings = { openSettings() } }
         // 主题的浅色 / 深色：改窗口外观，WebView 的 prefers-color-scheme 跟着窗口走；米黄按浅色
         .preferredColorScheme(settings.theme.colorScheme)
+    }
+}
+
+/// 双击 EPUB 默认进「图书」，「双击就读」就落空了。第一次在 Leaf 里读 EPUB 时问一次，以后不再问
+@MainActor
+enum DefaultReader {
+    private static let askedKey = "askedDefaultEPUB"
+
+    static var shouldAsk: Bool {
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "LeafForceDefaultPrompt") { return true } // 测试用
+        #endif
+        guard !UserDefaults.standard.bool(forKey: askedKey) else { return false }
+        guard let app = NSWorkspace.shared.urlForApplication(toOpen: .epub) else { return true }
+        return Bundle(url: app)?.bundleIdentifier != Bundle.main.bundleIdentifier
+    }
+
+    static func markAsked() { UserDefaults.standard.set(true, forKey: askedKey) }
+
+    /// 系统会弹窗让用户确认；用户拒绝会抛错，照常忽略
+    static func makeDefault() async {
+        try? await NSWorkspace.shared.setDefaultApplication(at: Bundle.main.bundleURL, toOpen: .epub)
+    }
+}
+
+/// 书页底部的一条轻提示，不挡正文中间
+struct DefaultReaderPrompt: View {
+    let dismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text("Open EPUB books in Leaf when you double-click them?")
+                .font(.callout)
+            Button("Not Now", action: dismiss)
+                .controlSize(.small)
+            Button("Use Leaf") {
+                dismiss()
+                Task { await DefaultReader.makeDefault() }
+            }
+            .controlSize(.small)
+            .buttonStyle(.borderedProminent)
+        }
+        .padding(.leading, 18).padding(.trailing, 10).padding(.vertical, 10)
+        .background(.regularMaterial, in: Capsule())
+        .shadow(color: .black.opacity(0.15), radius: 16, y: 4)
+        .padding(.bottom, 44)
     }
 }
 
@@ -298,6 +362,8 @@ struct TOCSidebar: View {
 /// 垫在整个窗口背后，用追踪区感知鼠标（不参与点击），淡入淡出整条标题栏。
 struct WindowChrome: NSViewRepresentable {
     let visible: Bool
+    /// 书名：标题栏隐藏着，但窗口菜单、调度中心、⌘` 用它；没有书名时保留文件名
+    let title: String
     let onHoverTop: (Bool) -> Void
 
     func makeNSView(context: Context) -> TrackingView { TrackingView() }
@@ -305,6 +371,7 @@ struct WindowChrome: NSViewRepresentable {
     func updateNSView(_ view: TrackingView, context: Context) {
         view.onHoverTop = onHoverTop
         view.setChromeVisible(visible)
+        if !title.isEmpty, let window = view.window, window.title != title { window.title = title }
     }
 
     final class TrackingView: NSView {
@@ -319,6 +386,47 @@ struct WindowChrome: NSViewRepresentable {
             // 书名改在侧栏头部，窗口菜单里仍是文件名。不用 .toolbar(removing: .title)：那样 Aa 会挤到左边
             window?.titleVisibility = .hidden
             applyAlpha(animated: false)
+            rememberFrame()
+        }
+
+        // MARK: 窗口位置与大小
+        // 全局只记一份「上次书窗口」，新书照它开，不按书记。不用 setFrameAutosaveName：同名只能给一个窗口用
+
+        private static let frameKey = "bookWindowFrame"
+        private var tracksFrame = false
+
+        private func rememberFrame() {
+            guard window != nil, !tracksFrame else { return }
+            tracksFrame = true
+            // 先同步读出旧值：SwiftUI 摆放窗口时会触发 didMove，先注册监听就会把默认尺寸存回去
+            let saved = UserDefaults.standard.string(forKey: Self.frameKey).map(NSRectFromString)
+            DispatchQueue.main.async { [weak self] in
+                guard let self, let window = self.window else { return }
+                if let saved, saved.width >= 300, saved.height >= 300 { Self.apply(saved, to: window) }
+                let center = NotificationCenter.default
+                center.addObserver(self, selector: #selector(self.frameChanged), name: NSWindow.didEndLiveResizeNotification, object: window)
+                center.addObserver(self, selector: #selector(self.frameChanged), name: NSWindow.didMoveNotification, object: window)
+                // 缩放按钮、辅助功能改尺寸不走 live resize，只发 didResize
+                center.addObserver(self, selector: #selector(self.frameChanged), name: NSWindow.didResizeNotification, object: window)
+            }
+        }
+
+        private static func apply(_ saved: NSRect, to window: NSWindow) {
+            let others = NSApp.windows.filter { $0 !== window && $0.isVisible && $0.windowController?.document != nil }
+            let onScreen = NSScreen.screens.contains { $0.visibleFrame.intersects(saved) }
+            if others.isEmpty && onScreen {
+                window.setFrame(saved, display: true)
+            } else {
+                // 已有书窗口（系统会错开摆放）或屏幕变了：只沿用大小，左上角不动
+                let top = window.frame.maxY
+                window.setFrame(NSRect(x: window.frame.minX, y: top - saved.height, width: saved.width, height: saved.height), display: true)
+                if !onScreen && others.isEmpty { window.center() }
+            }
+        }
+
+        @objc private func frameChanged(_ note: Notification) {
+            guard let window, !window.styleMask.contains(.fullScreen), !window.inLiveResize else { return }
+            UserDefaults.standard.set(NSStringFromRect(window.frame), forKey: Self.frameKey)
         }
 
         override func updateTrackingAreas() {

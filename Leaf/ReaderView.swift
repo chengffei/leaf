@@ -63,6 +63,12 @@ struct ReaderView: NSViewRepresentable {
         init(bookID: String, model: ReaderModel) {
             self.bookID = bookID
             self.model = model
+            super.init()
+            NotificationCenter.default.addObserver(self, selector: #selector(historyCleared), name: .readingHistoryCleared, object: nil)
+        }
+
+        @objc private func historyCleared(_ note: Notification) {
+            model.webView?.evaluateJavaScript("leaf.resetSpeed()", completionHandler: nil)
         }
 
         func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
