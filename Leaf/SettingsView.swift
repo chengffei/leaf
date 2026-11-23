@@ -75,6 +75,8 @@ private struct ReadingSettings: View {
                 menu("Letter Spacing", $settings.letterSpacing, LetterSpacing.allCases)
             }
             Section("Layout") {
+                // 竖排：日文书常用。原书 = 书怎么排就怎么排；改动会重开当前页
+                menu("Writing Direction", $settings.writing, WritingMode.allCases)
                 menu("Alignment", $settings.align, TextAlign.allCases)
                 menu("Margins", $settings.margin, PageMargin.allCases)
                 menu("Text Width", $settings.textWidth, TextWidth.allCases)
@@ -224,4 +226,5 @@ extension Columns: LabeledCase {}
 extension Theme: LabeledCase {}
 extension TextAlign: LabeledCase {}
 extension ParagraphSpacing: LabeledCase {}
+extension WritingMode: LabeledCase {}
 extension LetterSpacing: LabeledCase {}

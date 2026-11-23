@@ -107,6 +107,19 @@ enum LetterSpacing: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+/// 排版方向：原书 = 书怎么排就怎么排（日文竖排书自动竖排）；横排、竖排强制。改动要重开书页
+enum WritingMode: String, CaseIterable, Identifiable, Codable {
+    case book, horizontal, vertical
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .book: String(localized: "Original")
+        case .horizontal: String(localized: "Horizontal")
+        case .vertical: String(localized: "Vertical")
+        }
+    }
+}
+
 /// 主题：浅色 / 深色靠窗口外观（WebView 的 prefers-color-scheme 跟着窗口走），米黄、墨水屏在此之上再染色
 enum Theme: String, CaseIterable, Identifiable, Codable {
     case system, light, sepia, eink, dark
@@ -142,6 +155,7 @@ struct ReaderPrefs: Equatable, Encodable {
     let align: String
     let paragraphSpacing: String
     let letterSpacing: String
+    let writing: String
     /// 界面语言，网页层据此选文案；取 app 实际用的本地化，不是系统首选
     let lang: String
 
@@ -196,6 +210,9 @@ final class ReaderSettings {
     var letterSpacing: LetterSpacing {
         didSet { defaults.set(letterSpacing.rawValue, forKey: "letterSpacing") }
     }
+    var writing: WritingMode {
+        didSet { defaults.set(writing.rawValue, forKey: "writing") }
+    }
     /// 自定义排版预设，内置四套在 `Preset.builtins`
     var customPresets: [Preset] {
         didSet { defaults.set(try? JSONEncoder().encode(customPresets), forKey: "presets") }
@@ -231,6 +248,7 @@ final class ReaderSettings {
         align = TextAlign(rawValue: defaults.string(forKey: "align") ?? "") ?? .justify
         paragraphSpacing = ParagraphSpacing(rawValue: defaults.string(forKey: "paragraphSpacing") ?? "") ?? .original
         letterSpacing = LetterSpacing(rawValue: defaults.string(forKey: "letterSpacing") ?? "") ?? .standard
+        writing = WritingMode(rawValue: defaults.string(forKey: "writing") ?? "") ?? .book
         customPresets = defaults.data(forKey: "presets").flatMap { try? JSONDecoder().decode([Preset].self, from: $0) } ?? []
         uiLanguage = defaults.string(forKey: "uiLanguage") ?? ""
     }
@@ -250,6 +268,7 @@ final class ReaderSettings {
             fontScale: Double(zoomPercent) / 100, lineHeight: lineSpacing.rawValue, font: font,
             margin: margin.rawValue, maxWidth: textWidth.rawValue, columns: columns.rawValue, theme: theme.rawValue,
             weight: weight, align: align.rawValue, paragraphSpacing: paragraphSpacing.rawValue, letterSpacing: letterSpacing.rawValue,
+            writing: writing.rawValue,
             lang: Bundle.main.preferredLocalizations.first ?? "en"
         )
     }

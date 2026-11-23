@@ -66,6 +66,18 @@ const LITERATA_FACES = ['normal', 'italic'].map(style => `@font-face {
   src: url("${fontURL(style === 'italic' ? 'Literata-Italic.ttf' : 'Literata.ttf')}") format("truetype");
 }`).join('\n')
 const fontStack = font => font === 'original' ? '' : FONTS[font] ?? `"${font.replace(/["\\]/g, '')}", -apple-system, "PingFang SC", sans-serif`
+// 日文、韩文书：内置的黑体 / 宋体栈写的是中文字体，假名和谚文会掉到别的字体；按文档语言换成本语言的系统字体
+const CJK_FONTS = {
+  ja: { sans: '-apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif', serif: '"Hiragino Mincho ProN", "Hiragino Mincho Pro", serif', literata: '"Literata", "Hiragino Mincho ProN", serif' },
+  ko: { sans: '-apple-system, "Apple SD Gothic Neo", sans-serif', serif: '"AppleMyungjo", "Apple SD Gothic Neo", serif', literata: '"Literata", "AppleMyungjo", serif' },
+}
+const cjkFontCSS = font => Object.entries(CJK_FONTS).map(([lang, stacks]) => stacks[font]
+  ? `html:lang(${lang}) body, html:lang(${lang}) body :not(pre):not(code):not(kbd):not(samp):not(tt) { font-family: ${stacks[font]} !important; }` : '').join('\n')
+// 排版方向：原书不干预；横排、竖排强制。竖排用 vertical-rl（日文、中文竖排都是从右往左）
+const WRITING_CSS = {
+  horizontal: 'html, body { writing-mode: horizontal-tb !important; }',
+  vertical: 'html, body { writing-mode: vertical-rl !important; text-orientation: mixed; }',
+}
 // 主题。浅色 / 深色由窗口外观决定（跟随系统 = 不动窗口外观），这里只补书页的底色：
 // 深色：书里常写死 body{background:white}，配上 markDarkText 改白的字就整页看不见，底色一并压掉
 // 米黄：浅色外观之上染底色；深灰到黑的字（markDarkText 标记）换成棕色，彩色强调不动
@@ -99,13 +111,15 @@ const WEIGHT_EM = [0, 0.012, 0.024, 0.036, 0.05]
 const PARAGRAPH = { tight: '0.25em', loose: '1em' } // original = 不动
 const LETTER = { tight: '-0.01em', loose: '0.05em' } // standard = 不动
 const TEXT = 'p, li, blockquote, dd, dt, td, th'
-const prefsCSS = ({ fontScale, lineHeight, font, weight, align, paragraphSpacing, letterSpacing }) => `
+const prefsCSS = ({ fontScale, lineHeight, font, weight, align, paragraphSpacing, letterSpacing, writing }) => `
 ${font === 'literata' ? LITERATA_FACES : ''}
+${WRITING_CSS[writing] ?? ''}
 html { font-size: ${fontScale * 100}% !important; }
 p, li, blockquote, dd, dt, div, td, th { line-height: ${lineHeight} !important; }
 ${fontStack(font) ? `body, body :not(pre):not(code):not(kbd):not(samp):not(tt) {
   font-family: ${fontStack(font)} !important;
-}` : ''}
+}
+${cjkFontCSS(font)}` : ''}
 ${WEIGHT_EM[weight] ? `html { -webkit-text-stroke: ${WEIGHT_EM[weight]}em currentColor; }` : ''}
 ${align === 'left' ? `${TEXT} { text-align: left !important; }` : ''}
 ${PARAGRAPH[paragraphSpacing] ? `p { margin-top: ${PARAGRAPH[paragraphSpacing]} !important; margin-bottom: ${PARAGRAPH[paragraphSpacing]} !important; }` : ''}
@@ -116,7 +130,7 @@ const query = new URLSearchParams(location.search)
 const DEFAULT_PREFS = {
   fontScale: 1, lineHeight: 1.7, font: 'original', margin: 'standard',
   maxWidth: 680, columns: 'auto', theme: 'system',
-  weight: 0, align: 'justify', paragraphSpacing: 'original', letterSpacing: 'standard',
+  weight: 0, align: 'justify', paragraphSpacing: 'original', letterSpacing: 'standard', writing: 'book',
 }
 let prefs = { ...DEFAULT_PREFS }
 try { prefs = { ...prefs, ...JSON.parse(query.get('prefs') ?? '{}') } } catch {}
@@ -142,9 +156,23 @@ const setAttr = (name, value) => {
   const r = view.renderer
   if (r?.setAttribute && r.getAttribute(name) !== value) r.setAttribute(name, value)
 }
+// 当前渲染出的章节是不是竖排（原书竖排，或设置强制）。没加载出章节时按设置判断
+const isVertical = () => {
+  if (prefs.writing === 'vertical') return true
+  if (prefs.writing === 'horizontal') return false
+  const doc = view.renderer?.getContents?.()?.[0]?.doc
+  return Boolean(doc?.body && doc.defaultView.getComputedStyle(doc.body).writingMode.startsWith('vertical'))
+}
 const applyLayout = () => {
   const max = prefs.maxWidth > 0 ? prefs.maxWidth : 100000
   const { columns } = prefs
+  // 竖排：行是竖的，「版心宽度」和「分栏」都变成了上下方向的限制，一律撑满、单栏（像纸书和 Kindle 日文书）
+  if (isVertical()) {
+    setAttr('max-column-count', '1')
+    setAttr('max-column-count-portrait', '1')
+    setAttr('max-inline-size', '100000px')
+    return
+  }
   setAttr('max-column-count', columns === 'single' ? '1' : '2')
   setAttr('max-column-count-portrait', columns === 'double' ? '2' : '1')
   setAttr('max-inline-size', `${columns === 'double' ? Math.min(max, Math.floor(innerWidth / 2)) : max}px`)
@@ -220,7 +248,10 @@ globalThis.leaf = {
   // 设置里清除了阅读记录：内存里的速度样本也归零，否则下次翻页写回 localStorage
   resetSpeed() { speed = { bytes: 0, minutes: 0 }; store.set('leaf.readingSpeed', speed); if (lastLocation) renderProgress() },
   setPrefs(next) {
+    const reopen = view.book && next.writing && next.writing !== prefs.writing
     prefs = { ...prefs, ...next }
+    // 排版方向只在章节加载时生效（foliate 据此定分页方向），改了就让 Swift 带着当前位置重开页面
+    if (reopen) return post({ type: 'reopen' })
     applyStyles()
   },
   back() { view.history.back() },
@@ -293,8 +324,8 @@ const onKey = e => {
   if (k === 'Escape' && !$('#goto').hidden) return closeGoTo()
   if (k === 'Escape') return post({ type: 'closeTOC' })
   if (k === 't') return post({ type: 'toggleTOC' })
-  if (k === 'ArrowLeft') turn(() => view.goLeft())
-  else if (k === 'ArrowRight') turn(() => view.goRight())
+  if (k === 'ArrowLeft') turn(pageLeft)
+  else if (k === 'ArrowRight') turn(pageRight)
   else if (k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey)) turn(() => view.prev())
   else if (k === 'ArrowDown' || k === 'PageDown' || k === ' ') turn(() => view.next())
   else return
@@ -311,9 +342,14 @@ const onWheel = e => {
   const d = horizontal ? e.deltaX : e.deltaY
   if (wheelFired || Math.abs(d) < 8) return
   wheelFired = true
-  if (horizontal) turn(() => d > 0 ? view.goRight() : view.goLeft())
+  if (horizontal) turn(() => d > 0 ? pageRight() : pageLeft())
   else turn(() => d > 0 ? view.next() : view.prev())
 }
+// 左右和前后的对应：从右往左的书（page-progression-direction 是 rtl）和竖排书，左边是下一页。
+// 不用 foliate 的 goLeft / goRight：它只看书的 dir，强制竖排的横排书会反过来
+const leftIsNext = () => view.book?.dir === 'rtl' || isVertical()
+const pageLeft = () => leftIsNext() ? view.next() : view.prev()
+const pageRight = () => leftIsNext() ? view.prev() : view.next()
 
 // 书页在 iframe 里，点击坐标要加上 iframe 的偏移才是窗口坐标；注释卡片按它定位
 let lastPoint = { x: innerWidth / 2, y: innerHeight / 2 }
@@ -357,8 +393,8 @@ const listen = target => {
     const { x, y } = windowPoint(e)
     if (Math.hypot(x - lastPoint.x, y - lastPoint.y) > 4) return
     if (dismissing || e.detail > 1) return
-    if (x < innerWidth * BACK_ZONE) turn(() => view.prev())
-    else if (x > innerWidth * FORWARD_ZONE) turn(() => view.next())
+    if (x < innerWidth * BACK_ZONE) turn(pageLeft)
+    else if (x > innerWidth * FORWARD_ZONE) turn(pageRight)
     else pendingTurn = setTimeout(() => turn(() => view.next()), DOUBLE_CLICK_MS)
   })
   target.addEventListener('wheel', onWheel, { passive: false })
@@ -932,6 +968,9 @@ try {
 
   view.addEventListener('load', e => {
     listen(e.detail.doc)
+    // 章节加载后才知道原书是不是竖排：版心和分栏要按竖排重设；进度滑杆跟着阅读方向
+    applyLayout()
+    scrub.style.direction = leftIsNext() ? 'rtl' : 'ltr'
     markCJK(e.detail.doc)
     markDarkText(e.detail.doc)
     capHeadings(e.detail.doc)

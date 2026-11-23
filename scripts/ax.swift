@@ -20,7 +20,7 @@ func texts(_ e: AXUIElement) -> [String] {
 let win = (attr(root, kAXFocusedWindowAttribute) as! AXUIElement)
 let title = attr(win, kAXTitleAttribute) as? String ?? ""
 // 安全闸：只对测试书窗口动手，防止误碰用户正在读的书
-guard title.hasPrefix("alice") || title.hasPrefix("Alice") || title.hasPrefix("hongloumeng") || title.hasPrefix("紅樓夢") || title.hasPrefix("红楼梦") || title.hasPrefix("Leaf") || title.isEmpty || title == "阅读" || title == "通用" || title == "Reading" || title == "General" else { print("ABORT: focused window is \(title)"); exit(1) }
+guard title.hasPrefix("alice") || title.hasPrefix("Alice") || title.hasPrefix("吾輩は猫である") || title.hasPrefix("hongloumeng") || title.hasPrefix("紅樓夢") || title.hasPrefix("红楼梦") || title.hasPrefix("Leaf") || title.isEmpty || title == "阅读" || title == "通用" || title == "Reading" || title == "General" else { print("ABORT: focused window is \(title)"); exit(1) }
 // clickpage = 右侧 3/4 垂直居中；clickat <x比例> <y比例> 任意位置；rightclick <x比例> <y比例> 右键
 if CommandLine.arguments.count > 1, ["clickpage", "clickat", "rightclick", "dblclick"].contains(CommandLine.arguments[1]) {
     let a = CommandLine.arguments

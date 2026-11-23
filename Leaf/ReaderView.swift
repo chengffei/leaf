@@ -9,7 +9,7 @@ struct ReaderView: NSViewRepresentable {
     let model: ReaderModel
     let prefs: ReaderPrefs
 
-    func makeCoordinator() -> Coordinator { Coordinator(bookID: book.id, model: model) }
+    func makeCoordinator() -> Coordinator { Coordinator(book: book, model: model) }
 
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -26,8 +26,14 @@ struct ReaderView: NSViewRepresentable {
         webView.isInspectable = true
         #endif
 
+        context.coordinator.applied = prefs
+        webView.load(URLRequest(url: Self.pageURL(book: book, prefs: prefs)))
+        return webView
+    }
+
+    /// 书页地址：排版参数随首屏一起带上，避免先按默认排一遍再跳；位置取当前存的
+    static func pageURL(book: BookDocument, prefs: ReaderPrefs) -> URL {
         var url = URLComponents(string: "\(BookSchemeHandler.scheme)://app/reader.html")!
-        // 首屏就按当前排版渲染，避免先按默认排一遍再跳
         url.queryItems = [URLQueryItem(name: "prefs", value: prefs.json)]
         #if DEBUG
         url.queryItems?.append(URLQueryItem(name: "debug", value: "1")) // 页面回报实际排版（styled 日志）
@@ -39,9 +45,7 @@ struct ReaderView: NSViewRepresentable {
         if let cfi = ReadingPosition.load(book.id) {
             url.queryItems?.append(URLQueryItem(name: "cfi", value: cfi))
         }
-        context.coordinator.applied = prefs
-        webView.load(URLRequest(url: url.url!))
-        return webView
+        return url.url!
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
@@ -56,13 +60,14 @@ struct ReaderView: NSViewRepresentable {
 
     @MainActor
     final class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
-        private let bookID: String
+        private let book: BookDocument
+        private var bookID: String { book.id }
         private let model: ReaderModel
         /// 已推给页面的排版参数，用于跳过重复推送
         var applied: ReaderPrefs?
 
-        init(bookID: String, model: ReaderModel) {
-            self.bookID = bookID
+        init(book: BookDocument, model: ReaderModel) {
+            self.book = book
             self.model = model
             super.init()
             NotificationCenter.default.addObserver(self, selector: #selector(historyCleared), name: .readingHistoryCleared, object: nil)
@@ -160,6 +165,10 @@ struct ReaderView: NSViewRepresentable {
                 #endif
             case "perf":
                 log.info("perf \(String(describing: body), privacy: .public)")
+            case "reopen":
+                // 排版方向改了：foliate 只在章节加载时判断竖排，整页重开，位置用刚存的
+                guard let webView = model.webView, let prefs = applied else { return }
+                webView.load(URLRequest(url: ReaderView.pageURL(book: book, prefs: prefs)))
             case "styled":
                 log.info("styled \(String(describing: body), privacy: .public)")
             case "error":
