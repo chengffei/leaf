@@ -37,8 +37,8 @@
   "applicationCategory": "ProductivityApplication",
   "applicationSubCategory": "Ebook reader",
   "operatingSystem": "macOS 15 or later",
-  "softwareVersion": "0.4.3",
-  "dateModified": "2026-11-22",
+  "softwareVersion": "0.5.0",
+  "dateModified": "2026-11-23",
   "inLanguage": "zh-Hans",
   "url": "https://chengffei.github.io/leaf/zh/",
   "downloadUrl": "https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg",
@@ -86,7 +86,7 @@
       "name": "Mac 上有简单好用的电子书阅读器吗？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Leaf 能打开无 DRM 的 EPUB、MOBI、AZW3，以及 PDF、FB2、CBZ，一本书一个窗口。按你的阅读速度估算剩余时间，有位置号、排版预设、脚注就地弹出和全书查找。关掉窗口就退出。没有商店，不用账号。"
+        "text": "Leaf 能打开无 DRM 的 EPUB、MOBI、AZW3，以及 PDF、FB2、CBZ，一本书一个窗口。按你的阅读速度估算剩余时间，有位置号、排版预设、脚注就地弹出和全书查找，能高亮、写笔记、加书签并导出。关掉窗口就退出。没有商店，不用账号。"
       }
     },
     {
@@ -94,7 +94,7 @@
       "name": "Leaf 和 Readest 有什么区别？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Readest 跨平台，有书库、同步、高亮和朗读。Leaf 只做 Mac，有意做得更少：没有书库，只记阅读位置，合上书就退出。约 5 MB，Readest 约 67 MB。"
+        "text": "Readest 跨平台，有书库、同步和朗读。Leaf 只做 Mac，有意做得更少：没有书库，不同步，合上书就退出。阅读位置、高亮和书签存在它自己的目录里，不碰书文件。约 5 MB，Readest 约 67 MB。"
       }
     },
     {
@@ -390,6 +390,11 @@
       <p><kbd>⌘F</kbd> 全书查找，<kbd>⌘L</kbd> 跳到任意位置。</p>
     </div>
     <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l4-4 4 4-6 6H9z"/><path d="M13 7l2-2 4 4-2 2"/><path d="M4 20h16"/></svg>
+      <h3>读完留下</h3>
+      <p>高亮、笔记、书签，导出 Markdown 或 Kindle 标注格式。一步查词。</p>
+    </div>
+    <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
       <h3>六种格式</h3>
       <p>EPUB、MOBI、AZW3、PDF、FB2、CBZ，无需转换。</p>
@@ -429,9 +434,9 @@
     <tbody>
       <tr><td>MOBI · AZW3</td><td>✓ （无 DRM）</td><td>✓</td><td>不支持</td><td>✓</td></tr>
       <tr><td>打开文件</td><td>原地打开，不建书库</td><td>原地打开，记入书库</td><td>导入书库</td><td>以书库为主，阅读器可单独启动</td></tr>
-      <tr><td>会留下什么</td><td>只有阅读位置</td><td>书库条目：书名、路径、封面</td><td>书库里的副本</td><td>书库数据库</td></tr>
+      <tr><td>会留下什么</td><td>阅读位置、高亮和书签，存在自己的目录里</td><td>书库条目：书名、路径、封面</td><td>书库里的副本</td><td>书库数据库</td></tr>
       <tr><td>关掉窗口后</td><td>应用退出</td><td>继续在后台运行</td><td>—</td><td>—</td></tr>
-      <tr><td>高亮与笔记</td><td>下个版本</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>高亮与笔记</td><td>✓ 可导出 Markdown 与 Kindle 标注</td><td>✓</td><td>✓</td><td>✓</td></tr>
       <tr><td>其他平台</td><td>只有 Mac</td><td>iOS · Android · Windows · Linux · Web</td><td>iPhone · iPad</td><td>Windows · Linux</td></tr>
       <tr><td>界面</td><td>原生（SwiftUI）</td><td>网页技术（Tauri）</td><td>原生</td><td>Qt</td></tr>
       <tr><td>安装包大小</td><td>约 5 MB</td><td>约 67 MB</td><td>系统自带</td><td>约 350 MB</td></tr>
@@ -499,8 +504,8 @@
   <p class="section-lead">安装和使用中最常被问到的几件事。</p>
   <div class="faq">
     <details><summary>怎么在 Mac 上打开 MOBI 和 AZW3 文件？</summary><p>装好 Leaf 后，在访达里双击文件，或右键选「打开方式 › Leaf」。文件需要无 DRM。</p></details>
-    <details><summary>Mac 上有简单好用的电子书阅读器吗？</summary><p>Leaf 能打开无 DRM 的 EPUB、MOBI、AZW3，以及 PDF、FB2、CBZ，一本书一个窗口。按你的阅读速度估算剩余时间，有位置号、排版预设、脚注就地弹出和全书查找。关掉窗口就退出。没有商店，不用账号。</p></details>
-    <details><summary>Leaf 和 Readest 有什么区别？</summary><p>Readest 跨平台，有书库、同步、高亮和朗读。Leaf 只做 Mac，有意做得更少：没有书库，只记阅读位置，合上书就退出。约 5 MB，Readest 约 67 MB。</p></details>
+    <details><summary>Mac 上有简单好用的电子书阅读器吗？</summary><p>Leaf 能打开无 DRM 的 EPUB、MOBI、AZW3，以及 PDF、FB2、CBZ，一本书一个窗口。按你的阅读速度估算剩余时间，有位置号、排版预设、脚注就地弹出和全书查找，能高亮、写笔记、加书签并导出。关掉窗口就退出。没有商店，不用账号。</p></details>
+    <details><summary>Leaf 和 Readest 有什么区别？</summary><p>Readest 跨平台，有书库、同步和朗读。Leaf 只做 Mac，有意做得更少：没有书库，不同步，合上书就退出。阅读位置、高亮和书签存在它自己的目录里，不碰书文件。约 5 MB，Readest 约 67 MB。</p></details>
     <details><summary>Leaf 免费吗？</summary><p>免费，并以 GPL-3.0 协议开源。</p></details>
     <details><summary>为什么 macOS 提示无法验证开发者？</summary><p>Leaf 没有经过 Apple 公证。先打开一次并关掉提示，再到「系统设置 › 隐私与安全性」点「仍要打开」。只需操作一次。</p></details>
     <details><summary>能打开在 Kindle 商店买的书吗？</summary><p>只能打开无 DRM 的文件。Kindle 商店购买的书通常带 DRM，Leaf 打不开。</p></details>
@@ -517,7 +522,7 @@
   <p><a href="https://github.com/chengffei/leaf">github.com/chengffei/leaf</a></p>
   <p>
     
-    作者 <a href="https://github.com/chengffei">Felix</a> · 版本 0.4.3 · 最后更新 <time datetime="2026-11-22">2026 年 11 月 22 日</time>
+    作者 <a href="https://github.com/chengffei">Felix</a> · 版本 0.5.0 · 最后更新 <time datetime="2026-11-23">2026 年 11 月 23 日</time>
   </p>
 </footer>
 

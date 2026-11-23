@@ -49,6 +49,10 @@ One book, one window. Double-click a book in Finder and start reading. Close the
 - **Contents that float.** `⌘T` opens them over the page, so the text never reflows.
 - **Layout.** Set the text width, read in one or two columns, and click the edges of the page to turn it.
 - **Pictures.** Double-click any image to see it full size.
+- **Highlights and notes.** Select text to highlight it in one of four colors and add a note. `⌘D` bookmarks the page. The Notes panel (`⇧⌘N`) lists everything by chapter.
+- **Export.** Save your notes as Markdown, or in Kindle’s My Clippings format for Readwise and Obsidian.
+- **Look up in one step.** Select a word and press `⌃⌘D`, or use the bar that appears above the selection.
+- **About the book.** The description from the book’s metadata, at the top of the panel.
 - **Eight languages.** English, Simplified Chinese, Traditional Chinese, Japanese, Korean, French, German and Spanish.
 
 ## How it compares
@@ -57,9 +61,8 @@ One book, one window. Double-click a book in Finder and start reading. Close the
 
 ## What's next
 
-- Highlights, bookmarks and export to Markdown or Kindle's My Clippings
-- Look up a word in one step
-- Your font settings over the publisher's, and TXT files
+- Your font settings over the publisher’s, and TXT files
+- Real page numbers, and a way back after flipping ahead
 - Finder thumbnails, Quick Look and Spotlight search, later
 
 Not planned: a library, a store, an account or sync.
@@ -82,6 +85,10 @@ Requires macOS 15 or later.
 | Go to | `⌘L` |
 | Size and theme | `Aa` at the top right, or right-click the page |
 | Settings | `⌘,` |
+| Highlight | Select text, then pick a color |
+| Bookmark | `⌘D` |
+| Notes | `⇧⌘N` |
+| Look Up | `⌃⌘D` |
 
 ## Build from source
 

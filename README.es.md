@@ -49,6 +49,10 @@ Un libro, una ventana. Haz doble clic en un libro en el Finder y empieza a leer.
 - **Índice flotante.** `⌘T` lo abre sobre la página, así el texto no se recoloca.
 - **Diseño.** Ajusta el ancho del texto, lee en una o dos columnas y haz clic en los bordes para pasar de página.
 - **Imágenes.** Haz doble clic en una imagen para verla a tamaño completo.
+- **Resaltados y notas.** Selecciona texto, elige uno de cuatro colores y añade una nota. `⌘D` marca la página. El panel de notas (`⇧⌘N`) lo lista todo por capítulo.
+- **Exportar.** En Markdown o en el formato My Clippings de Kindle, para Readwise y Obsidian.
+- **Consultar en un solo paso.** Selecciona una palabra y pulsa `⌃⌘D`, o usa la barra que aparece sobre la selección.
+- **Sobre el libro.** La descripción de los metadatos del libro, en la cabecera del panel.
 - **Ocho idiomas.** Inglés, chino simplificado, chino tradicional, japonés, coreano, francés, alemán y español.
 
 ## Comparativa
@@ -57,9 +61,8 @@ Un libro, una ventana. Haz doble clic en un libro en el Finder y empieza a leer.
 
 ## Próximamente
 
-- Resaltados, marcadores y exportación a Markdown o My Clippings de Kindle
-- Consultar una palabra en un solo paso
 - Tus ajustes de fuente por encima de los del editor, y archivos TXT
+- Números de página reales y una forma de volver tras hojear más adelante
 - Miniaturas en el Finder, Vista Rápida y búsqueda con Spotlight, más adelante
 
 No está previsto: biblioteca, tienda, cuenta ni sincronización.
@@ -82,6 +85,10 @@ Requiere macOS 15 o posterior.
 | Ir a | `⌘L` |
 | Tamaño y tema | `Aa` arriba a la derecha, o clic derecho en la página |
 | Ajustes | `⌘,` |
+| Resaltar | Selecciona texto y elige un color |
+| Marcador | `⌘D` |
+| Notas | `⇧⌘N` |
+| Consultar | `⌃⌘D` |
 
 ## Compilar desde el código fuente
 

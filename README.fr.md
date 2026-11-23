@@ -49,6 +49,10 @@ Un livre, une fenêtre. Double-cliquez sur un livre dans le Finder et commencez 
 - **Table des matières flottante.** `⌘T` l’ouvre par-dessus la page, sans recomposer le texte.
 - **Mise en page.** Réglez la largeur du texte, lisez sur une ou deux colonnes, et cliquez sur les bords de la page pour la tourner.
 - **Images.** Double-cliquez sur une image pour la voir en taille réelle.
+- **Surlignages et notes.** Sélectionnez du texte, choisissez une des quatre couleurs et ajoutez une note. `⌘D` pose un signet sur la page. Le panneau Notes (`⇧⌘N`) liste tout par chapitre.
+- **Export.** En Markdown, ou au format My Clippings de Kindle pour Readwise et Obsidian.
+- **Recherche d’un mot en une étape.** Sélectionnez un mot et appuyez sur `⌃⌘D`, ou utilisez la barre qui apparaît au-dessus de la sélection.
+- **À propos du livre.** La description tirée des métadonnées du livre, en tête du panneau.
 - **Huit langues.** Anglais, chinois simplifié, chinois traditionnel, japonais, coréen, français, allemand et espagnol.
 
 ## Comparaison
@@ -57,9 +61,8 @@ Un livre, une fenêtre. Double-cliquez sur un livre dans le Finder et commencez 
 
 ## À venir
 
-- Surlignages, signets et export en Markdown ou au format My Clippings de Kindle
-- Recherche d’un mot en une étape
 - Vos réglages de police avant ceux de l’éditeur, et les fichiers TXT
+- Les vrais numéros de page, et un retour après avoir feuilleté plus loin
 - Vignettes dans le Finder, Coup d’œil et recherche Spotlight, plus tard
 
 Pas prévu : bibliothèque, boutique, compte ou synchronisation.
@@ -82,6 +85,10 @@ Nécessite macOS 15 ou une version ultérieure.
 | Atteindre | `⌘L` |
 | Taille et thème | `Aa` en haut à droite, ou clic droit sur la page |
 | Réglages | `⌘,` |
+| Surligner | Sélectionner du texte, puis une couleur |
+| Signet | `⌘D` |
+| Notes | `⇧⌘N` |
+| Rechercher | `⌃⌘D` |
 
 ## Compiler depuis les sources
 

@@ -49,6 +49,10 @@ Ein Buch, ein Fenster. Doppelklicke im Finder auf ein Buch und lies los. Schlie�
 - **Schwebendes Inhaltsverzeichnis.** `⌘T` öffnet es über der Seite, der Text bleibt, wo er ist.
 - **Layout.** Textbreite einstellen, ein- oder zweispaltig lesen und zum Blättern auf den Seitenrand klicken.
 - **Bilder.** Doppelklicke auf ein Bild, um es in voller Größe zu sehen.
+- **Markierungen und Notizen.** Text auswählen, eine von vier Farben wählen, Notiz anhängen. `⌘D` setzt ein Lesezeichen auf die Seite. Das Notizen-Panel (`⇧⌘N`) listet alles nach Kapiteln.
+- **Export.** Als Markdown oder im My-Clippings-Format von Kindle für Readwise und Obsidian.
+- **Nachschlagen mit einem Schritt.** Wort auswählen und `⌃⌘D` drücken, oder die Leiste über der Auswahl benutzen.
+- **Über das Buch.** Die Beschreibung aus den Metadaten des Buchs, oben im Panel.
 - **Acht Sprachen.** Englisch, vereinfachtes Chinesisch, traditionelles Chinesisch, Japanisch, Koreanisch, Französisch, Deutsch und Spanisch.
 
 ## Im Vergleich
@@ -57,9 +61,8 @@ Ein Buch, ein Fenster. Doppelklicke im Finder auf ein Buch und lies los. Schlie�
 
 ## Als Nächstes
 
-- Markierungen, Lesezeichen und Export als Markdown oder Kindle My Clippings
-- Wörter mit einem Schritt nachschlagen
 - Eigene Schrifteinstellungen vor denen des Verlags, und TXT-Dateien
+- Echte Seitenzahlen und ein Weg zurück nach dem Vorblättern
 - Finder-Vorschaubilder, Quick Look und Spotlight-Suche, später
 
 Nicht geplant: Bibliothek, Store, Account oder Sync.
@@ -82,6 +85,10 @@ Erfordert macOS 15 oder neuer.
 | Gehe zu | `⌘L` |
 | Größe und Thema | `Aa` oben rechts, oder Rechtsklick auf die Seite |
 | Einstellungen | `⌘,` |
+| Markieren | Text auswählen, dann eine Farbe wählen |
+| Lesezeichen | `⌘D` |
+| Notizen | `⇧⌘N` |
+| Nachschlagen | `⌃⌘D` |
 
 ## Aus dem Quellcode bauen
 

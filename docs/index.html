@@ -37,8 +37,8 @@
   "applicationCategory": "ProductivityApplication",
   "applicationSubCategory": "Ebook reader",
   "operatingSystem": "macOS 15 or later",
-  "softwareVersion": "0.4.3",
-  "dateModified": "2026-11-22",
+  "softwareVersion": "0.5.0",
+  "dateModified": "2026-11-23",
   "inLanguage": "en",
   "url": "https://chengffei.github.io/leaf/",
   "downloadUrl": "https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg",
@@ -86,7 +86,7 @@
       "name": "Is there a simple ebook reader for Mac?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Leaf opens DRM-free EPUB, MOBI and AZW3 files, plus PDF, FB2 and CBZ, each in its own window. It shows time left based on how fast you read, location numbers, typography presets, footnotes in place and find in book. Close the window and it quits. No store, no account."
+        "text": "Leaf opens DRM-free EPUB, MOBI and AZW3 files, plus PDF, FB2 and CBZ, each in its own window. It shows time left based on how fast you read, location numbers, typography presets, footnotes in place and find in book, and you can highlight, take notes, bookmark pages and export them. Close the window and it quits. No store, no account."
       }
     },
     {
@@ -94,7 +94,7 @@
       "name": "How is Leaf different from Readest?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Readest is cross-platform, with a library, sync, highlights and text-to-speech. Leaf is Mac only and does less on purpose: no library, only your reading position, and it quits when you close the book. About 5 MB, against 67 MB."
+        "text": "Readest is cross-platform, with a library, sync and text-to-speech. Leaf is Mac only and does less on purpose: no library, no sync, and it quits when you close the book. It keeps your reading position, highlights and bookmarks in its own folder, never in the book file. About 5 MB, against 67 MB."
       }
     },
     {
@@ -390,6 +390,11 @@
       <p><kbd>⌘F</kbd> to search the book. <kbd>⌘L</kbd> to jump anywhere.</p>
     </div>
     <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l4-4 4 4-6 6H9z"/><path d="M13 7l2-2 4 4-2 2"/><path d="M4 20h16"/></svg>
+      <h3>Keep what you read</h3>
+      <p>Highlights, notes and bookmarks. Export as Markdown or Kindle clippings. Look up in one step.</p>
+    </div>
+    <div class="card">
       <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
       <h3>Six formats</h3>
       <p>EPUB, MOBI, AZW3, PDF, FB2 and CBZ. No conversion.</p>
@@ -429,9 +434,9 @@
     <tbody>
       <tr><td>MOBI · AZW3</td><td>✓ (DRM-free)</td><td>✓</td><td>Not supported</td><td>✓</td></tr>
       <tr><td>Opening a file</td><td>In place, no library</td><td>In place, added to its library</td><td>Imported into its library</td><td>Library first; viewer can run alone</td></tr>
-      <tr><td>What it keeps</td><td>Reading position only</td><td>Library entry: title, path, cover</td><td>A copy in its library</td><td>Library database</td></tr>
+      <tr><td>What it keeps</td><td>Reading position, highlights and bookmarks, in its own folder</td><td>Library entry: title, path, cover</td><td>A copy in its library</td><td>Library database</td></tr>
       <tr><td>Closing the window</td><td>App quits</td><td>Keeps running</td><td>—</td><td>—</td></tr>
-      <tr><td>Highlights and notes</td><td>Next version</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Highlights and notes</td><td>✓ Exports Markdown and Kindle clippings</td><td>✓</td><td>✓</td><td>✓</td></tr>
       <tr><td>Other platforms</td><td>Mac only</td><td>iOS · Android · Windows · Linux · Web</td><td>iPhone · iPad</td><td>Windows · Linux</td></tr>
       <tr><td>Interface</td><td>Native (SwiftUI)</td><td>Web (Tauri)</td><td>Native</td><td>Qt</td></tr>
       <tr><td>Download size</td><td>About 5 MB</td><td>About 67 MB</td><td>Built into macOS</td><td>About 350 MB</td></tr>
@@ -499,8 +504,8 @@
   <p class="section-lead">Common questions about installing and using Leaf.</p>
   <div class="faq">
     <details><summary>How do I open MOBI and AZW3 files on a Mac?</summary><p>Install Leaf, then double-click the file in Finder, or right-click it and choose Open With › Leaf. The file must be DRM-free.</p></details>
-    <details><summary>Is there a simple ebook reader for Mac?</summary><p>Leaf opens DRM-free EPUB, MOBI and AZW3 files, plus PDF, FB2 and CBZ, each in its own window. It shows time left based on how fast you read, location numbers, typography presets, footnotes in place and find in book. Close the window and it quits. No store, no account.</p></details>
-    <details><summary>How is Leaf different from Readest?</summary><p>Readest is cross-platform, with a library, sync, highlights and text-to-speech. Leaf is Mac only and does less on purpose: no library, only your reading position, and it quits when you close the book. About 5 MB, against 67 MB.</p></details>
+    <details><summary>Is there a simple ebook reader for Mac?</summary><p>Leaf opens DRM-free EPUB, MOBI and AZW3 files, plus PDF, FB2 and CBZ, each in its own window. It shows time left based on how fast you read, location numbers, typography presets, footnotes in place and find in book, and you can highlight, take notes, bookmark pages and export them. Close the window and it quits. No store, no account.</p></details>
+    <details><summary>How is Leaf different from Readest?</summary><p>Readest is cross-platform, with a library, sync and text-to-speech. Leaf is Mac only and does less on purpose: no library, no sync, and it quits when you close the book. It keeps your reading position, highlights and bookmarks in its own folder, never in the book file. About 5 MB, against 67 MB.</p></details>
     <details><summary>Is Leaf free?</summary><p>Yes. Leaf is free and open source under the GPL-3.0.</p></details>
     <details><summary>Why does macOS say it can’t verify the developer?</summary><p>Leaf isn’t notarized by Apple. Open it once and dismiss the warning, then go to System Settings › Privacy & Security and click Open Anyway. You only need to do this once.</p></details>
     <details><summary>Can Leaf open Kindle books I bought?</summary><p>Only DRM-free files. Books bought from the Kindle Store usually have DRM, and Leaf can’t open them.</p></details>
@@ -516,7 +521,7 @@
   </p>
   <p><a href="https://github.com/chengffei/leaf">github.com/chengffei/leaf</a></p>
   <p>
-    Made by <a href="https://github.com/chengffei">Felix</a> · Version 0.4.3 · Last updated <time datetime="2026-11-22">22 November 2026</time>
+    Made by <a href="https://github.com/chengffei">Felix</a> · Version 0.5.0 · Last updated <time datetime="2026-11-23">23 November 2026</time>
     
   </p>
 </footer>
