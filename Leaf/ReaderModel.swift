@@ -269,7 +269,8 @@ final class ReaderModel {
     func goTo(_ annotation: Annotation) {
         guard let json = encode(annotation.cfi) else { return }
         call("leaf.showAnnotation(\(json))")
-        webView?.window?.makeFirstResponder(webView)
+        // 面板里的列表点过之后还握着键盘焦点，面板收起后再把焦点还给书页，方向键才能翻页
+        DispatchQueue.main.async { [weak self] in self?.webView?.window?.makeFirstResponder(self?.webView) }
     }
 
     /// ⌘D：当页有书签就移除，没有就加

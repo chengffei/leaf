@@ -154,6 +154,12 @@ struct ReaderView: NSViewRepresentable {
             case "ready":
                 log.info("ready \(String(describing: body), privacy: .public)")
                 model.loadAnnotations()
+                #if DEBUG
+                let seed = UserDefaults.standard.integer(forKey: "LeafDebugSeed")
+                if seed > 0 { model.webView?.evaluateJavaScript("leaf.debugSeed(\(seed), \(seed / 10))", completionHandler: nil) }
+                #endif
+            case "perf":
+                log.info("perf \(String(describing: body), privacy: .public)")
             case "styled":
                 log.info("styled \(String(describing: body), privacy: .public)")
             case "error":

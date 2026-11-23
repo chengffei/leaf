@@ -8,6 +8,10 @@ import { chunkSections } from './chunks.js'
 
 const $ = s => document.querySelector(s)
 const post = msg => window.webkit?.messageHandlers?.leaf?.postMessage(msg)
+// Debug 构建才回报耗时（Swift 侧写进日志），正式版这个函数是空的
+const perf = new URLSearchParams(location.search).has('debug')
+  ? (name, t0, extra = {}) => post({ type: 'perf', name, ms: Math.round((performance.now() - t0) * 10) / 10, ...extra })
+  : () => {}
 
 // 注入书内 iframe 的样式：只给缺省值，不压过书本自带排版
 const bookCSS = `
@@ -234,11 +238,45 @@ globalThis.leaf = {
   lookUpSelection() { lookUpSelection() },
   // 红绿灯与工具栏浮现时，右上角的书签角标让位
   setChromeVisible(visible) { $('#bookmark').classList.toggle('dim', visible) },
+  // 性能测试用（Debug 构建，启动参数 -LeafDebugSeed N）：全书搜「的」或「the」，每隔几处取一条做成高亮，前 b 条再各加一条书签
+  async debugSeed(n, b) {
+    const t0 = performance.now()
+    const cfis = []
+    for (const q of ['的', 'the']) {
+      const gen = view.search({ query: q, matchCase: false, matchDiacritics: false, matchWholeWords: false, draw: Overlayer.highlight, drawOptions: { color: 'transparent' } })
+      let i = 0
+      for await (const r of gen) {
+        if (r === 'done') break
+        if (r.subitems) for (const { cfi, excerpt } of r.subitems) { if (i++ % 7 === 0) cfis.push({ cfi, text: `${excerpt.pre}${excerpt.match}${excerpt.post}`.trim(), chapter: r.label }); if (cfis.length >= n) break }
+        if (cfis.length >= n) { gen.return(); break }
+      }
+      if (cfis.length >= n) break
+    }
+    view.clearSearch()
+    const colors = Object.keys(HIGHLIGHT)
+    for (const [i, { cfi, text, chapter }] of cfis.entries()) {
+      const a = { id: crypto.randomUUID(), kind: 'highlight', cfi, text, note: i % 5 === 0 ? `note ${i}` : '', color: colors[i % 4], chapter: (chapter ?? '').trim(), location: i, created: new Date().toISOString() }
+      await resolveIndex(a)
+      annots.set(cfi, a)
+      postAnnot('add', a)
+      if (i < b) {
+        const bm = { ...a, id: crypto.randomUUID(), kind: 'bookmark', cfi: CFI.collapse(cfi), note: '', color: '' } // 收成点 CFI，避开同键
+        await resolveIndex(bm)
+        annots.set(bm.cfi, bm)
+        postAnnot('add', bm)
+      }
+    }
+    postOrder()
+    for (const a of annots.values()) if (a.kind === 'highlight' && loadedIndices().has(a.index)) addOverlay(a)
+    perf('debugSeed', t0, { count: annots.size })
+  },
 }
 
 // ---- 翻页输入：键盘 + 触控板（一次手势只翻一页） ----
 // 用户亲手翻的页才计数：一次跳转本身会触发好几次 relocate，不能拿它数
+let turnAt = 0 // 上次亲手翻页的时刻，relocate 时算一次翻页耗时
 const turn = go => {
+  turnAt = performance.now()
   pagesSinceJump++
   updateBack()
   lastTurn = { at: Date.now(), bytes: bytesAt(lastLocation) } // 给阅读速度采样
@@ -642,11 +680,12 @@ const HIGHLIGHT = { yellow: '#ffd60a', green: '#30d158', blue: '#64d2ff', pink: 
 const annots = new Map() // cfi → { id, kind, cfi, text, note, color, chapter, location, created, index }
 const byId = id => [...annots.values()].find(a => a.id === id)
 const postAnnot = (action, a) => {
-  const { index, ...item } = a
+  const { index, point, ...item } = a
   post({ type: 'annotation', action, item })
 }
 const postOrder = () => post({ type: 'order', ids: [...annots.values()].sort((a, b) => CFI.compare(a.cfi, b.cfi)).map(a => a.id) })
-const resolveIndex = a => { try { a.index = view.resolveNavigation(a.cfi)?.index ?? -1 } catch { a.index = -1 } }
+// 大章节分块后 resolveCFI 返回 Promise（要先解析原章节才知道落在哪一块），所以这里是异步的
+const resolveIndex = async a => { try { a.index = (await view.resolveNavigation(a.cfi))?.index ?? -1 } catch { a.index = -1 } }
 // foliate 用 value 字段当 CFI；只把画图要用的几项传过去
 const addOverlay = a => view.addAnnotation({ value: a.cfi, kind: a.kind, color: a.color })
 const removeOverlay = a => view.deleteAnnotation({ value: a.cfi })
@@ -657,17 +696,21 @@ view.addEventListener('draw-annotation', e => {
 })
 // 每节的画层是翻到那一节才建的：建好时把属于它的高亮画上
 view.addEventListener('create-overlay', e => {
-  for (const a of annots.values()) if (a.kind === 'highlight' && a.index === e.detail.index) addOverlay(a)
+  const t0 = performance.now()
+  const jobs = []
+  for (const a of annots.values()) if (a.kind === 'highlight' && a.index === e.detail.index) jobs.push(addOverlay(a))
+  if (jobs.length) Promise.all(jobs).then(() => perf('createOverlay', t0, { index: e.detail.index, drawn: jobs.length }))
 })
-const setAnnotations = list => {
-  const loaded = loadedIndices()
-  for (const a of annots.values()) if (a.kind === 'highlight' && loaded.has(a.index)) removeOverlay(a)
+const setAnnotations = async list => {
+  const t0 = performance.now()
+  for (const a of annots.values()) if (a.kind === 'highlight' && loadedIndices().has(a.index)) removeOverlay(a)
   annots.clear()
-  for (const a of list ?? []) {
-    resolveIndex(a)
-    annots.set(a.cfi, a)
-    if (a.kind === 'highlight' && loaded.has(a.index)) addOverlay(a)
-  }
+  for (const a of list ?? []) annots.set(a.cfi, a)
+  await Promise.all([...annots.values()].map(resolveIndex))
+  // 解析期间可能已经建好了当前节的画层（create-overlay 那时还不知道 index），这里补画
+  const loaded = loadedIndices()
+  for (const a of annots.values()) if (a.kind === 'highlight' && loaded.has(a.index)) addOverlay(a)
+  perf('setAnnotations', t0, { count: annots.size })
   updateBookmark()
 }
 const removeAnnotation = id => {
@@ -819,18 +862,23 @@ addEventListener('resize', () => { closeAnnot(); closeSel() })
 
 // 书签：⌘D 给当页加一条，再按移除；右上角的角标表示当页有书签
 const pageText = () => (view.lastLocation?.range?.toString() ?? '').replace(/\s+/g, ' ').trim().slice(0, 80)
-const bookmarkOnPage = () => {
+const bookmarkOnPage = async () => {
   const loc = view.lastLocation
   if (!loc?.range) return null
-  const content = view.renderer?.getContents?.().find(c => c.index === loc.index) ?? currentContent(loc.range.startContainer.ownerDocument)
+  const content = currentContent(loc.range.startContainer.ownerDocument)
+  if (!content) return null
+  // 先按缓存的 index 筛，只解析落在当前节的书签
   for (const a of annots.values()) {
-    if (a.kind !== 'bookmark') continue
+    if (a.kind !== 'bookmark' || a.index !== content.index) continue
     try {
-      const { index, anchor } = view.resolveNavigation(a.cfi) ?? {}
-      if (index !== (content?.index ?? loc.index)) continue
-      const r = anchor(content.doc)
+      // 同一节内每次翻页都要比一遍，解析结果按文档缓存，换节再解析
+      if (a.point?.doc !== content.doc) {
+        const { anchor } = await view.resolveNavigation(a.cfi) ?? {}
+        const r = anchor(content.doc)
+        a.point = { doc: content.doc, node: r.startContainer ?? r, offset: r.startOffset ?? 0 }
+      }
       const pt = content.doc.createRange()
-      pt.setStart(r.startContainer ?? r, r.startOffset ?? 0)
+      pt.setStart(a.point.node, a.point.offset)
       pt.collapse(true)
       // 页首 ≤ 书签点 < 页尾：isPointInRange 把页尾也算在内，上一页会误判
       if (loc.range.compareBoundaryPoints(Range.START_TO_START, pt) <= 0 && loc.range.compareBoundaryPoints(Range.START_TO_END, pt) > 0) return a
@@ -838,13 +886,15 @@ const bookmarkOnPage = () => {
   }
   return null
 }
-const updateBookmark = () => {
-  const on = Boolean(bookmarkOnPage())
+const updateBookmark = async () => {
+  const t0 = performance.now()
+  const on = Boolean(await bookmarkOnPage())
+  perf('updateBookmark', t0)
   $('#bookmark').hidden = !on
   post({ type: 'bookmarked', value: on })
 }
-const toggleBookmark = () => {
-  const existing = bookmarkOnPage()
+const toggleBookmark = async () => {
+  const existing = await bookmarkOnPage()
   if (existing) {
     annots.delete(existing.cfi)
     postAnnot('remove', existing)
@@ -852,7 +902,7 @@ const toggleBookmark = () => {
     const loc = view.lastLocation
     if (!loc?.cfi) return
     const a = { id: crypto.randomUUID(), kind: 'bookmark', cfi: loc.cfi, text: pageText(), note: '', color: '', chapter: (loc.tocItem?.label ?? '').trim(), location: loc.location?.current ?? 0, created: new Date().toISOString() }
-    resolveIndex(a)
+    await resolveIndex(a)
     annots.set(a.cfi, a)
     postAnnot('add', a)
     postOrder()
@@ -896,6 +946,7 @@ try {
     scrub.value = Math.round((fraction ?? 0) * 1000)
     renderProgress()
     closeSel()
+    if (turnAt) { perf('turn', turnAt); turnAt = 0 }
     updateBookmark()
     post({ type: 'relocate', cfi, fraction, tocHref: tocItem?.href ?? null })
   })
