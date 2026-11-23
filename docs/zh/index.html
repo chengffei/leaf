@@ -8,6 +8,12 @@
 <link rel="canonical" href="https://chengffei.github.io/leaf/zh/">
 <link rel="alternate" hreflang="en" href="https://chengffei.github.io/leaf/">
 <link rel="alternate" hreflang="zh-Hans" href="https://chengffei.github.io/leaf/zh/">
+<link rel="alternate" hreflang="zh-Hant" href="https://chengffei.github.io/leaf/zh-hant/">
+<link rel="alternate" hreflang="ja" href="https://chengffei.github.io/leaf/ja/">
+<link rel="alternate" hreflang="ko" href="https://chengffei.github.io/leaf/ko/">
+<link rel="alternate" hreflang="fr" href="https://chengffei.github.io/leaf/fr/">
+<link rel="alternate" hreflang="de" href="https://chengffei.github.io/leaf/de/">
+<link rel="alternate" hreflang="es" href="https://chengffei.github.io/leaf/es/">
 <link rel="alternate" hreflang="x-default" href="https://chengffei.github.io/leaf/">
 <link rel="alternate" type="text/plain" title="llms.txt" href="https://chengffei.github.io/leaf/llms.txt">
 <meta name="theme-color" content="#f6f4ef">
@@ -22,6 +28,12 @@
 <meta property="og:image:alt" content="Leaf showing a book in two-column layout">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta property="og:locale:alternate" content="ja_JP">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta property="og:locale:alternate" content="de_DE">
+<meta property="og:locale:alternate" content="es_ES">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Leaf — 不建书库的 Mac 电子书阅读器">
 <meta name="twitter:description" content="双击就读，关窗就走。小巧的原生 Mac 电子书阅读器，免费开源。">
@@ -188,6 +200,19 @@
     padding: 4px 12px; cursor: pointer;
   }
   .lang-toggle:hover { color: var(--ink); border-color: rgba(0,0,0,.18); }
+  /* 语言菜单：<details> 下拉，不靠 JS；当前语言作标题 */
+  .langs { position: relative; }
+  .langs summary { list-style: none; }
+  .langs summary::-webkit-details-marker { display: none; }
+  .langs summary::after { content: " ▾"; font-size: 11px; }
+  .langs-menu {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 140px;
+    display: flex; flex-direction: column; padding: 6px;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 10px 32px rgba(0,0,0,.12);
+  }
+  .langs-menu a { display: block; padding: 7px 12px; border-radius: 8px; font-size: 14px; white-space: nowrap; }
+  .langs-menu a:hover { background: var(--alt, #f5f5f7); text-decoration: none; }
 
   .hero { text-align: center; padding: 88px 24px 56px; }
   .hero .icon { width: 128px; height: 128px; margin: 0 auto 28px; }
@@ -296,7 +321,7 @@
       <a class="hide-sm" href="#features">功能</a>
       <a class="hide-sm" href="#install">安装</a>
       <a href="https://github.com/chengffei/leaf">GitHub</a>
-      <a class="lang-toggle" href="../" hreflang="en" lang="en">EN</a>
+      <details class="langs"><summary class="lang-toggle" aria-label="Language">简体中文</summary><div class="langs-menu"><a href="../" hreflang="en" lang="en">English</a><a href="../zh-hant/" hreflang="zh-Hant" lang="zh-Hant">繁體中文</a><a href="../ja/" hreflang="ja" lang="ja">日本語</a><a href="../ko/" hreflang="ko" lang="ko">한국어</a><a href="../fr/" hreflang="fr" lang="fr">Français</a><a href="../de/" hreflang="de" lang="de">Deutsch</a><a href="../es/" hreflang="es" lang="es">Español</a></div></details>
     </div>
   </div>
 </nav>
@@ -526,5 +551,12 @@
   </p>
 </footer>
 
+<script>
+  // 语言菜单：点菜单外或选了语言就收起（<details> 自己不会）
+  for (const d of document.querySelectorAll('details.langs')) {
+    document.addEventListener('click', e => { if (!d.contains(e.target)) d.removeAttribute('open') })
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') d.removeAttribute('open') })
+  }
+</script>
 </body>
 </html>

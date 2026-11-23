@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaf — 不建書庫的 Mac 電子書閱讀器，支援直排</title>
+<meta name="description" content="免費開源的 Mac 電子書閱讀器。按兩下 EPUB、MOBI、AZW3、PDF、FB2、CBZ 即讀，關窗即退。直排的書照原樣直排。沒有書庫，不用帳號。原生應用程式，約 5 MB。">
+<link rel="canonical" href="https://chengffei.github.io/leaf/zh-hant/">
+<link rel="alternate" hreflang="en" href="https://chengffei.github.io/leaf/">
+<link rel="alternate" hreflang="zh-Hans" href="https://chengffei.github.io/leaf/zh/">
+<link rel="alternate" hreflang="zh-Hant" href="https://chengffei.github.io/leaf/zh-hant/">
+<link rel="alternate" hreflang="ja" href="https://chengffei.github.io/leaf/ja/">
+<link rel="alternate" hreflang="ko" href="https://chengffei.github.io/leaf/ko/">
+<link rel="alternate" hreflang="fr" href="https://chengffei.github.io/leaf/fr/">
+<link rel="alternate" hreflang="de" href="https://chengffei.github.io/leaf/de/">
+<link rel="alternate" hreflang="es" href="https://chengffei.github.io/leaf/es/">
+<link rel="alternate" hreflang="x-default" href="https://chengffei.github.io/leaf/">
+<link rel="alternate" type="text/plain" title="llms.txt" href="https://chengffei.github.io/leaf/llms.txt">
+<meta name="theme-color" content="#f6f4ef">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Leaf">
+<meta property="og:url" content="https://chengffei.github.io/leaf/zh-hant/">
+<meta property="og:title" content="Leaf — 不建書庫的 Mac 電子書閱讀器，支援直排">
+<meta property="og:description" content="按兩下就讀，關窗就走。小巧的原生 Mac 電子書閱讀器，免費開源，支援直排。">
+<meta property="og:image" content="https://chengffei.github.io/leaf/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Leaf showing a book in two-column layout">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:locale:alternate" content="ja_JP">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta property="og:locale:alternate" content="de_DE">
+<meta property="og:locale:alternate" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Leaf — 不建書庫的 Mac 電子書閱讀器，支援直排">
+<meta name="twitter:description" content="按兩下就讀，關窗就走。小巧的原生 Mac 電子書閱讀器，免費開源，支援直排。">
+<meta name="twitter:image" content="https://chengffei.github.io/leaf/images/og.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../images/favicon.png">
+<link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Leaf",
+  "description": "免費開源的 Mac 電子書閱讀器，打開 EPUB、MOBI、AZW3、PDF、FB2、CBZ。沒有書庫，不用帳號。",
+  "applicationCategory": "ProductivityApplication",
+  "applicationSubCategory": "Ebook reader",
+  "operatingSystem": "macOS 15 or later",
+  "softwareVersion": "0.5.1",
+  "dateModified": "2026-11-23",
+  "inLanguage": "zh-Hant",
+  "url": "https://chengffei.github.io/leaf/zh-hant/",
+  "downloadUrl": "https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg",
+  "fileFormat": [
+    "application/epub+zip",
+    "application/x-mobipocket-ebook",
+    "application/vnd.amazon.mobi8-ebook",
+    "application/pdf",
+    "application/x-fictionbook+xml",
+    "application/vnd.comicbook+zip"
+  ],
+  "screenshot": "https://chengffei.github.io/leaf/images/reading.png",
+  "image": "https://chengffei.github.io/leaf/images/icon.png",
+  "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Felix",
+    "url": "https://github.com/chengffei"
+  },
+  "codeRepository": "https://github.com/chengffei/leaf"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "zh-Hant",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "怎麼在 Mac 上打開 MOBI 和 AZW3 檔案？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "裝好 Leaf 後，在 Finder 裡按兩下檔案，或按右鍵選「打開檔案的應用程式 › Leaf」。檔案需要無 DRM。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Mac 上有簡單好用的電子書閱讀器嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Leaf 能打開無 DRM 的 EPUB、MOBI、AZW3，以及 PDF、FB2、CBZ，一本書一個視窗。按你的閱讀速度估算剩餘時間，有位置號、排版預設、註腳就地彈出和全書尋找，能標示、寫筆記、加書籤並匯出。直排的書照原樣直排。關掉視窗就退出。沒有商店，不用帳號。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Leaf 和 Readest 有什麼不同？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Readest 跨平台，有書庫、同步和朗讀。Leaf 只做 Mac，刻意做得更少：沒有書庫，不同步，合上書就退出。閱讀位置、標示和書籤存在它自己的目錄裡，不碰書檔。約 5 MB，Readest 約 67 MB。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Leaf 免費嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "免費，並以 GPL-3.0 授權開源。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "為什麼 macOS 說無法驗證開發者？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Leaf 沒有經過 Apple 公證。先打開一次並關掉提示，再到「系統設定 › 隱私權與安全性」按「強制打開」。只需操作一次。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "能打開在 Kindle 商店買的書嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "只能打開無 DRM 的檔案。Kindle 商店購買的書通常有 DRM，Leaf 打不開。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Leaf 是 Kindle 的 app 嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不是。Leaf 是獨立的開源專案，與 Amazon 無關。它用來在 Mac 上讀無 DRM 的 EPUB、MOBI、AZW3，沒有商店，不用帳號。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Leaf 有書架或書庫嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "沒有。Leaf 直接打開書所在的位置，不匯入也不複製檔案。Leaf 自己只記每本讀到哪；和其他 Mac 文件應用程式一樣，系統會在「檔案 › 打開最近使用過的」列出最近的檔案。"
+      }
+    }
+  ]
+}
+</script>
+<style>
+  :root {
+    --paper: #f6f4ef;
+    --card: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6e6e73;
+    --line: rgba(0, 0, 0, .08);
+    --green: #2c7355;
+    --green-hover: #245f46;
+    --radius: 18px;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  img { max-width: 100%; height: auto; display: block; }
+
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(246, 244, 239, .82);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--ink); }
+  .brand:hover { text-decoration: none; }
+  .brand img { width: 28px; height: 28px; }
+  .nav-links { display: flex; align-items: center; gap: 20px; font-size: 15px; }
+  .nav-links a { color: var(--ink); }
+  .lang-toggle {
+    display: inline-block; text-decoration: none;
+    font: inherit; font-size: 13px; color: var(--muted);
+    background: none; border: 1px solid var(--line); border-radius: 999px;
+    padding: 4px 12px; cursor: pointer;
+  }
+  .lang-toggle:hover { color: var(--ink); border-color: rgba(0,0,0,.18); }
+  /* 语言菜单：<details> 下拉，不靠 JS；当前语言作标题 */
+  .langs { position: relative; }
+  .langs summary { list-style: none; }
+  .langs summary::-webkit-details-marker { display: none; }
+  .langs summary::after { content: " ▾"; font-size: 11px; }
+  .langs-menu {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 140px;
+    display: flex; flex-direction: column; padding: 6px;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 10px 32px rgba(0,0,0,.12);
+  }
+  .langs-menu a { display: block; padding: 7px 12px; border-radius: 8px; font-size: 14px; white-space: nowrap; }
+  .langs-menu a:hover { background: var(--alt, #f5f5f7); text-decoration: none; }
+
+  .hero { text-align: center; padding: 88px 24px 56px; }
+  .hero .icon { width: 128px; height: 128px; margin: 0 auto 28px; }
+  .narrow { max-width: 760px; }
+  .definition { font-size: 19px; line-height: 1.7; margin: 0; text-align: left; }
+  .table-scroll { overflow-x: auto; }
+  table.compare { max-width: 1000px; }
+  table.compare th { padding: 16px 24px; text-align: left; font-size: 15px; border-bottom: 1px solid var(--line); }
+  table.compare td { text-align: left; color: var(--ink); font-size: 15px; }
+  table.compare td:first-child { color: var(--muted); }
+  table.compare th:nth-child(2), table.compare td:nth-child(2) { background: rgba(44, 115, 85, .06); font-weight: 600; }
+  table.compare th, table.compare td { padding-left: 18px; padding-right: 18px; }
+  .eyebrow { margin: 0 0 14px; font-size: 15px; font-weight: 600; letter-spacing: .02em; color: var(--green); }
+  .faq { max-width: 760px; margin: 0 auto; }
+  .faq details { background: var(--card); border-radius: 14px; padding: 18px 24px; margin-bottom: 12px; }
+  .faq summary { cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; float: right; color: var(--muted); font-weight: 400; }
+  .faq details[open] summary::after { content: "–"; }
+  .faq p { margin: 10px 0 0; color: var(--muted); font-size: 16px; }
+  h1 {
+    font-size: clamp(40px, 7vw, 68px); line-height: 1.08; letter-spacing: -.02em;
+    margin: 0 0 18px; font-weight: 700;
+  }
+  .lead { font-size: clamp(18px, 2.4vw, 22px); color: var(--muted); margin: 0 auto 36px; max-width: 640px; }
+  .actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 26px; border-radius: 999px; font-size: 17px; font-weight: 500;
+  }
+  .btn:hover { text-decoration: none; }
+  .btn-primary { background: var(--green); color: #fff; }
+  .btn-primary:hover { background: var(--green-hover); }
+  .btn-secondary { color: var(--ink); border: 1px solid rgba(0,0,0,.15); }
+  .btn-secondary:hover { background: rgba(0,0,0,.03); }
+  .meta { margin-top: 16px; font-size: 14px; color: var(--muted); }
+
+  .shot {
+    margin: 0 auto; max-width: 1000px;
+    border-radius: 14px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(60, 48, 20, .16), 0 0 0 1px rgba(0,0,0,.06);
+    background: transparent; /* 截图自带窗口圆角（透明角） */
+  }
+
+  section.wrap { padding-top: 112px; }
+  h2 {
+    font-size: clamp(30px, 4.4vw, 44px); line-height: 1.15; letter-spacing: -.015em;
+    margin: 0 0 14px; text-align: center; font-weight: 700;
+  }
+  .section-lead { text-align: center; color: var(--muted); margin: 0 auto 48px; max-width: 620px; font-size: 19px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card {
+    background: var(--card); border-radius: var(--radius); padding: 28px;
+    box-shadow: 0 1px 2px rgba(60, 48, 20, .05);
+  }
+  .card .glyph { width: 36px; height: 36px; color: var(--green); margin-bottom: 14px; }
+  .card h3 { margin: 0 0 6px; font-size: 19px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: center; }
+  .split h2, .split .section-lead { text-align: left; margin-left: 0; }
+
+  .steps { counter-reset: step; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .step { background: var(--card); border-radius: var(--radius); padding: 28px; position: relative; }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--green); color: #fff; font-weight: 600; font-size: 15px; margin-bottom: 14px;
+  }
+  .step h3 { margin: 0 0 6px; font-size: 18px; }
+  .step p { margin: 0; color: var(--muted); font-size: 15.5px; }
+  .install-download { margin: -16px 0 40px; }
+  .note { text-align: center; color: var(--muted); font-size: 14px; margin-top: 22px; }
+
+  table { width: 100%; max-width: 640px; margin: 0 auto; border-collapse: collapse; background: var(--card); border-radius: var(--radius); overflow: hidden; }
+  td { padding: 16px 24px; border-bottom: 1px solid var(--line); font-size: 16px; }
+  tr:last-child td { border-bottom: none; }
+  td:last-child { text-align: right; color: var(--muted); }
+  kbd {
+    font: 500 14px -apple-system, BlinkMacSystemFont, sans-serif; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--line); border-bottom-width: 2px;
+    border-radius: 6px; padding: 2px 8px; margin-left: 4px;
+  }
+
+  footer.wrap { padding-top: 96px; padding-bottom: 56px; text-align: center; color: var(--muted); font-size: 14px; }
+  footer p { margin: 6px 0; }
+
+  @media (max-width: 820px) {
+    .grid, .steps { grid-template-columns: 1fr; }
+    .split { grid-template-columns: 1fr; gap: 28px; }
+    .split h2, .split .section-lead { text-align: center; margin-left: auto; }
+    .hero { padding: 56px 24px 40px; }
+    section.wrap { padding-top: 80px; }
+    .nav-links .hide-sm { display: none; }
+    td { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="../images/favicon.png" width="28" height="28" alt="">Leaf</a>
+    <div class="nav-links">
+      <a class="hide-sm" href="#features">功能</a>
+      <a class="hide-sm" href="#install">安裝</a>
+      <a href="https://github.com/chengffei/leaf">GitHub</a>
+      <details class="langs"><summary class="lang-toggle" aria-label="Language">繁體中文</summary><div class="langs-menu"><a href="../" hreflang="en" lang="en">English</a><a href="../zh/" hreflang="zh-Hans" lang="zh-Hans">简体中文</a><a href="../ja/" hreflang="ja" lang="ja">日本語</a><a href="../ko/" hreflang="ko" lang="ko">한국어</a><a href="../fr/" hreflang="fr" lang="fr">Français</a><a href="../de/" hreflang="de" lang="de">Deutsch</a><a href="../es/" hreflang="es" lang="es">Español</a></div></details>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <img class="icon" src="../images/icon-256.png" width="128" height="128" alt="Leaf app icon">
+  <p class="eyebrow">開源的 Mac 電子書閱讀器 · EPUB · MOBI · AZW3 · PDF · FB2 · CBZ</p>
+  <h1>按兩下就讀，關窗就走。</h1>
+  <p class="lead">
+    
+    一本書，一個視窗。沒有書架，只記得你讀到哪。直排的書照原樣直排。
+  </p>
+  <div class="actions">
+    <a class="btn btn-primary" href="https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg">
+      下載 Leaf
+    </a>
+    <a class="btn btn-secondary" href="https://github.com/chengffei/leaf">
+      查看原始碼
+    </a>
+  </div>
+  <p class="meta">
+    
+    免費開源 · 原生 Mac 應用程式 · 約 5 MB · macOS 15 或更新
+  </p>
+</header>
+
+<div class="wrap">
+  <div class="shot">
+    <img src="../images/reading.png" width="1600" height="1106" alt="Leaf reading an EPUB book on Mac in two-column layout" loading="eager">
+  </div>
+</div>
+
+<section id="about" class="wrap narrow">
+  <h2>Leaf 是什麼？</h2>
+  <p class="definition">
+    Leaf 是免費開源的 Mac 電子書閱讀器。按兩下 EPUB、MOBI、AZW3、PDF、FB2 或 CBZ 檔案即可閱讀，關閉視窗就退出。沒有書庫，不複製檔案，不用帳號。它記得你讀到哪。原生 SwiftUI 應用程式，約 5 MB，需要 macOS 15。與 Amazon 無關。
+    
+  </p>
+</section>
+
+<section id="features" class="wrap">
+  <h2>只有書。</h2>
+  <p class="section-lead">
+    
+    沒有書庫。不複製。不用帳號。
+  </p>
+  <div class="grid">
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/><path d="M6 7h.01M8.5 7h.01"/></svg>
+      <h3>一個視窗</h3>
+      <p>像文件一樣打開，關掉就退出。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
+      <h3>記得讀到哪</h3>
+      <p>改名、搬移檔案，也能接著讀。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/></svg>
+      <h3>原生，5 MB</h3>
+      <p>系統選單、快速鍵、查詢與翻譯，都是 Mac 原裝。</p>
+    </div>
+  </div>
+</section>
+
+<section id="reading" class="wrap">
+  <h2>為讀書而設計。</h2>
+  <p class="section-lead">
+    
+    好讀，在於細節。
+  </p>
+  <div class="grid">
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/></svg>
+      <h3>還要讀多久</h3>
+      <p>按你自己的閱讀速度估算。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 5l5 14"/><path d="M5.8 14h6.4"/><path d="M15 19l3-8 3 8"/><path d="M16 16.5h4"/></svg>
+      <h3>排版隨你調</h3>
+      <p>直排的書照原樣直排，下一頁在左邊。字體、字重、間距、版心，五套預設，也能存自己的。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4"/><path d="M8 9h8M8 12h5"/></svg>
+      <h3>註腳就地彈出</h3>
+      <p>點一下編號，註釋就在目前頁面彈出。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M14 6l6 6-6 6"/></svg>
+      <h3>尋找與跳轉</h3>
+      <p><kbd>⌘F</kbd> 全書尋找，<kbd>⌘L</kbd> 跳到任意位置。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l4-4 4 4-6 6H9z"/><path d="M13 7l2-2 4 4-2 2"/><path d="M4 20h16"/></svg>
+      <h3>讀完留下</h3>
+      <p>螢光標示、筆記、書籤，匯出 Markdown 或 Kindle 標註格式。一步查詢。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
+      <h3>六種格式</h3>
+      <p>EPUB、MOBI、AZW3、PDF、FB2、CBZ，無需轉換。</p>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M5.5 8h1.5M5.5 11h1.5M5.5 14h1.5"/></svg>
+      <h3>主題與語言</h3>
+      <p>紙白、米黃或深色。八種語言。</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="split">
+    <div>
+      <h2>目錄，一鍵即到</h2>
+      <p class="section-lead">
+        
+        按 <kbd>⌘T</kbd>。浮在頁面上，內文不重排。
+      </p>
+    </div>
+    <div class="shot">
+      <img src="../images/toc.png" width="1600" height="1106" alt="Leaf floating table of contents panel on macOS" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<section id="compare" class="wrap">
+  <h2>Leaf 對比 Readest、Apple 書籍和 Calibre</h2>
+  <p class="section-lead">
+    Readest 功能最多。Apple 書籍隨 Mac 附帶。Calibre 最擅長管理藏書。Leaf 只做一件事：打開一本書。
+    
+  </p>
+  <div class="table-scroll">
+  <table class="compare">
+    <thead><tr><th></th><th>Leaf</th><th>Readest</th><th>Apple Books</th><th>Calibre</th></tr></thead>
+    <tbody>
+      <tr><td>MOBI · AZW3</td><td>✓ （無 DRM）</td><td>✓</td><td>不支援</td><td>✓</td></tr>
+      <tr><td>打開檔案</td><td>原地打開，不建書庫</td><td>原地打開，記入書庫</td><td>匯入書庫</td><td>以書庫為主，閱讀器可單獨啟動</td></tr>
+      <tr><td>會留下什麼</td><td>閱讀位置、標示和書籤，存在自己的目錄裡</td><td>書庫條目：書名、路徑、封面</td><td>書庫裡的副本</td><td>書庫資料庫</td></tr>
+      <tr><td>關掉視窗後</td><td>應用程式退出</td><td>繼續在背景執行</td><td>—</td><td>—</td></tr>
+      <tr><td>標示與筆記</td><td>✓ 可匯出 Markdown 與 Kindle 標註</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>其他平台</td><td>只有 Mac</td><td>iOS · Android · Windows · Linux · Web</td><td>iPhone · iPad</td><td>Windows · Linux</td></tr>
+      <tr><td>介面</td><td>原生（SwiftUI）</td><td>網頁技術（Tauri）</td><td>原生</td><td>Qt</td></tr>
+      <tr><td>安裝檔大小</td><td>約 5 MB</td><td>約 67 MB</td><td>系統內建</td><td>約 350 MB</td></tr>
+      <tr><td>系統需求</td><td>macOS 15+</td><td>macOS 12+</td><td>—</td><td>macOS 14+</td></tr>
+      <tr><td>價格 · 授權</td><td>免費 · GPL-3.0</td><td>免費，雲端同步可選付費 · AGPL-3.0</td><td>免費 · 閉源</td><td>免費 · GPL-3.0</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">
+    Readest 於 2026 年 10 月 30 日核對：<a href="https://github.com/readest/readest/releases">0.12.16 版</a>與 macOS 版實測。Apple 書籍與 Calibre 於 2026 年 10 月 3 日核對：<a href="https://support.apple.com/guide/books/import-books-audiobooks-or-pdfs-ibkseed72068/mac">Apple 書籍說明</a>、<a href="https://calibre-ebook.com/download_osx">calibre 9.15.0 for macOS</a> 與 <a href="https://manual.calibre-ebook.com/viewer.html">calibre 閱讀器手冊</a>。
+    
+  </p>
+</section>
+
+<section id="install" class="wrap">
+  <h2>安裝</h2>
+  <p class="section-lead">
+    
+    Leaf 未經 Apple 公證，第一次打開時允許一次即可。
+  </p>
+  <div class="actions install-download">
+    <a class="btn btn-primary" href="https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg">
+      下載 Leaf.dmg
+    </a>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <h3>拖進「應用程式」</h3>
+      <p>打開 <a href="https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg">Leaf.dmg</a>，把 Leaf 拖進「應用程式」資料夾。</p>
+    </div>
+    <div class="step">
+      <h3>打開一次</h3>
+      <p>按兩下 Leaf。macOS 提示無法驗證開發者時，按「完成」。</p>
+    </div>
+    <div class="step">
+      <h3>在設定裡允許</h3>
+      <p>到「系統設定 › 隱私權與安全性」，往下捲動按「強制打開」。</p>
+    </div>
+  </div>
+  <p class="note">
+    
+    需要 macOS 15 或更新版本。帶 DRM 的書（如 Kindle 商店購買的）打不開。
+  </p>
+</section>
+
+<section class="wrap">
+  <h2>快速鍵</h2>
+  <p class="section-lead">
+    
+    手不用離開鍵盤。
+  </p>
+  <table>
+    <tr><td>翻頁</td><td><kbd>←</kbd><kbd>→</kbd><kbd>Space</kbd></td></tr>
+    <tr><td>目錄</td><td><kbd>⌘T</kbd></td></tr>
+    <tr><td>書內尋找</td><td><kbd>⌘F</kbd><kbd>⌘G</kbd></td></tr>
+    <tr><td>跳到百分比或位置</td><td><kbd>⌘L</kbd></td></tr>
+    <tr><td>設定</td><td><kbd>⌘,</kbd></td></tr>
+    <tr><td>放大 / 縮小文字</td><td><kbd>⌘=</kbd><kbd>⌘-</kbd></td></tr>
+    <tr><td>實際大小</td><td><kbd>⌘0</kbd></td></tr>
+  </table>
+</section>
+
+<section id="faq" class="wrap">
+  <h2>常見問題</h2>
+  <p class="section-lead">安裝與使用 Leaf 的常見問題。</p>
+  <div class="faq">
+    <details><summary>怎麼在 Mac 上打開 MOBI 和 AZW3 檔案？</summary><p>裝好 Leaf 後，在 Finder 裡按兩下檔案，或按右鍵選「打開檔案的應用程式 › Leaf」。檔案需要無 DRM。</p></details>
+    <details><summary>Mac 上有簡單好用的電子書閱讀器嗎？</summary><p>Leaf 能打開無 DRM 的 EPUB、MOBI、AZW3，以及 PDF、FB2、CBZ，一本書一個視窗。按你的閱讀速度估算剩餘時間，有位置號、排版預設、註腳就地彈出和全書尋找，能標示、寫筆記、加書籤並匯出。直排的書照原樣直排。關掉視窗就退出。沒有商店，不用帳號。</p></details>
+    <details><summary>Leaf 和 Readest 有什麼不同？</summary><p>Readest 跨平台，有書庫、同步和朗讀。Leaf 只做 Mac，刻意做得更少：沒有書庫，不同步，合上書就退出。閱讀位置、標示和書籤存在它自己的目錄裡，不碰書檔。約 5 MB，Readest 約 67 MB。</p></details>
+    <details><summary>Leaf 免費嗎？</summary><p>免費，並以 GPL-3.0 授權開源。</p></details>
+    <details><summary>為什麼 macOS 說無法驗證開發者？</summary><p>Leaf 沒有經過 Apple 公證。先打開一次並關掉提示，再到「系統設定 › 隱私權與安全性」按「強制打開」。只需操作一次。</p></details>
+    <details><summary>能打開在 Kindle 商店買的書嗎？</summary><p>只能打開無 DRM 的檔案。Kindle 商店購買的書通常有 DRM，Leaf 打不開。</p></details>
+    <details><summary>Leaf 是 Kindle 的 app 嗎？</summary><p>不是。Leaf 是獨立的開源專案，與 Amazon 無關。它用來在 Mac 上讀無 DRM 的 EPUB、MOBI、AZW3，沒有商店，不用帳號。</p></details>
+    <details><summary>Leaf 有書架或書庫嗎？</summary><p>沒有。Leaf 直接打開書所在的位置，不匯入也不複製檔案。Leaf 自己只記每本讀到哪；和其他 Mac 文件應用程式一樣，系統會在「檔案 › 打開最近使用過的」列出最近的檔案。</p></details>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>
+    
+    Leaf 以 GPL-3.0 開源 · 排版引擎 <a href="https://github.com/johnfactotum/foliate-js">foliate-js</a>
+  </p>
+  <p><a href="https://github.com/chengffei/leaf">github.com/chengffei/leaf</a></p>
+  <p>
+    作者 <a href="https://github.com/chengffei">Felix</a> · 版本 0.5.1 · 最後更新 <time datetime="2026-11-23">2026 年 11 月 23 日</time>
+    
+  </p>
+</footer>
+
+<script>
+  // 语言菜单：点菜单外或选了语言就收起（<details> 自己不会）
+  for (const d of document.querySelectorAll('details.langs')) {
+    document.addEventListener('click', e => { if (!d.contains(e.target)) d.removeAttribute('open') })
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') d.removeAttribute('open') })
+  }
+</script>
+</body>
+</html>

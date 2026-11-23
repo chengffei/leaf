@@ -36,7 +36,8 @@ Leaf is built with SwiftUI and WebKit and uses foliate-js to parse and paginate 
 ## Links
 
 - [Website](https://chengffei.github.io/leaf/): overview, screenshots, comparison and FAQ
-- [中文介绍页](https://chengffei.github.io/leaf/zh/): Chinese version of the website
+- [中文介绍页](https://chengffei.github.io/leaf/zh/): Simplified Chinese version of the website
+- Other languages: [繁體中文](https://chengffei.github.io/leaf/zh-hant/), [日本語](https://chengffei.github.io/leaf/ja/), [한국어](https://chengffei.github.io/leaf/ko/), [Français](https://chengffei.github.io/leaf/fr/), [Deutsch](https://chengffei.github.io/leaf/de/), [Español](https://chengffei.github.io/leaf/es/)
 - [Download Leaf.dmg](https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg): latest release
 - [Source code](https://github.com/chengffei/leaf): GitHub repository, README and release notes
 - [Development notes](https://github.com/chengffei/leaf/blob/main/DEVELOPMENT.md): architecture and known pitfalls (Chinese)

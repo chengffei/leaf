@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""从 index.template.html 生成介绍页：docs/index.html（英文）与 docs/zh/index.html（中文）。
+"""从 index.template.html 生成介绍页，八种语言，与 app 一致。
 
-每页只保留自己语言的 <span lang="..."> 片段，头部（标题、描述、OG、hreflang、
-JSON-LD）按语言生成；FAQ 结构化数据直接解析页面里的 FAQ，只维护一份。
-改页面请改模板，然后运行：python3 scripts/site/build.py
+模板里只写英文和简体中文（<span lang="en"> / <span lang="zh">）；其余六种语言在
+scripts/site/i18n/<lang>.json 里按英文原文查译文，缺一条就报错，不会悄悄退回英文。
+头部（标题、描述、OG、hreflang、JSON-LD）按语言生成；FAQ 结构化数据直接解析页面里的 FAQ；
+sitemap 一并生成。改页面请改模板和译文表，然后运行：python3 scripts/site/build.py
 """
 import datetime
 import html
@@ -12,49 +13,111 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TEMPLATE = Path(__file__).with_name("index.template.html")
+HERE = Path(__file__).parent
+TEMPLATE = HERE / "index.template.html"
 SITE = "https://chengffei.github.io/leaf/"
 DOWNLOAD = "https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg"
 
 VERSION = re.search(r'MARKETING_VERSION: "([^"]+)"', (ROOT / "project.yml").read_text()).group(1)
 TODAY = datetime.date.today()
 
-PAGES = {
-    "en": {
-        "out": ROOT / "docs/index.html",
-        "url": SITE,
-        "html_lang": "en",
-        "og_locale": "en_US",
-        "base": "",
-        "title": "Leaf — Free EPUB, MOBI and AZW3 Reader for Mac, No Library",
-        "description": "A free, open-source ebook reader for Mac. Double-click an EPUB, MOBI, AZW3, PDF, FB2 or CBZ file to read; close the window to quit. No library, no account. Native, about 5 MB.",
-        "og_description": "Double-click to read. Close to leave. A small, native ebook reader for Mac. Free and open source.",
-        "app_description": "A free, open-source Mac ebook reader for EPUB, MOBI, AZW3, PDF, FB2 and CBZ. No library, no account.",
-        "toggle": '<a class="lang-toggle" href="zh/" hreflang="zh-Hans" lang="zh-Hans">中文</a>',
-        "updated": f"{TODAY:%-d %B %Y}",
-    },
-    "zh": {
-        "out": ROOT / "docs/zh/index.html",
-        "url": SITE + "zh/",
-        "html_lang": "zh-Hans",
-        "og_locale": "zh_CN",
-        "base": "../",
-        "title": "Leaf — 不建书库的 Mac 电子书阅读器",
-        "description": "免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3、PDF、FB2、CBZ 即读，关窗即退。没有书库，不用账号。原生应用，约 5 MB。",
-        "og_description": "双击就读，关窗就走。小巧的原生 Mac 电子书阅读器，免费开源。",
-        "app_description": "免费开源的 Mac 电子书阅读器，打开 EPUB、MOBI、AZW3、PDF、FB2、CBZ。没有书库，不用账号。",
-        "toggle": '<a class="lang-toggle" href="../" hreflang="en" lang="en">EN</a>',
-        "updated": f"{TODAY.year} 年 {TODAY.month} 月 {TODAY.day} 日",
-    },
+MONTHS = {
+    "fr": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+    "de": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+    "es": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
 }
+DATES = {
+    "en": f"{TODAY:%-d %B %Y}",
+    "zh": f"{TODAY.year} 年 {TODAY.month} 月 {TODAY.day} 日",
+    "zh-Hant": f"{TODAY.year} 年 {TODAY.month} 月 {TODAY.day} 日",
+    "ja": f"{TODAY.year}年{TODAY.month}月{TODAY.day}日",
+    "ko": f"{TODAY.year}년 {TODAY.month}월 {TODAY.day}일",
+    "fr": f"{TODAY.day} {MONTHS['fr'][TODAY.month - 1]} {TODAY.year}",
+    "de": f"{TODAY.day}. {MONTHS['de'][TODAY.month - 1]} {TODAY.year}",
+    "es": f"{TODAY.day} de {MONTHS['es'][TODAY.month - 1]} de {TODAY.year}",
+}
+
+# 顺序 = 语言菜单的顺序。dir 是 docs 下的目录（英文在根）
+PAGES = {
+    "en": dict(dir="", html_lang="en", og_locale="en_US", name="English",
+        title="Leaf — Free EPUB, MOBI and AZW3 Reader for Mac, No Library",
+        description="A free, open-source ebook reader for Mac. Double-click an EPUB, MOBI, AZW3, PDF, FB2 or CBZ file to read; close the window to quit. No library, no account. Native, about 5 MB.",
+        og_description="Double-click to read. Close to leave. A small, native ebook reader for Mac. Free and open source.",
+        app_description="A free, open-source Mac ebook reader for EPUB, MOBI, AZW3, PDF, FB2 and CBZ. No library, no account."),
+    "zh": dict(dir="zh/", html_lang="zh-Hans", og_locale="zh_CN", name="简体中文",
+        title="Leaf — 不建书库的 Mac 电子书阅读器",
+        description="免费开源的 Mac 电子书阅读器。双击 EPUB、MOBI、AZW3、PDF、FB2、CBZ 即读，关窗即退。没有书库，不用账号。原生应用，约 5 MB。",
+        og_description="双击就读，关窗就走。小巧的原生 Mac 电子书阅读器，免费开源。",
+        app_description="免费开源的 Mac 电子书阅读器，打开 EPUB、MOBI、AZW3、PDF、FB2、CBZ。没有书库，不用账号。"),
+    "zh-Hant": dict(dir="zh-hant/", html_lang="zh-Hant", og_locale="zh_TW", name="繁體中文",
+        title="Leaf — 不建書庫的 Mac 電子書閱讀器，支援直排",
+        description="免費開源的 Mac 電子書閱讀器。按兩下 EPUB、MOBI、AZW3、PDF、FB2、CBZ 即讀，關窗即退。直排的書照原樣直排。沒有書庫，不用帳號。原生應用程式，約 5 MB。",
+        og_description="按兩下就讀，關窗就走。小巧的原生 Mac 電子書閱讀器，免費開源，支援直排。",
+        app_description="免費開源的 Mac 電子書閱讀器，打開 EPUB、MOBI、AZW3、PDF、FB2、CBZ。沒有書庫，不用帳號。"),
+    "ja": dict(dir="ja/", html_lang="ja", og_locale="ja_JP", name="日本語",
+        title="Leaf — 本棚のいらない Mac 用電子書籍リーダー、縦書き対応",
+        description="無料でオープンソースの Mac 用電子書籍リーダー。EPUB、MOBI、AZW3、PDF、FB2、CBZ をダブルクリックで読み、ウインドウを閉じれば終了。縦書きの本はそのまま縦書きで、ルビも表示。ライブラリもアカウントも不要。ネイティブアプリ、約 5 MB。",
+        og_description="ダブルクリックで読む。閉じれば終わり。縦書き対応の小さなネイティブ Mac 用電子書籍リーダー。無料・オープンソース。",
+        app_description="無料でオープンソースの Mac 用電子書籍リーダー。EPUB、MOBI、AZW3、PDF、FB2、CBZ を開く。縦書き対応。ライブラリもアカウントも不要。"),
+    "ko": dict(dir="ko/", html_lang="ko", og_locale="ko_KR", name="한국어",
+        title="Leaf — 라이브러리 없는 Mac 전자책 리더",
+        description="무료 오픈 소스 Mac 전자책 리더. EPUB, MOBI, AZW3, PDF, FB2, CBZ를 두 번 클릭해 읽고 창을 닫으면 종료. 라이브러리도 계정도 없음. 네이티브 앱, 약 5 MB.",
+        og_description="두 번 클릭해 읽고, 창을 닫으면 끝. 작고 네이티브한 Mac 전자책 리더. 무료 오픈 소스.",
+        app_description="무료 오픈 소스 Mac 전자책 리더. EPUB, MOBI, AZW3, PDF, FB2, CBZ를 엽니다. 라이브러리도 계정도 없습니다."),
+    "fr": dict(dir="fr/", html_lang="fr", og_locale="fr_FR", name="Français",
+        title="Leaf — Lecteur EPUB, MOBI et AZW3 gratuit pour Mac, sans bibliothèque",
+        description="Lecteur d’ebooks gratuit et open source pour Mac. Double-cliquez sur un EPUB, MOBI, AZW3, PDF, FB2 ou CBZ pour lire ; fermez la fenêtre pour quitter. Pas de bibliothèque, pas de compte. Natif, environ 5 Mo.",
+        og_description="Double-cliquez pour lire. Fermez pour partir. Un petit lecteur d’ebooks natif pour Mac. Gratuit et open source.",
+        app_description="Lecteur d’ebooks gratuit et open source pour Mac : EPUB, MOBI, AZW3, PDF, FB2 et CBZ. Pas de bibliothèque, pas de compte."),
+    "de": dict(dir="de/", html_lang="de", og_locale="de_DE", name="Deutsch",
+        title="Leaf — Kostenloser EPUB-, MOBI- und AZW3-Reader für den Mac, ohne Bibliothek",
+        description="Kostenloser Open-Source-E-Book-Reader für den Mac. EPUB, MOBI, AZW3, PDF, FB2 oder CBZ per Doppelklick lesen; Fenster schließen, fertig. Keine Bibliothek, kein Konto. Nativ, etwa 5 MB.",
+        og_description="Doppelklicken und lesen. Schließen und fertig. Ein kleiner nativer E-Book-Reader für den Mac. Kostenlos und Open Source.",
+        app_description="Kostenloser Open-Source-E-Book-Reader für den Mac: EPUB, MOBI, AZW3, PDF, FB2 und CBZ. Keine Bibliothek, kein Konto."),
+    "es": dict(dir="es/", html_lang="es", og_locale="es_ES", name="Español",
+        title="Leaf — Lector gratuito de EPUB, MOBI y AZW3 para Mac, sin biblioteca",
+        description="Lector de ebooks gratuito y de código abierto para Mac. Doble clic en un EPUB, MOBI, AZW3, PDF, FB2 o CBZ para leer; cierra la ventana para salir. Sin biblioteca, sin cuenta. Nativo, unos 5 MB.",
+        og_description="Doble clic para leer. Cierra y listo. Un pequeño lector de ebooks nativo para Mac. Gratis y de código abierto.",
+        app_description="Lector de ebooks gratuito y de código abierto para Mac: EPUB, MOBI, AZW3, PDF, FB2 y CBZ. Sin biblioteca, sin cuenta."),
+}
+for lang, page in PAGES.items():
+    page["url"] = SITE + page["dir"]
+    page["out"] = ROOT / "docs" / page["dir"] / "index.html"
+    page["base"] = "../" if page["dir"] else ""
+    page["updated"] = DATES[lang]
 
 LANG_SPAN = r'<span lang="{}">(.*?)</span>'
 
 
-def keep_language(text, lang):
-    other = "zh" if lang == "en" else "en"
-    text = re.sub(LANG_SPAN.format(other), "", text, flags=re.S)
-    return re.sub(LANG_SPAN.format(lang), r"\1", text, flags=re.S)
+def localize(text, lang):
+    """只留本语言的文案。英文、简中直接取模板；其他语言按英文原文查译文表。"""
+    if lang == "en":
+        text = re.sub(LANG_SPAN.format("zh"), "", text, flags=re.S)
+        return re.sub(LANG_SPAN.format("en"), r"\1", text, flags=re.S)
+    if lang == "zh":
+        text = re.sub(LANG_SPAN.format("en"), "", text, flags=re.S)
+        return re.sub(LANG_SPAN.format("zh"), r"\1", text, flags=re.S)
+    table = json.loads((HERE / "i18n" / f"{lang}.json").read_text())
+    missing = sorted({s for s in re.findall(LANG_SPAN.format("en"), text, re.S) if s not in table})
+    assert not missing, f"{lang}: {len(missing)} untranslated, first: {missing[0][:60]!r}"
+    text = re.sub(LANG_SPAN.format("zh"), "", text, flags=re.S)
+    return re.sub(LANG_SPAN.format("en"), lambda m: table[m.group(1)], text, flags=re.S)
+
+
+def language_menu(current):
+    """导航里的语言菜单：当前语言作标题，展开列出其余七种；不依赖 JS"""
+    links = []
+    for lang, page in PAGES.items():
+        if lang == current:
+            continue
+        href = page["base"] and "" or ""
+        # 从当前页到目标页的相对路径：根页直接写目录名，子目录页先回上一级
+        href = ("../" if PAGES[current]["dir"] else "") + page["dir"]
+        if not href:
+            href = "./" if not PAGES[current]["dir"] else "../"
+        links.append(f'<a href="{href}" hreflang="{page["html_lang"]}" lang="{page["html_lang"]}">{page["name"]}</a>')
+    return ('<details class="langs"><summary class="lang-toggle" aria-label="Language">'
+            f'{PAGES[current]["name"]}</summary><div class="langs-menu">' + "".join(links) + "</div></details>")
 
 
 def plain(fragment):
@@ -100,14 +163,14 @@ def head(lang, page, faq):
         ],
     }
     ld = lambda d: '<script type="application/ld+json">\n' + json.dumps(d, ensure_ascii=False, indent=2) + "\n</script>"
-    other = "zh_CN" if lang == "en" else "en_US"
+    alternates = [f'<link rel="alternate" hreflang="{p["html_lang"]}" href="{p["url"]}">' for p in PAGES.values()]
+    alternates.append(f'<link rel="alternate" hreflang="x-default" href="{SITE}">')
+    locales = [f'<meta property="og:locale:alternate" content="{p["og_locale"]}">' for l, p in PAGES.items() if l != lang]
     return "\n".join([
         f"<title>{esc(page['title'])}</title>",
         f'<meta name="description" content="{esc(page["description"])}">',
         f'<link rel="canonical" href="{page["url"]}">',
-        f'<link rel="alternate" hreflang="en" href="{SITE}">',
-        f'<link rel="alternate" hreflang="zh-Hans" href="{SITE}zh/">',
-        f'<link rel="alternate" hreflang="x-default" href="{SITE}">',
+        *alternates,
         f'<link rel="alternate" type="text/plain" title="llms.txt" href="{SITE}llms.txt">',
         '<meta name="theme-color" content="#f6f4ef">',
         '<meta property="og:type" content="website">',
@@ -120,7 +183,7 @@ def head(lang, page, faq):
         '<meta property="og:image:height" content="630">',
         '<meta property="og:image:alt" content="Leaf showing a book in two-column layout">',
         f'<meta property="og:locale" content="{page["og_locale"]}">',
-        f'<meta property="og:locale:alternate" content="{other}">',
+        *locales,
         '<meta name="twitter:card" content="summary_large_image">',
         f'<meta name="twitter:title" content="{esc(page["title"])}">',
         f'<meta name="twitter:description" content="{esc(page["og_description"])}">',
@@ -132,23 +195,34 @@ def head(lang, page, faq):
     ])
 
 
+def sitemap():
+    links = "".join(f'\n    <xhtml:link rel="alternate" hreflang="{p["html_lang"]}" href="{p["url"]}"/>' for p in PAGES.values())
+    links += f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE}"/>'
+    urls = "".join(f"\n  <url>\n    <loc>{p['url']}</loc>\n    <lastmod>{TODAY.isoformat()}</lastmod>{links}\n  </url>" for p in PAGES.values())
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+            f'xmlns:xhtml="http://www.w3.org/1999/xhtml">{urls}\n</urlset>\n')
+
+
 def main():
     template = TEMPLATE.read_text()
     for lang, page in PAGES.items():
-        body = keep_language(template, lang)
+        body = localize(template, lang)
         out = (body
                .replace("{{HTML_LANG}}", page["html_lang"])
                .replace("{{BASE}}", page["base"])
-               .replace("{{LANG_TOGGLE}}", page["toggle"])
+               .replace("{{LANG_TOGGLE}}", language_menu(lang))
                .replace("{{VERSION}}", VERSION)
                .replace("{{UPDATED}}", TODAY.isoformat())
                .replace("{{UPDATED_EN}}", page["updated"])
-               .replace("{{UPDATED_ZH}}", page["updated"]))
+               .replace("{{UPDATED_ZH}}", page["updated"])
+               .replace("{{UPDATED_L}}", page["updated"]))
         out = out.replace("{{HEAD}}", head(lang, page, faq_items(out)))
         assert "{{" not in out and "<span lang=" not in out, lang
         page["out"].parent.mkdir(parents=True, exist_ok=True)
         page["out"].write_text(out)
         print(f"{lang}: {page['out'].relative_to(ROOT)} ({len(out):,} bytes, {len(faq_items(out))} FAQ)")
+    (ROOT / "docs/sitemap.xml").write_text(sitemap())
+    print("sitemap: docs/sitemap.xml")
 
 
 if __name__ == "__main__":

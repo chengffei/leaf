@@ -52,6 +52,19 @@
     padding: 4px 12px; cursor: pointer;
   }
   .lang-toggle:hover { color: var(--ink); border-color: rgba(0,0,0,.18); }
+  /* 语言菜单：<details> 下拉，不靠 JS；当前语言作标题 */
+  .langs { position: relative; }
+  .langs summary { list-style: none; }
+  .langs summary::-webkit-details-marker { display: none; }
+  .langs summary::after { content: " ▾"; font-size: 11px; }
+  .langs-menu {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 140px;
+    display: flex; flex-direction: column; padding: 6px;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 10px 32px rgba(0,0,0,.12);
+  }
+  .langs-menu a { display: block; padding: 7px 12px; border-radius: 8px; font-size: 14px; white-space: nowrap; }
+  .langs-menu a:hover { background: var(--alt, #f5f5f7); text-decoration: none; }
 
   .hero { text-align: center; padding: 88px 24px 56px; }
   .hero .icon { width: 128px; height: 128px; margin: 0 auto 28px; }
@@ -390,5 +403,12 @@
   </p>
 </footer>
 
+<script>
+  // 语言菜单：点菜单外或选了语言就收起（<details> 自己不会）
+  for (const d of document.querySelectorAll('details.langs')) {
+    document.addEventListener('click', e => { if (!d.contains(e.target)) d.removeAttribute('open') })
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') d.removeAttribute('open') })
+  }
+</script>
 </body>
 </html>
