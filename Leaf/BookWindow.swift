@@ -9,6 +9,7 @@ struct BookWindow: View {
     @State private var asksDefault = false
     @Environment(\.openSettings) private var openSettings
     private let settings = ReaderSettings.shared
+    private var chromeVisible: Bool { introducing || model.showsTOC || model.hoversTop || model.showsTypography }
 
     var body: some View {
         // 目录是浮动面板，盖在正文上：推挤式侧栏会让书重新分页，读者刚看到的那页就变了
@@ -46,6 +47,14 @@ struct BookWindow: View {
             }
             // 标题隐藏后工具栏会向左收拢，用弹性间隔把 Aa 推回右上角
             if #available(macOS 26.0, *) { ToolbarSpacer(.flexible) }
+            if !book.isPDF {
+                ToolbarItem(placement: .primaryAction) {
+                    Button { model.toggleBookmark() } label: {
+                        Image(systemName: model.isBookmarked ? "bookmark.fill" : "bookmark")
+                    }
+                    .help(model.isBookmarked ? "Remove Bookmark ⌘D" : "Add Bookmark ⌘D")
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button { model.showsTypography.toggle() } label: {
                     // 衬线 Aa：比 SF Symbol 的大小两个 A 轻，也更像阅读器；不随语言本地化
@@ -61,7 +70,7 @@ struct BookWindow: View {
         }
         .background(
             WindowChrome(
-                visible: introducing || model.showsTOC || model.hoversTop || model.showsTypography,
+                visible: chromeVisible,
                 title: model.title
             ) { hovering in
                 if model.hoversTop != hovering { model.hoversTop = hovering }
@@ -72,6 +81,7 @@ struct BookWindow: View {
             try? await Task.sleep(for: .seconds(3))
             introducing = false
         }
+        .onChange(of: chromeVisible, initial: true) { _, visible in model.setChromeVisible(visible) }
         .task {
             // 等书翻开、工具栏淡出后再问，别和开书抢注意力
             guard book.isEPUB, DefaultReader.shouldAsk else { return }
@@ -161,7 +171,8 @@ struct TOCPanel: View {
     var body: some View {
         VStack(spacing: 0) {
             Picker("Panel", selection: $model.panelTab) {
-                ForEach(PanelTab.allCases) { Text($0.label).tag($0) }
+                // PDF 还没有标注，不给页签
+                ForEach(PanelTab.allCases.filter { $0 != .notes || !model.isPDF }) { Text($0.label).tag($0) }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -171,6 +182,7 @@ struct TOCPanel: View {
             switch model.panelTab {
             case .toc: TOCSidebar(model: model)
             case .search: SearchPanel(model: model)
+            case .notes: NotesPanel(model: model)
             }
         }
         .frame(width: 300)
@@ -314,6 +326,8 @@ struct TOCSidebar: View {
         .padding(.leading, CGFloat(entry.depth) * 14)
     }
 
+    @State private var showsDescription = false
+
     @ViewBuilder private var header: some View {
         if !model.title.isEmpty {
             VStack(alignment: .leading, spacing: 3) {
@@ -325,6 +339,17 @@ struct TOCSidebar: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                }
+                // 关于本书：元数据里的简介，默认三行，点开全文
+                if !model.description.isEmpty {
+                    Text(model.description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(showsDescription ? nil : 3)
+                        .padding(.top, 4)
+                        .contentShape(Rectangle())
+                        .onTapGesture { withAnimation(.easeOut(duration: 0.15)) { showsDescription.toggle() } }
+                        .help(showsDescription ? "Click to show less" : "Click to read the whole description")
                 }
             }
             .help(model.author.isEmpty ? model.title : "\(model.title)\n\(model.author)")
@@ -493,7 +518,24 @@ struct ReaderCommands: Commands {
                 .keyboardShortcut("]")
                 .disabled(reader?.canGoForward != true)
         }
+        CommandMenu("Notes") {
+            Button(reader?.isBookmarked == true ? "Remove Bookmark" : "Add Bookmark") { reader?.toggleBookmark() }
+                .keyboardShortcut("d")
+                .disabled(reader == nil || reader?.isPDF == true)
+            Button("Show Notes") { reader?.panelTab = .notes; reader?.showsTOC = true }
+                .keyboardShortcut("n", modifiers: [.command, .shift])
+                .disabled(reader == nil || reader?.isPDF == true)
+            Divider()
+            Button("Export as Markdown…") { reader?.export(clippings: false) }
+                .disabled(reader?.annotations.isEmpty ?? true)
+            Button("Export as Kindle Clippings…") { reader?.export(clippings: true) }
+                .disabled(reader?.annotations.isEmpty ?? true)
+        }
         CommandGroup(after: .textEditing) {
+            Button("Look Up") { reader?.lookUp() }
+                .keyboardShortcut("d", modifiers: [.command, .control])
+                .disabled(reader == nil || reader?.isPDF == true)
+            Divider()
             Button("Find…") { reader?.find() }
                 .keyboardShortcut("f")
                 .disabled(reader == nil)
@@ -560,6 +602,90 @@ struct SearchField: NSViewRepresentable {
             default:
                 return false
             }
+        }
+    }
+}
+
+/// 标注页：高亮与书签按章节分组，点一条跳过去；右键拷贝或删除
+struct NotesPanel: View {
+    let model: ReaderModel
+
+    var body: some View {
+        if model.annotations.isEmpty {
+            ContentUnavailableView {
+                Label("No Notes Yet", systemImage: "highlighter")
+            } description: {
+                Text("Select text to highlight it. Press ⌘D to bookmark the page.")
+            }
+            .frame(maxHeight: .infinity)
+        } else {
+            List {
+                ForEach(groups, id: \.first) { group in
+                    Section(group.label.isEmpty ? String(localized: "Body") : group.label) {
+                        ForEach(group.items) { item in
+                            row(item)
+                                .contentShape(Rectangle())
+                                .onTapGesture { model.goTo(item); model.showsTOC = false }
+                                .contextMenu {
+                                    Button("Copy") {
+                                        NSPasteboard.general.clearContents()
+                                        NSPasteboard.general.setString(item.note.isEmpty ? item.text : "\(item.text)\n\n\(item.note)", forType: .string)
+                                    }
+                                    Button("Delete", role: .destructive) { model.remove(item) }
+                                }
+                        }
+                    }
+                }
+            }
+            .listStyle(.sidebar)
+            .scrollContentBackground(.hidden)
+        }
+    }
+
+    private struct Group { let label: String; let first: UUID; var items: [Annotation] }
+    private var groups: [Group] {
+        var out: [Group] = []
+        for item in model.annotations {
+            if out.last?.label == item.chapter { out[out.count - 1].items.append(item) }
+            else { out.append(Group(label: item.chapter, first: item.id, items: [item])) }
+        }
+        return out
+    }
+
+    @ViewBuilder private func row(_ item: Annotation) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            if item.kind == .bookmark {
+                Image(systemName: "bookmark.fill")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+                    .frame(width: 10)
+                    .padding(.top, 2)
+            } else {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Self.color(item.color))
+                    .frame(width: 4)
+            }
+            VStack(alignment: .leading, spacing: 3) {
+                Text(item.text)
+                    .lineLimit(4)
+                    .foregroundStyle(item.kind == .bookmark ? .secondary : .primary)
+                if !item.note.isEmpty {
+                    Text(item.note)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                }
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
+    static func color(_ name: String) -> Color {
+        switch name {
+        case "green": Color(red: 0.19, green: 0.82, blue: 0.35)
+        case "blue": Color(red: 0.39, green: 0.82, blue: 1.0)
+        case "pink": Color(red: 1.0, green: 0.39, blue: 0.51)
+        default: Color(red: 1.0, green: 0.84, blue: 0.04)
         }
     }
 }

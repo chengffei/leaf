@@ -17,7 +17,7 @@ targets:
       path: Leaf/Leaf.entitlements
       properties:
         com.apple.security.app-sandbox: true
-        com.apple.security.files.user-selected.read-only: true
+        com.apple.security.files.user-selected.read-write: true
         com.apple.security.network.client: true # WKWebView 子进程在沙盒里必需，书只从本地读
     info:
       path: Leaf/Info.plist

@@ -2,6 +2,7 @@ import { makeBook } from './foliate/view.js'
 import { EPUB } from './foliate/epub.js'
 import { FootnoteHandler } from './foliate/footnotes.js'
 import { Overlayer } from './foliate/overlayer.js'
+import * as CFI from './foliate/epubcfi.js'
 import { STRINGS } from './strings.js'
 import { chunkSections } from './chunks.js'
 
@@ -226,6 +227,13 @@ globalThis.leaf = {
   findNext(step) { stepFind(step) },
   goToResult(i) { goToFindResult(i) },
   goToPrompt() { openGoTo() },
+  setAnnotations(list) { setAnnotations(list) },
+  removeAnnotation(id) { removeAnnotation(id) },
+  showAnnotation(cfi) { jumpTo(cfi) },
+  toggleBookmark() { toggleBookmark() },
+  lookUpSelection() { lookUpSelection() },
+  // 红绿灯与工具栏浮现时，右上角的书签角标让位
+  setChromeVisible(visible) { $('#bookmark').classList.toggle('dim', visible) },
 }
 
 // ---- 翻页输入：键盘 + 触控板（一次手势只翻一页） ----
@@ -238,10 +246,12 @@ const turn = go => {
 }
 const onKey = e => {
   if (!view.book || e.metaKey || e.ctrlKey || e.altKey) return
-  if (e.target.closest?.('#goto')) return // 跳转框里打字不翻页
   const k = e.key
   if (k === 'Escape' && !$('#lightbox').hidden) return closeLightbox()
   if (k === 'Escape' && !$('#note').hidden) return closeNote()
+  if (k === 'Escape' && !$('#annot').hidden) return closeAnnot()
+  if (k === 'Escape' && !$('#sel').hidden) return closeSel()
+  if (e.target.closest?.('#goto, #annot')) return // 跳转框、笔记框里打字不翻页
   if (k === 'Escape' && !$('#goto').hidden) return closeGoTo()
   if (k === 'Escape') return post({ type: 'closeTOC' })
   if (k === 't') return post({ type: 'toggleTOC' })
@@ -269,7 +279,7 @@ const onWheel = e => {
 
 // 书页在 iframe 里，点击坐标要加上 iframe 的偏移才是窗口坐标；注释卡片按它定位
 let lastPoint = { x: innerWidth / 2, y: innerHeight / 2 }
-const CHROME = '#note, #back, #goto, #status, #lightbox'
+const CHROME = '#note, #back, #goto, #status, #lightbox, #sel, #annot, #bookmark'
 const windowPoint = e => {
   const frame = e.view?.frameElement?.getBoundingClientRect()
   return { x: e.clientX + (frame?.left ?? 0), y: e.clientY + (frame?.top ?? 0) }
@@ -289,8 +299,10 @@ const listen = target => {
   target.addEventListener('mousedown', e => {
     if (e.target.closest?.(CHROME)) return // 点卡片里的按钮不算点正文
     lastPoint = windowPoint(e)
-    dismissing = panelOpen || !$('#note').hidden || !e.target.ownerDocument.getSelection()?.isCollapsed
+    dismissing = panelOpen || !$('#note').hidden || !$('#annot').hidden || !e.target.ownerDocument.getSelection()?.isCollapsed
     closeNote()
+    closeAnnot()
+    closeSel()
     post({ type: 'closeTOC' }) // 点正文 = 收起目录
   })
   // 书里的图有两种写法：<img>，或封面常用的 <svg><image xlink:href>；foliate 已把它们的地址换成 blob
@@ -303,6 +315,7 @@ const listen = target => {
     clearTimeout(pendingTurn) // 双击的第二下：选词，不翻页（选中后下面的选区判断会先 return）
     if (e.button !== 0 || e.target.closest?.(`a, img, image, ${CHROME}`)) return
     if (!e.target.ownerDocument.getSelection()?.isCollapsed) return
+    if (currentContent(e.target.ownerDocument)?.overlayer?.hitTest(e)[0]) return // 点在高亮上：弹卡片，不翻页
     const { x, y } = windowPoint(e)
     if (Math.hypot(x - lastPoint.x, y - lastPoint.y) > 4) return
     if (dismissing || e.detail > 1) return
@@ -311,6 +324,9 @@ const listen = target => {
     else pendingTurn = setTimeout(() => turn(() => view.next()), DOUBLE_CLICK_MS)
   })
   target.addEventListener('wheel', onWheel, { passive: false })
+  // 松开鼠标时有选区就弹标注小条；键盘扩选（⇧方向键）也算
+  target.addEventListener('mouseup', e => { if (!e.target.closest?.(CHROME)) setTimeout(() => showSelIfAny(e.target.ownerDocument), 0) })
+  target.addEventListener('keyup', e => { if (e.shiftKey && e.key.startsWith('Arrow')) showSelIfAny(e.target.ownerDocument) })
 }
 
 // ---- 脚注：就地弹出，不离开当前页（识别交给 foliate 的 FootnoteHandler） ----
@@ -619,6 +635,234 @@ const fetchBook = async url => {
   return new File([await res.blob()], new URL(res.url).pathname)
 }
 
+// ---- 标注：高亮、笔记、书签 ----
+// 按 CFI 存：foliate 的 addAnnotation 用 value（CFI）当画层的键，也用它定位。同一段选两次只留一条。
+// Swift 侧按书的内容哈希存 JSON；这里只管画、弹小条、回报
+const HIGHLIGHT = { yellow: '#ffd60a', green: '#30d158', blue: '#64d2ff', pink: '#ff6482' }
+const annots = new Map() // cfi → { id, kind, cfi, text, note, color, chapter, location, created, index }
+const byId = id => [...annots.values()].find(a => a.id === id)
+const postAnnot = (action, a) => {
+  const { index, ...item } = a
+  post({ type: 'annotation', action, item })
+}
+const postOrder = () => post({ type: 'order', ids: [...annots.values()].sort((a, b) => CFI.compare(a.cfi, b.cfi)).map(a => a.id) })
+const resolveIndex = a => { try { a.index = view.resolveNavigation(a.cfi)?.index ?? -1 } catch { a.index = -1 } }
+// foliate 用 value 字段当 CFI；只把画图要用的几项传过去
+const addOverlay = a => view.addAnnotation({ value: a.cfi, kind: a.kind, color: a.color })
+const removeOverlay = a => view.deleteAnnotation({ value: a.cfi })
+const loadedIndices = () => new Set(view.renderer?.getContents?.().map(c => c.index) ?? [])
+view.addEventListener('draw-annotation', e => {
+  const { draw, annotation } = e.detail
+  if (annotation.kind === 'highlight') draw(Overlayer.highlight, { color: HIGHLIGHT[annotation.color] ?? HIGHLIGHT.yellow })
+})
+// 每节的画层是翻到那一节才建的：建好时把属于它的高亮画上
+view.addEventListener('create-overlay', e => {
+  for (const a of annots.values()) if (a.kind === 'highlight' && a.index === e.detail.index) addOverlay(a)
+})
+const setAnnotations = list => {
+  const loaded = loadedIndices()
+  for (const a of annots.values()) if (a.kind === 'highlight' && loaded.has(a.index)) removeOverlay(a)
+  annots.clear()
+  for (const a of list ?? []) {
+    resolveIndex(a)
+    annots.set(a.cfi, a)
+    if (a.kind === 'highlight' && loaded.has(a.index)) addOverlay(a)
+  }
+  updateBookmark()
+}
+const removeAnnotation = id => {
+  const a = byId(id)
+  if (!a) return
+  if (a.kind === 'highlight' && loadedIndices().has(a.index)) removeOverlay(a)
+  annots.delete(a.cfi)
+  if (!$('#annot').hidden && $('#annot').dataset.id === id) closeAnnot()
+  updateBookmark()
+}
+const currentContent = doc => view.renderer?.getContents?.().find(c => c.doc === doc)
+const stripHTML = html => { const d = new DOMParser().parseFromString(html ?? '', 'text/html'); return d.body.textContent.replace(/\s+/g, ' ').trim() }
+
+// 选区小条：四个颜色点、笔记、拷贝、查词
+let selDoc = null // 小条对应的那一节
+const closeSel = () => { $('#sel').hidden = true; selDoc = null }
+const selRect = doc => {
+  const sel = doc.getSelection()
+  if (!sel || sel.isCollapsed || !sel.rangeCount) return null
+  const rects = sel.getRangeAt(0).getClientRects()
+  const r = rects[rects.length - 1] ?? sel.getRangeAt(0).getBoundingClientRect()
+  const frame = doc.defaultView.frameElement?.getBoundingClientRect()
+  return { left: r.left + (frame?.left ?? 0), right: r.right + (frame?.left ?? 0), top: r.top + (frame?.top ?? 0), bottom: r.bottom + (frame?.top ?? 0) }
+}
+const showSelIfAny = doc => {
+  const rect = selRect(doc)
+  if (!rect || !currentContent(doc)) return closeSel()
+  selDoc = doc
+  const bar = $('#sel')
+  bar.hidden = false
+  const w = bar.offsetWidth, h = bar.offsetHeight
+  const x = Math.min(Math.max(rect.right - w / 2, 8), innerWidth - w - 8)
+  const below = rect.bottom + 8 + h < innerHeight - 40
+  Object.assign(bar.style, { left: `${x}px`, top: `${below ? rect.bottom + 8 : Math.max(8, rect.top - 8 - h)}px` })
+}
+const selectionText = doc => doc.getSelection()?.toString().replace(/\s+/g, ' ').trim() ?? ''
+const makeHighlight = async (color, withNote) => {
+  const doc = selDoc
+  const content = doc && currentContent(doc)
+  const sel = doc?.getSelection()
+  if (!content || !sel || sel.isCollapsed) return closeSel()
+  const range = sel.getRangeAt(0)
+  const cfi = view.getCFI(content.index, range)
+  const text = selectionText(doc)
+  sel.removeAllRanges()
+  closeSel()
+  if (!text) return
+  let a = annots.get(cfi)
+  const existed = Boolean(a)
+  if (a) { a.color = color; removeOverlay(a) }
+  else {
+    a = { id: crypto.randomUUID(), kind: 'highlight', cfi, text, note: '', color, chapter: '', location: lastLocation?.location?.current ?? 0, created: new Date().toISOString(), index: content.index }
+    annots.set(cfi, a)
+  }
+  const { label } = await addOverlay(a) ?? {}
+  a.chapter = (label ?? view.lastLocation?.tocItem?.label ?? '').trim()
+  postAnnot(existed ? 'update' : 'add', a)
+  postOrder()
+  if (withNote) openAnnot(a, selRect(doc) ?? null, true)
+}
+for (const dot of $('#sel').querySelectorAll('[data-color]')) {
+  dot.style.background = HIGHLIGHT[dot.dataset.color]
+  dot.title = t(dot.dataset.color[0].toUpperCase() + dot.dataset.color.slice(1))
+  dot.addEventListener('click', () => makeHighlight(dot.dataset.color, false))
+}
+$('#sel-note').textContent = t('Note')
+$('#sel-note').addEventListener('click', () => makeHighlight('yellow', true))
+$('#sel-copy').textContent = t('Copy')
+$('#sel-copy').addEventListener('click', () => { if (selDoc) post({ type: 'copy', text: selectionText(selDoc) }); closeSel() })
+$('#sel-lookup').textContent = t('Look Up')
+$('#sel-lookup').addEventListener('click', () => lookUpSelection())
+// 系统词典：回报选中的词和选区左下角，Swift 弹 showDefinition
+const lookUpSelection = () => {
+  const doc = selDoc ?? view.renderer?.getContents?.().map(c => c.doc).find(d => !d.getSelection()?.isCollapsed)
+  const rect = doc && selRect(doc)
+  const text = doc && selectionText(doc)
+  if (!rect || !text) return
+  post({ type: 'lookup', text, x: rect.left, y: rect.bottom })
+}
+
+// 标注卡片：点高亮弹出，改颜色、写笔记、拷贝、删除
+const closeAnnot = () => {
+  const card = $('#annot')
+  if (card.hidden) return
+  saveNote()
+  card.hidden = true
+  delete card.dataset.id
+}
+const saveNote = () => {
+  const a = byId($('#annot').dataset.id)
+  if (!a) return
+  const note = $('#annot-note').value.trim()
+  if (note === a.note) return
+  a.note = note
+  postAnnot('update', a)
+}
+const openAnnot = (a, rect, focusNote) => {
+  const card = $('#annot')
+  if (!card.hidden && card.dataset.id !== a.id) saveNote()
+  card.dataset.id = a.id
+  card.hidden = false
+  $('#annot-note').value = a.note
+  for (const dot of card.querySelectorAll('[data-color]')) dot.classList.toggle('on', dot.dataset.color === a.color)
+  const w = card.offsetWidth, h = card.offsetHeight
+  const anchor = rect ?? { left: lastPoint.x, right: lastPoint.x, top: lastPoint.y, bottom: lastPoint.y }
+  const x = Math.min(Math.max((anchor.left + anchor.right) / 2 - w / 2, 16), innerWidth - w - 16)
+  const below = anchor.bottom + 10 + h < innerHeight - 40
+  Object.assign(card.style, { left: `${x}px`, top: `${below ? anchor.bottom + 10 : Math.max(16, anchor.top - 10 - h)}px` })
+  if (focusNote) $('#annot-note').focus()
+}
+view.addEventListener('show-annotation', e => {
+  const a = annots.get(e.detail.value)
+  if (!a) return
+  e.detail.range?.startContainer?.ownerDocument?.getSelection()?.removeAllRanges() // 点击时顺带选中的一小段清掉
+  const rects = e.detail.range?.getClientRects?.()
+  const r = rects?.[rects.length - 1]
+  const frame = currentContent(e.detail.range?.startContainer?.ownerDocument)?.doc.defaultView.frameElement?.getBoundingClientRect()
+  // 打开就把光标放进笔记框：不然按键会落到正文上翻页
+  openAnnot(a, r ? { left: r.left + (frame?.left ?? 0), right: r.right + (frame?.left ?? 0), top: r.top + (frame?.top ?? 0), bottom: r.bottom + (frame?.top ?? 0) } : null, true)
+})
+for (const dot of $('#annot').querySelectorAll('[data-color]')) {
+  dot.style.background = HIGHLIGHT[dot.dataset.color]
+  dot.title = t(dot.dataset.color[0].toUpperCase() + dot.dataset.color.slice(1))
+  dot.addEventListener('click', () => {
+    const a = byId($('#annot').dataset.id)
+    if (!a || a.color === dot.dataset.color) return
+    removeOverlay(a)
+    a.color = dot.dataset.color
+    addOverlay(a)
+    postAnnot('update', a)
+    for (const d of $('#annot').querySelectorAll('[data-color]')) d.classList.toggle('on', d === dot)
+  })
+}
+$('#annot-note').placeholder = t('Add a note')
+$('#annot-note').addEventListener('blur', saveNote)
+$('#annot-note').addEventListener('keydown', e => { if (e.key === 'Enter' && e.metaKey) { e.preventDefault(); closeAnnot() } })
+$('#annot-copy').textContent = t('Copy')
+$('#annot-copy').addEventListener('click', () => { const a = byId($('#annot').dataset.id); if (a) post({ type: 'copy', text: a.text }) })
+$('#annot-delete').textContent = t('Delete')
+$('#annot-delete').addEventListener('click', () => {
+  const a = byId($('#annot').dataset.id)
+  if (!a) return
+  $('#annot').hidden = true // 先关，免得 closeAnnot 把空笔记存回去
+  delete $('#annot').dataset.id
+  removeAnnotation(a.id)
+  postAnnot('remove', a)
+})
+addEventListener('resize', () => { closeAnnot(); closeSel() })
+
+// 书签：⌘D 给当页加一条，再按移除；右上角的角标表示当页有书签
+const pageText = () => (view.lastLocation?.range?.toString() ?? '').replace(/\s+/g, ' ').trim().slice(0, 80)
+const bookmarkOnPage = () => {
+  const loc = view.lastLocation
+  if (!loc?.range) return null
+  const content = view.renderer?.getContents?.().find(c => c.index === loc.index) ?? currentContent(loc.range.startContainer.ownerDocument)
+  for (const a of annots.values()) {
+    if (a.kind !== 'bookmark') continue
+    try {
+      const { index, anchor } = view.resolveNavigation(a.cfi) ?? {}
+      if (index !== (content?.index ?? loc.index)) continue
+      const r = anchor(content.doc)
+      const pt = content.doc.createRange()
+      pt.setStart(r.startContainer ?? r, r.startOffset ?? 0)
+      pt.collapse(true)
+      // 页首 ≤ 书签点 < 页尾：isPointInRange 把页尾也算在内，上一页会误判
+      if (loc.range.compareBoundaryPoints(Range.START_TO_START, pt) <= 0 && loc.range.compareBoundaryPoints(Range.START_TO_END, pt) > 0) return a
+    } catch {}
+  }
+  return null
+}
+const updateBookmark = () => {
+  const on = Boolean(bookmarkOnPage())
+  $('#bookmark').hidden = !on
+  post({ type: 'bookmarked', value: on })
+}
+const toggleBookmark = () => {
+  const existing = bookmarkOnPage()
+  if (existing) {
+    annots.delete(existing.cfi)
+    postAnnot('remove', existing)
+  } else {
+    const loc = view.lastLocation
+    if (!loc?.cfi) return
+    const a = { id: crypto.randomUUID(), kind: 'bookmark', cfi: loc.cfi, text: pageText(), note: '', color: '', chapter: (loc.tocItem?.label ?? '').trim(), location: loc.location?.current ?? 0, created: new Date().toISOString() }
+    resolveIndex(a)
+    annots.set(a.cfi, a)
+    postAnnot('add', a)
+    postOrder()
+  }
+  updateBookmark()
+  flashStatus()
+}
+$('#bookmark').title = t('Bookmarked. Press ⌘D to remove.')
+$('#bookmark').addEventListener('click', toggleBookmark)
+
 // ---- 打开 ----
 try {
   // FB2、FBZ、CBZ 只能靠扩展名认出来，网址带上扩展名
@@ -634,7 +878,7 @@ try {
   const title = titleOf(book.metadata?.title) || t('Untitled')
   const author = [book.metadata?.author].flat()
     .map(a => typeof a === 'string' ? a : titleOf(a?.name)).filter(Boolean).join('、')
-  post({ type: 'meta', title, author })
+  post({ type: 'meta', title, author, description: stripHTML(titleOf(book.metadata?.description)) })
 
   view.addEventListener('load', e => {
     listen(e.detail.doc)
@@ -651,6 +895,8 @@ try {
     $('#chapter').textContent = tocItem?.label ?? ''
     scrub.value = Math.round((fraction ?? 0) * 1000)
     renderProgress()
+    closeSel()
+    updateBookmark()
     post({ type: 'relocate', cfi, fraction, tocHref: tocItem?.href ?? null })
   })
   view.addEventListener('link', e => {

@@ -109,6 +109,8 @@ private struct GeneralSettings: View {
     @State private var launchedLanguage = ReaderSettings.shared.uiLanguage
     @State private var historyCount = ReadingPosition.count
     @State private var confirmsClear = false
+    @State private var notesBooks = AnnotationStore.bookCount
+    @State private var confirmsDeleteNotes = false
 
     var body: some View {
         Form {
@@ -138,12 +140,33 @@ private struct GeneralSettings: View {
                         Text("Leaf remembers your place in \(historyCount) books.")
                     }
                 }
+                LabeledContent {
+                    Button("Delete…") { confirmsDeleteNotes = true }
+                        .disabled(notesBooks == 0)
+                } label: {
+                    Text("Notes and Highlights")
+                    if notesBooks == 0 {
+                        Text("No notes or highlights.")
+                    } else {
+                        Text("Notes and highlights in \(notesBooks) books. Export them from the Notes menu first.")
+                    }
+                }
             }
         }
         .formStyle(.grouped)
         .scrollDisabled(true)
-        .frame(width: 460, height: 200)
-        .onAppear { historyCount = ReadingPosition.count }
+        .frame(width: 460, height: 250)
+        .onAppear { historyCount = ReadingPosition.count; notesBooks = AnnotationStore.bookCount }
+        .alert("Delete All Notes and Highlights?", isPresented: $confirmsDeleteNotes) {
+            Button("Delete", role: .destructive) {
+                AnnotationStore.deleteAll()
+                notesBooks = 0
+                NotificationCenter.default.post(name: .annotationsDeleted, object: nil)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This removes every highlight, note and bookmark in every book. It can’t be undone.")
+        }
         .alert("Clear Reading History?", isPresented: $confirmsClear) {
             Button("Clear", role: .destructive) { clearHistory() }
             Button("Cancel", role: .cancel) {}
@@ -165,6 +188,7 @@ private struct GeneralSettings: View {
 
 extension Notification.Name {
     static let readingHistoryCleared = Notification.Name("LeafReadingHistoryCleared")
+    static let annotationsDeleted = Notification.Name("LeafAnnotationsDeleted")
 }
 
 /// 预设下拉：内置四套在前，自定义在后；当前设置不等于任何预设时显示「自定义」

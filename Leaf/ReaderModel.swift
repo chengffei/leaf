@@ -1,14 +1,16 @@
 import Observation
 import SwiftUI
+import UniformTypeIdentifiers
 import WebKit
 
 enum PanelTab: String, CaseIterable, Identifiable {
-    case toc, search
+    case toc, search, notes
     var id: String { rawValue }
     var label: String {
         switch self {
         case .toc: String(localized: "Contents")
         case .search: String(localized: "Find")
+        case .notes: String(localized: "Notes")
         }
     }
 }
@@ -51,6 +53,14 @@ final class ReaderModel {
     var searchStatus = "idle" // idle / searching / done，由 JS 回报
     var title = ""
     var author = ""
+    /// 元数据里的简介，去掉了 HTML 标签；没有就空
+    var description = ""
+    /// 内容哈希，标注文件按它存
+    @ObservationIgnored var bookID = ""
+    /// 高亮、笔记、书签，按在书里的先后排（JS 回报时已排好）
+    private(set) var annotations: [Annotation] = []
+    /// 当前页上有书签：工具栏与菜单据此显示「移除书签」
+    var isBookmarked = false
     var canGoBack = false
     var canGoForward = false
     var hoversTop = false // 鼠标在窗口顶部，用来浮现红绿灯与工具栏
@@ -181,6 +191,102 @@ final class ReaderModel {
     func goToPage(_ text: String) {
         guard let n = Int(text.trimmingCharacters(in: .whitespaces)) else { return }
         pdf?.goToPage(n - 1)
+    }
+
+    // MARK: 标注
+
+    /// 开书时从磁盘读，推给页面画出来
+    func loadAnnotations() {
+        annotations = AnnotationStore.load(bookID)
+        pushAnnotations()
+    }
+
+    private func pushAnnotations() {
+        guard let json = encode(annotations) else { return }
+        call("leaf.setAnnotations(\(json))")
+    }
+
+    /// 页面新建了高亮或书签（JS 已算好 CFI、原文、章节、位置号）
+    func add(_ annotation: Annotation) {
+        annotations.append(annotation)
+        sortAndSave()
+    }
+
+    func update(_ annotation: Annotation) {
+        guard let i = annotations.firstIndex(where: { $0.id == annotation.id }) else { return }
+        annotations[i] = annotation
+        sortAndSave()
+        pushAnnotations()
+    }
+
+    /// 页面自己删掉了（卡片上的「删除」、再按 ⌘D）：只更新内存和磁盘
+    func removed(_ id: UUID) {
+        annotations.removeAll { $0.id == id }
+        sortAndSave()
+    }
+
+    func remove(_ annotation: Annotation) {
+        annotations.removeAll { $0.id == annotation.id }
+        sortAndSave()
+        guard let json = encode(annotation.id.uuidString) else { return }
+        call("leaf.removeAnnotation(\(json))")
+    }
+
+    /// 页面按书内顺序回报：JS 比较 CFI 比 Swift 方便
+    func setOrder(_ ids: [String]) {
+        let rank = Dictionary(uniqueKeysWithValues: ids.enumerated().map { ($1, $0) })
+        annotations.sort { (rank[$0.id.uuidString] ?? .max) < (rank[$1.id.uuidString] ?? .max) }
+        sortAndSave()
+    }
+
+    private func sortAndSave() {
+        AnnotationStore.save(annotations, for: bookID)
+    }
+
+    /// 导出：Markdown 或 Kindle 的 My Clippings，走系统存储面板
+    func export(clippings: Bool) {
+        let panel = NSSavePanel()
+        let base = title.isEmpty ? String(localized: "Notes") : title
+        panel.nameFieldStringValue = clippings ? "My Clippings.txt" : "\(base).md"
+        panel.allowedContentTypes = [clippings ? .plainText : .init(filenameExtension: "md") ?? .plainText]
+        panel.canCreateDirectories = true
+        guard let window = webView?.window else { return }
+        panel.beginSheetModal(for: window) { [self] response in
+            guard response == .OK, let url = panel.url else { return }
+            let text = clippings
+                ? AnnotationExport.clippings(annotations, title: title, author: author)
+                : AnnotationExport.markdown(annotations, title: title, author: author)
+            try? text.write(to: url, atomically: true, encoding: .utf8)
+        }
+    }
+
+    /// 设置里删光了：清内存并让页面擦掉
+    func annotationsDeleted() {
+        annotations = []
+        pushAnnotations()
+    }
+
+    func goTo(_ annotation: Annotation) {
+        guard let json = encode(annotation.cfi) else { return }
+        call("leaf.showAnnotation(\(json))")
+        webView?.window?.makeFirstResponder(webView)
+    }
+
+    /// ⌘D：当页有书签就移除，没有就加
+    func toggleBookmark() { if !isPDF { call("leaf.toggleBookmark()") } }
+
+    /// ⌃⌘D 或选区小条上的「查词」：让页面回报选中的词和位置，再弹系统词典
+    func lookUp() { if !isPDF { call("leaf.lookUpSelection()") } }
+
+    func setChromeVisible(_ visible: Bool) { if !isPDF { call("leaf.setChromeVisible(\(visible))") } }
+
+    var highlightCount: Int { annotations.filter { $0.kind == .highlight }.count }
+
+    private func encode<T: Encodable>(_ value: T) -> String? {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        guard let data = try? encoder.encode(value) else { return nil }
+        return String(data: data, encoding: .utf8)
     }
 
     private func call(_ js: String) { webView?.evaluateJavaScript(js, completionHandler: nil) }

@@ -20,6 +20,7 @@ struct ReaderView: NSViewRepresentable {
         webView.navigationDelegate = context.coordinator
         webView.model = model
         model.webView = webView
+        model.bookID = book.id
         webView.setValue(false, forKey: "drawsBackground") // 加载前不闪白
         #if DEBUG
         webView.isInspectable = true
@@ -65,10 +66,19 @@ struct ReaderView: NSViewRepresentable {
             self.model = model
             super.init()
             NotificationCenter.default.addObserver(self, selector: #selector(historyCleared), name: .readingHistoryCleared, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(annotationsDeleted), name: .annotationsDeleted, object: nil)
         }
 
         @objc private func historyCleared(_ note: Notification) {
             model.webView?.evaluateJavaScript("leaf.resetSpeed()", completionHandler: nil)
+        }
+
+        @objc private func annotationsDeleted(_ note: Notification) { model.annotationsDeleted() }
+
+        private static let decoder: JSONDecoder = { let d = JSONDecoder(); d.dateDecodingStrategy = .iso8601; return d }()
+        private func annotation(from body: [String: Any]) -> Annotation? {
+            guard let item = body["item"], let data = try? JSONSerialization.data(withJSONObject: item) else { return nil }
+            return try? Self.decoder.decode(Annotation.self, from: data)
         }
 
         func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -90,6 +100,30 @@ struct ReaderView: NSViewRepresentable {
             case "meta":
                 model.title = body["title"] as? String ?? ""
                 model.author = body["author"] as? String ?? ""
+                model.description = body["description"] as? String ?? ""
+            case "annotation":
+                guard let item = annotation(from: body) else { return }
+                switch body["action"] as? String {
+                case "update": model.update(item)
+                case "remove": model.removed(item.id)
+                default: model.add(item)
+                }
+            case "copy":
+                if let text = body["text"] as? String, !text.isEmpty {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(text, forType: .string)
+                }
+            case "order":
+                model.setOrder(body["ids"] as? [String] ?? [])
+            case "bookmarked":
+                let value = body["value"] as? Bool ?? false
+                if model.isBookmarked != value { model.isBookmarked = value }
+            case "lookup":
+                // 系统词典弹窗：点在选区的位置。WKWebView 是翻转坐标系，网页坐标直接用
+                guard let text = body["text"] as? String, !text.isEmpty, let webView = model.webView else { return }
+                let x = body["x"] as? Double ?? 0, y = body["y"] as? Double ?? 0
+                let point = webView.isFlipped ? NSPoint(x: x, y: y) : NSPoint(x: x, y: webView.bounds.height - y)
+                webView.showDefinition(for: NSAttributedString(string: text), at: point)
             case "history":
                 model.canGoBack = body["back"] as? Bool ?? false
                 model.canGoForward = body["forward"] as? Bool ?? false
@@ -119,6 +153,7 @@ struct ReaderView: NSViewRepresentable {
                 }
             case "ready":
                 log.info("ready \(String(describing: body), privacy: .public)")
+                model.loadAnnotations()
             case "styled":
                 log.info("styled \(String(describing: body), privacy: .public)")
             case "error":

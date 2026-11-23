@@ -13,6 +13,19 @@
   <button id="goto-close" type="button"></button>
 </div>
 <div id="lightbox" hidden><img alt=""></div>
+<div id="sel" hidden>
+  <span class="dots"><button type="button" data-color="yellow"></button><button type="button" data-color="green"></button><button type="button" data-color="blue"></button><button type="button" data-color="pink"></button></span>
+  <button id="sel-note" type="button"></button><button id="sel-copy" type="button"></button><button id="sel-lookup" type="button"></button>
+</div>
+<div id="annot" hidden>
+  <div class="row">
+    <span class="dots"><button type="button" data-color="yellow"></button><button type="button" data-color="green"></button><button type="button" data-color="blue"></button><button type="button" data-color="pink"></button></span>
+    <span class="grow"></span>
+    <button id="annot-copy" type="button"></button><button id="annot-delete" type="button"></button>
+  </div>
+  <textarea id="annot-note" rows="3" spellcheck="true"></textarea>
+</div>
+<button id="bookmark" type="button" hidden aria-label="Bookmark"></button>
 <footer id="status"><span id="chapter"></span><input id="scrub" type="range" min="0" max="1000" value="0"><span id="percent"></span></footer>
 <div id="error" hidden></div>
 <script>

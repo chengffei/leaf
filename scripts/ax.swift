@@ -20,7 +20,7 @@ func texts(_ e: AXUIElement) -> [String] {
 let win = (attr(root, kAXFocusedWindowAttribute) as! AXUIElement)
 let title = attr(win, kAXTitleAttribute) as? String ?? ""
 // 安全闸：只对测试书窗口动手，防止误碰用户正在读的书
-guard title.hasPrefix("alice") || title.hasPrefix("hongloumeng") || title.hasPrefix("Leaf") else { print("ABORT: focused window is \(title)"); exit(1) }
+guard title.hasPrefix("alice") || title.hasPrefix("Alice") || title.hasPrefix("hongloumeng") || title.hasPrefix("紅樓夢") || title.hasPrefix("红楼梦") || title.hasPrefix("Leaf") || title.isEmpty || title == "阅读" || title == "通用" || title == "Reading" || title == "General" else { print("ABORT: focused window is \(title)"); exit(1) }
 // clickpage = 右侧 3/4 垂直居中；clickat <x比例> <y比例> 任意位置；rightclick <x比例> <y比例> 右键
 if CommandLine.arguments.count > 1, ["clickpage", "clickat", "rightclick", "dblclick"].contains(CommandLine.arguments[1]) {
     let a = CommandLine.arguments
@@ -51,6 +51,48 @@ if CommandLine.arguments.count > 1, ["clickpage", "clickat", "rightclick", "dblc
         }
     }
     print("\(a[1]) at \(pt)"); exit(0)
+}
+// drag <x1> <y1> <x2> <y2>（窗口比例）：按住左键拖动，用来拖选正文
+if CommandLine.arguments.count == 6, CommandLine.arguments[1] == "drag" {
+    let a = CommandLine.arguments.dropFirst(2).map { Double($0) ?? 0 }
+    let pos = attr(win, kAXPositionAttribute) as! AXValue, size = attr(win, kAXSizeAttribute) as! AXValue
+    var p = CGPoint.zero, sz = CGSize.zero
+    AXValueGetValue(pos, .cgPoint, &p); AXValueGetValue(size, .cgSize, &sz)
+    let from = CGPoint(x: p.x + sz.width * a[0], y: p.y + sz.height * a[1])
+    let to = CGPoint(x: p.x + sz.width * a[2], y: p.y + sz.height * a[3])
+    app.activate(); usleep(300_000)
+    let wins = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
+    let top = wins.first { w in
+        guard (w[kCGWindowLayer as String] as? Int) == 0, let b = w[kCGWindowBounds as String] as? [String: CGFloat] else { return false }
+        return CGRect(x: b["X"] ?? 0, y: b["Y"] ?? 0, width: b["Width"] ?? 0, height: b["Height"] ?? 0).contains(from)
+    }
+    guard (top?[kCGWindowOwnerPID as String] as? Int32) == app.processIdentifier else { print("ABORT: not Leaf at \(from)"); exit(1) }
+    CGEvent(mouseEventSource: nil, mouseType: .leftMouseDown, mouseCursorPosition: from, mouseButton: .left)!.post(tap: .cghidEventTap)
+    usleep(60_000)
+    for i in 1...10 {
+        let f = Double(i) / 10
+        let pt = CGPoint(x: from.x + (to.x - from.x) * f, y: from.y + (to.y - from.y) * f)
+        CGEvent(mouseEventSource: nil, mouseType: .leftMouseDragged, mouseCursorPosition: pt, mouseButton: .left)!.post(tap: .cghidEventTap)
+        usleep(20_000)
+    }
+    CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: to, mouseButton: .left)!.post(tap: .cghidEventTap)
+    print("drag \(from) -> \(to)"); exit(0)
+}
+// key <按键码> [cmd|shift|ctrl|alt...]：给 Leaf 发快捷键（d=2）
+if CommandLine.arguments.count >= 3, CommandLine.arguments[1] == "key" {
+    app.activate(); usleep(300_000)
+    let code = CGKeyCode(CommandLine.arguments[2]) ?? 0
+    var flags: CGEventFlags = []
+    for m in CommandLine.arguments.dropFirst(3) {
+        switch m { case "cmd": flags.insert(.maskCommand); case "shift": flags.insert(.maskShift); case "ctrl": flags.insert(.maskControl); case "alt": flags.insert(.maskAlternate); default: break }
+    }
+    for down in [true, false] {
+        let ev = CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: down)!
+        ev.flags = flags
+        ev.post(tap: .cghidEventTap)
+        usleep(40_000)
+    }
+    print("key \(code) \(flags.rawValue)"); exit(0)
 }
 func all(_ e: AXUIElement, _ role: String, _ out: inout [AXUIElement]) {
     if attr(e, kAXRoleAttribute) as? String == role { out.append(e) }
