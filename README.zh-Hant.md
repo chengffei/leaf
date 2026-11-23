@@ -57,9 +57,10 @@
 
 ## 接下來
 
-- Finder 封面縮圖、快速查看、Spotlight 搜尋
+- 螢光標示、書籤，匯出 Markdown 或 Kindle 的 My Clippings
 - 一步查詢字詞
-- 螢光標示、書籤和 Markdown 匯出
+- 字體設定優先於出版社樣式，支援 TXT
+- Finder 封面縮圖、快速查看、Spotlight 搜尋，之後再做
 
 不做：書庫、書店、帳號、同步。
 

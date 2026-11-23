@@ -57,9 +57,10 @@ One book, one window. Double-click a book in Finder and start reading. Close the
 
 ## What's next
 
-- Finder thumbnails, Quick Look and Spotlight search for your books
+- Highlights, bookmarks and export to Markdown or Kindle's My Clippings
 - Look up a word in one step
-- Highlights, bookmarks and Markdown export
+- Your font settings over the publisher's, and TXT files
+- Finder thumbnails, Quick Look and Spotlight search, later
 
 Not planned: a library, a store, an account or sync.
 

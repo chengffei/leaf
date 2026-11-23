@@ -57,9 +57,10 @@ Un libro, una ventana. Haz doble clic en un libro en el Finder y empieza a leer.
 
 ## Próximamente
 
-- Miniaturas en el Finder, Vista Rápida y búsqueda con Spotlight
+- Resaltados, marcadores y exportación a Markdown o My Clippings de Kindle
 - Consultar una palabra en un solo paso
-- Resaltados, marcadores y exportación a Markdown
+- Tus ajustes de fuente por encima de los del editor, y archivos TXT
+- Miniaturas en el Finder, Vista Rápida y búsqueda con Spotlight, más adelante
 
 No está previsto: biblioteca, tienda, cuenta ni sincronización.
 

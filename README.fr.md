@@ -57,9 +57,10 @@ Un livre, une fenêtre. Double-cliquez sur un livre dans le Finder et commencez 
 
 ## À venir
 
-- Vignettes dans le Finder, Coup d’œil et recherche Spotlight
+- Surlignages, signets et export en Markdown ou au format My Clippings de Kindle
 - Recherche d’un mot en une étape
-- Surlignages, signets et export Markdown
+- Vos réglages de police avant ceux de l’éditeur, et les fichiers TXT
+- Vignettes dans le Finder, Coup d’œil et recherche Spotlight, plus tard
 
 Pas prévu : bibliothèque, boutique, compte ou synchronisation.
 

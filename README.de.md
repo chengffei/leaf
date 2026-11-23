@@ -57,9 +57,10 @@ Ein Buch, ein Fenster. Doppelklicke im Finder auf ein Buch und lies los. Schlie�
 
 ## Als Nächstes
 
-- Finder-Vorschaubilder, Quick Look und Spotlight-Suche
+- Markierungen, Lesezeichen und Export als Markdown oder Kindle My Clippings
 - Wörter mit einem Schritt nachschlagen
-- Markierungen, Lesezeichen und Markdown-Export
+- Eigene Schrifteinstellungen vor denen des Verlags, und TXT-Dateien
+- Finder-Vorschaubilder, Quick Look und Spotlight-Suche, später
 
 Nicht geplant: Bibliothek, Store, Account oder Sync.
 

@@ -57,9 +57,10 @@
 
 ## 다음 계획
 
-- Finder 썸네일, 훑어보기, Spotlight 검색
+- 하이라이트, 책갈피, Markdown 또는 Kindle My Clippings로 내보내기
 - 한 번에 단어 찾아보기
-- 하이라이트, 책갈피, Markdown 내보내기
+- 출판사 스타일보다 내 글꼴 설정 우선, TXT 지원
+- Finder 썸네일, 훑어보기, Spotlight 검색은 그 다음
 
 계획 없음: 서재, 스토어, 계정, 동기화.
 
