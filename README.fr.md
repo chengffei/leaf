@@ -73,6 +73,14 @@ Pas prévu : bibliothèque, boutique, compte ou synchronisation.
 1. Téléchargez [Leaf.dmg](https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg) et faites glisser Leaf dans Applications.
 2. Leaf n’est pas notarisée par Apple, donc macOS la bloque la première fois. Ouvrez-la et cliquez sur **Terminé**. Allez ensuite dans **Réglages Système › Confidentialité et sécurité**, faites défiler vers le bas et cliquez sur **Ouvrir quand même**.
 
+Ou avec Homebrew :
+
+```sh
+brew tap chengffei/tap
+brew trust chengffei/tap
+brew install --cask leaf
+```
+
 Nécessite macOS 15 ou une version ultérieure.
 
 ## Raccourcis

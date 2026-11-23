@@ -73,6 +73,14 @@
 1. 下載 [Leaf.dmg](https://github.com/chengffei/leaf/releases/latest/download/Leaf.dmg)，把 Leaf 拖進「應用程式」。
 2. Leaf 沒有經過 Apple 公證，第一次打開會被系統擋下。先打開它並按「完成」，再到「系統設定 › 隱私權與安全性」，捲到底部按「強制打開」。
 
+也可以用 Homebrew：
+
+```sh
+brew tap chengffei/tap
+brew trust chengffei/tap
+brew install --cask leaf
+```
+
 需要 macOS 15 或以上版本。
 
 ## 快速鍵

@@ -109,5 +109,6 @@
  "Does Leaf have a library or bookshelf?": "ライブラリや本棚はありますか？",
  "No. Leaf opens books where they are, without importing or copying them. Leaf itself keeps only where you stopped in each book; like any Mac document app, macOS lists recent files under File › Open Recent.": "ありません。Leaf は本をその場で開き、読み込みもコピーもしません。Leaf が覚えるのは各本の読んだ場所だけ。ほかの Mac の書類アプリと同じく、最近のファイルは「ファイル › 最近使った項目を開く」に並びます。",
  "Leaf is open source under the GPL-3.0 · Rendering by <a href=\"https://github.com/johnfactotum/foliate-js\">foliate-js</a>": "Leaf は GPL-3.0 のオープンソース · レンダリングは <a href=\"https://github.com/johnfactotum/foliate-js\">foliate-js</a>",
- "Made by <a href=\"https://github.com/chengffei\">Felix</a> · Version {{VERSION}} · Last updated <time datetime=\"{{UPDATED}}\">{{UPDATED_EN}}</time>": "作者 <a href=\"https://github.com/chengffei\">Felix</a> · バージョン {{VERSION}} · 最終更新 <time datetime=\"{{UPDATED}}\">{{UPDATED_L}}</time>"
+ "Made by <a href=\"https://github.com/chengffei\">Felix</a> · Version {{VERSION}} · Last updated <time datetime=\"{{UPDATED}}\">{{UPDATED_EN}}</time>": "作者 <a href=\"https://github.com/chengffei\">Felix</a> · バージョン {{VERSION}} · 最終更新 <time datetime=\"{{UPDATED}}\">{{UPDATED_L}}</time>",
+ "Or with Homebrew: <code>brew tap chengffei/tap &amp;&amp; brew install --cask leaf</code>.": "Homebrew でも入れられます：<code>brew tap chengffei/tap &amp;&amp; brew install --cask leaf</code>"
 }
