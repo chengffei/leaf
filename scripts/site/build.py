@@ -91,8 +91,20 @@ SHOTS = {
     "de": ("reading-de.png", "Leaf liest Kafkas Die Verwandlung auf dem Mac, zweispaltig"),
     "es": ("reading-es.png", "Leaf leyendo Don Quijote de Cervantes en Mac, a dos columnas"),
 }
+# 目录面板截图：界面语言也切到本语言（启动参数 -AppleLanguages）
+TOC_SHOTS = {
+    "en": ("toc.png", "Leaf floating table of contents panel on macOS"),
+    "zh": ("toc-zh-hans.png", "Leaf 的浮动目录面板，鲁迅《呐喊》"),
+    "zh-Hant": ("toc-zh-hant.png", "Leaf 的浮動目錄面板，《紅樓夢》回目"),
+    "ja": ("toc-ja.png", "Leaf の目次パネル、縦書きの『吾輩は猫である』"),
+    "ko": ("toc-ko.png", "Leaf의 목차 패널, 이상 단편선"),
+    "fr": ("toc-fr.png", "Le panneau Table des matières de Leaf, Du côté de chez Swann"),
+    "de": ("toc-de.png", "Das Inhaltsverzeichnis-Panel von Leaf, Die Verwandlung"),
+    "es": ("toc-es.png", "El panel de índice de Leaf, Don Quijote"),
+}
 for lang, page in PAGES.items():
     page["shot"], page["shot_alt"] = SHOTS[lang]
+    page["toc_shot"], page["toc_shot_alt"] = TOC_SHOTS[lang]
     page["url"] = SITE + page["dir"]
     page["out"] = ROOT / "docs" / page["dir"] / "index.html"
     page["base"] = "../" if page["dir"] else ""
@@ -225,6 +237,8 @@ def main():
                .replace("{{LANG_TOGGLE}}", language_menu(lang))
                .replace("{{SHOT}}", page["shot"])
                .replace("{{SHOT_ALT}}", html.escape(page["shot_alt"], quote=True))
+               .replace("{{TOC_SHOT}}", page["toc_shot"])
+               .replace("{{TOC_SHOT_ALT}}", html.escape(page["toc_shot_alt"], quote=True))
                .replace("{{VERSION}}", VERSION)
                .replace("{{UPDATED}}", TODAY.isoformat())
                .replace("{{UPDATED_EN}}", page["updated"])
