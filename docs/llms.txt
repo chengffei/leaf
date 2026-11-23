@@ -21,6 +21,7 @@ Leaf is built with SwiftUI and WebKit and uses foliate-js to parse and paginate 
 - About the book: the description from the book’s metadata is shown at the top of the panel
 - Typography: any installed font or original / sans / serif, size 80–200%, five weight levels, line / paragraph / letter spacing, margins, text width, one or two columns, justified or left; built-in Literata font; built-in presets Compact / Standard / Large / Low Vision / E-ink plus custom presets
 - Themes: paper, sepia, e-ink, dark or follow the system
+- Writing direction: books set for vertical writing (Japanese 縦書き) open vertically with the next page on the left; Settings › Layout › Writing Direction forces vertical or horizontal for any book; Japanese and Korean books use their own system fonts
 - Interface languages: English, Simplified Chinese, Traditional Chinese, Japanese, Korean, French, German, Spanish
 - Not included by design: store, account, sync, library
 - First launch: Leaf is not notarized by Apple; allow it once in System Settings › Privacy & Security › Open Anyway

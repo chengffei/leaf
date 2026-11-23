@@ -53,6 +53,7 @@ Un libro, una ventana. Haz doble clic en un libro en el Finder y empieza a leer.
 - **Exportar.** En Markdown o en el formato My Clippings de Kindle, para Readwise y Obsidian.
 - **Consultar en un solo paso.** Selecciona una palabra y pulsa `⌃⌘D`, o usa la barra que aparece sobre la selección.
 - **Sobre el libro.** La descripción de los metadatos del libro, en la cabecera del panel.
+- **Texto vertical.** Los libros japoneses compuestos en vertical se abren así, con la página siguiente a la izquierda. Ajustes › Diseño › Dirección del texto fuerza vertical u horizontal en cualquier libro.
 - **Ocho idiomas.** Inglés, chino simplificado, chino tradicional, japonés, coreano, francés, alemán y español.
 
 ## Comparativa

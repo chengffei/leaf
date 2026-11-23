@@ -53,6 +53,7 @@ Un livre, une fenêtre. Double-cliquez sur un livre dans le Finder et commencez 
 - **Export.** En Markdown, ou au format My Clippings de Kindle pour Readwise et Obsidian.
 - **Recherche d’un mot en une étape.** Sélectionnez un mot et appuyez sur `⌃⌘D`, ou utilisez la barre qui apparaît au-dessus de la sélection.
 - **À propos du livre.** La description tirée des métadonnées du livre, en tête du panneau.
+- **Texte vertical.** Les livres japonais composés verticalement s’ouvrent ainsi, page suivante à gauche. Réglages › Mise en page › Sens d’écriture force le vertical ou l’horizontal pour n’importe quel livre.
 - **Huit langues.** Anglais, chinois simplifié, chinois traditionnel, japonais, coréen, français, allemand et espagnol.
 
 ## Comparaison

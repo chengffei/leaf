@@ -53,6 +53,7 @@ Ein Buch, ein Fenster. Doppelklicke im Finder auf ein Buch und lies los. Schlie�
 - **Export.** Als Markdown oder im My-Clippings-Format von Kindle für Readwise und Obsidian.
 - **Nachschlagen mit einem Schritt.** Wort auswählen und `⌃⌘D` drücken, oder die Leiste über der Auswahl benutzen.
 - **Über das Buch.** Die Beschreibung aus den Metadaten des Buchs, oben im Panel.
+- **Vertikaler Text.** Japanische Bücher mit vertikalem Satz öffnen sich so, die nächste Seite liegt links. Einstellungen › Layout › Schreibrichtung erzwingt vertikal oder horizontal für jedes Buch.
 - **Acht Sprachen.** Englisch, vereinfachtes Chinesisch, traditionelles Chinesisch, Japanisch, Koreanisch, Französisch, Deutsch und Spanisch.
 
 ## Im Vergleich

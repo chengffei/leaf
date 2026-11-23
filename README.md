@@ -53,6 +53,7 @@ One book, one window. Double-click a book in Finder and start reading. Close the
 - **Export.** Save your notes as Markdown, or in Kindle’s My Clippings format for Readwise and Obsidian.
 - **Look up in one step.** Select a word and press `⌃⌘D`, or use the bar that appears above the selection.
 - **About the book.** The description from the book’s metadata, at the top of the panel.
+- **Vertical text.** Japanese books set for vertical writing open that way, with the next page on the left. Settings › Layout › Writing Direction can force vertical or horizontal for any book.
 - **Eight languages.** English, Simplified Chinese, Traditional Chinese, Japanese, Korean, French, German and Spanish.
 
 ## How it compares
