@@ -20,7 +20,7 @@ func texts(_ e: AXUIElement) -> [String] {
 let win = (attr(root, kAXFocusedWindowAttribute) as! AXUIElement)
 let title = attr(win, kAXTitleAttribute) as? String ?? ""
 // 安全闸：只对测试书窗口动手，防止误碰用户正在读的书
-guard title.hasPrefix("alice") || title.hasPrefix("Alice") || title.hasPrefix("吾輩は猫である") || title.hasPrefix("hongloumeng") || title.hasPrefix("紅樓夢") || title.hasPrefix("红楼梦") || title.hasPrefix("Leaf") || title.isEmpty || title == "阅读" || title == "通用" || title == "Reading" || title == "General" else { print("ABORT: focused window is \(title)"); exit(1) }
+guard ProcessInfo.processInfo.environment["LEAFAX_ANY"] == "1" || title.hasPrefix("alice") || title.hasPrefix("Alice") || title.hasPrefix("吾輩は猫である") || title.hasPrefix("hongloumeng") || title.hasPrefix("紅樓夢") || title.hasPrefix("红楼梦") || title.hasPrefix("Leaf") || title.isEmpty || title == "阅读" || title == "通用" || title == "Reading" || title == "General" else { print("ABORT: focused window is \(title)"); exit(1) }
 // clickpage = 右侧 3/4 垂直居中；clickat <x比例> <y比例> 任意位置；rightclick <x比例> <y比例> 右键
 if CommandLine.arguments.count > 1, ["clickpage", "clickat", "rightclick", "dblclick"].contains(CommandLine.arguments[1]) {
     let a = CommandLine.arguments
@@ -93,6 +93,28 @@ if CommandLine.arguments.count >= 3, CommandLine.arguments[1] == "key" {
         usleep(40_000)
     }
     print("key \(code) \(flags.rawValue)"); exit(0)
+}
+// resize <w> <h> [x y]：把焦点窗口设成指定大小（截图用）
+if CommandLine.arguments.count >= 4, CommandLine.arguments[1] == "resize" {
+    var size = CGSize(width: Double(CommandLine.arguments[2]) ?? 800, height: Double(CommandLine.arguments[3]) ?? 553)
+    if CommandLine.arguments.count >= 6 {
+        var pos = CGPoint(x: Double(CommandLine.arguments[4]) ?? 0, y: Double(CommandLine.arguments[5]) ?? 0)
+        AXUIElementSetAttributeValue(win, kAXPositionAttribute as CFString, AXValueCreate(.cgPoint, &pos)!)
+    }
+    AXUIElementSetAttributeValue(win, kAXSizeAttribute as CFString, AXValueCreate(.cgSize, &size)!)
+    usleep(300_000)
+    let sz = attr(win, kAXSizeAttribute) as! AXValue; var s = CGSize.zero; AXValueGetValue(sz, .cgSize, &s)
+    print("size \(s)"); exit(0)
+}
+// windowid：打印 Leaf 焦点窗口的 CGWindowID，给 screencapture -l 用
+if CommandLine.arguments.count == 2, CommandLine.arguments[1] == "windowid" {
+    var num: CFTypeRef?
+    AXUIElementCopyAttributeValue(win, "AXWindowNumber" as CFString, &num)
+    if let n = num as? Int { print(n); exit(0) }
+    let wins = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
+    if let w = wins.first(where: { ($0[kCGWindowOwnerPID as String] as? Int32) == app.processIdentifier && ($0[kCGWindowLayer as String] as? Int) == 0 }),
+       let id = w[kCGWindowNumber as String] as? Int { print(id); exit(0) }
+    print("no window"); exit(1)
 }
 func all(_ e: AXUIElement, _ role: String, _ out: inout [AXUIElement]) {
     if attr(e, kAXRoleAttribute) as? String == role { out.append(e) }

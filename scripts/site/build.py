@@ -80,7 +80,19 @@ PAGES = {
         og_description="Doble clic para leer. Cierra y listo. Un pequeño lector de ebooks nativo para Mac. Gratis y de código abierto.",
         app_description="Lector de ebooks gratuito y de código abierto para Mac: EPUB, MOBI, AZW3, PDF, FB2 y CBZ. Sin biblioteca, sin cuenta."),
 }
+# 首屏截图：每种语言用本语言的公版经典，日文竖排。英文是爱丽丝（reading.png）
+SHOTS = {
+    "en": ("reading.png", "Leaf reading Alice’s Adventures in Wonderland on Mac in two-column layout"),
+    "zh": ("reading-zh-hans.png", "Leaf 在 Mac 上双栏阅读鲁迅《狂人日记》"),
+    "zh-Hant": ("reading-zh-hant.png", "Leaf 在 Mac 上雙欄閱讀《紅樓夢》"),
+    "ja": ("reading-ja.png", "Leaf で夏目漱石『吾輩は猫である』を縦書きで読む"),
+    "ko": ("reading-ko.png", "Leaf에서 이상의 『날개』를 두 단으로 읽는 모습"),
+    "fr": ("reading-fr.png", "Leaf lisant Du côté de chez Swann de Proust sur Mac, en deux colonnes"),
+    "de": ("reading-de.png", "Leaf liest Kafkas Die Verwandlung auf dem Mac, zweispaltig"),
+    "es": ("reading-es.png", "Leaf leyendo Don Quijote de Cervantes en Mac, a dos columnas"),
+}
 for lang, page in PAGES.items():
+    page["shot"], page["shot_alt"] = SHOTS[lang]
     page["url"] = SITE + page["dir"]
     page["out"] = ROOT / "docs" / page["dir"] / "index.html"
     page["base"] = "../" if page["dir"] else ""
@@ -145,7 +157,7 @@ def head(lang, page, faq):
         "url": page["url"],
         "downloadUrl": DOWNLOAD,
         "fileFormat": ["application/epub+zip", "application/x-mobipocket-ebook", "application/vnd.amazon.mobi8-ebook", "application/pdf", "application/x-fictionbook+xml", "application/vnd.comicbook+zip"],
-        "screenshot": SITE + "images/reading.png",
+        "screenshot": SITE + "images/" + page["shot"],
         "image": SITE + "images/icon.png",
         "license": "https://www.gnu.org/licenses/gpl-3.0.html",
         "isAccessibleForFree": True,
@@ -211,6 +223,8 @@ def main():
                .replace("{{HTML_LANG}}", page["html_lang"])
                .replace("{{BASE}}", page["base"])
                .replace("{{LANG_TOGGLE}}", language_menu(lang))
+               .replace("{{SHOT}}", page["shot"])
+               .replace("{{SHOT_ALT}}", html.escape(page["shot_alt"], quote=True))
                .replace("{{VERSION}}", VERSION)
                .replace("{{UPDATED}}", TODAY.isoformat())
                .replace("{{UPDATED_EN}}", page["updated"])
